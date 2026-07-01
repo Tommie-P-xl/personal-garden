@@ -1,0 +1,41 @@
+# build output
+dist/
+
+# API cache
+.cache/
+
+# generated types
+.astro/
+
+# dependencies
+node_modules/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# OMC state
+.omc/
+
+# Superpowers brainstorm
+.superpowers/
+
+# screenshots and temp files
+*.png
+.playwright-mcp/
+
+# environment
+.env
+.env.production
+
+# Claude Code
+CLAUDE.md
+.claude/
+docs/
+
+# Superpowers plans
+.superpowers/plans/

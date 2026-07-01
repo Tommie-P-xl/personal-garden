@@ -1,0 +1,33 @@
+---
+import Callout from '../components/mdx/Callout.astro';
+import Tabs from '../components/mdx/Tabs.astro';
+import TabItem from '../components/mdx/TabItem.astro';
+import Collapse from '../components/mdx/Collapse.astro';
+import CodeBlock from '../components/mdx/CodeBlock.astro';
+import Gallery from '../components/mdx/Gallery.astro';
+import Progress from '../components/mdx/Progress.astro';
+import BraceMap from '../components/mdx/BraceMap.astro';
+
+interface Props {
+  Content: any;
+  headings?: Array<{ depth: number; slug: string; text: string }>;
+}
+
+const { Content, headings } = Astro.props;
+
+// 注册所有 MDX 组件，使其在 .mdx 文件中可用
+const components = {
+  Callout,
+  Tabs,
+  TabItem,
+  Collapse,
+  CodeBlock,
+  Gallery,
+  Progress,
+  BraceMap,
+};
+---
+
+<div class="prose">
+  <Content components={components} />
+</div>

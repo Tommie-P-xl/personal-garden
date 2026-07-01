@@ -1,0 +1,130 @@
+---
+interface Props {
+  base: string;
+  currentPath: string;
+}
+
+const { base, currentPath } = Astro.props;
+
+function href(path: string) {
+  return base + path.replace(/^\//, '');
+}
+---
+
+{/* 导航栏 */}
+<nav class="bg-white/80 dark:bg-[#18181b]/80 backdrop-blur-md border-b border-gray-200/60 dark:border-white/[0.06] sticky top-0 z-50">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6">
+    <div class="flex items-center justify-between h-16">
+      {/* Logo */}
+      <a href={href('/')} class="flex items-center gap-2 text-gray-900 dark:text-white font-bold text-lg tracking-tight hover:text-garden-600 dark:hover:text-garden-400 transition-colors">
+        <span>Tommie</span>
+      </a>
+
+      {/* 导航链接 */}
+      <div class="hidden sm:flex items-center gap-1 relative" id="nav-links">
+        {[
+          { label: '首页', path: '/', icon: 'home', match: (p: string) => p === base || p === base + 'index.html', idx: 0 },
+          { label: '笔记', path: '/garden/', icon: 'note', match: (p: string) => p.includes('/garden'), idx: 1 },
+          { label: '项目', path: '/projects/', icon: 'project', match: (p: string) => p.includes('/projects'), idx: 2 },
+          { label: '关于', path: '/about/', icon: 'about', match: (p: string) => p.includes('/about'), idx: 3 },
+        ].map((item) => {
+          const active = item.match(currentPath);
+          return (
+            <a
+              href={href(item.path)}
+              class:list={[
+                'nav-item relative px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5',
+                active
+                  ? 'text-garden-700 dark:text-garden-400'
+                  : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/[0.06] hover:text-gray-900 dark:hover:text-white',
+              ]}
+              data-active={active ? 'true' : 'false'}
+              data-nav-idx={item.idx}
+            >
+              <img src={href(`/icons/${item.icon}.svg`)} alt="" class="w-4 h-4 dark:invert" />
+              {item.label}
+              <span class:list={['nav-indicator absolute bottom-0 left-0 right-0 h-0.5 bg-garden-500 dark:bg-garden-400 rounded-full transition-opacity duration-200', { 'opacity-0': !active }]}></span>
+            </a>
+          );
+        })}
+
+        {/* 主题切换按钮 */}
+        <div class="relative ml-3">
+          <button
+            id="theme-toggle"
+            class="p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            aria-label="切换主题"
+          >
+            <svg id="icon-light" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+            </svg>
+            <svg id="icon-dark" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+            </svg>
+            <svg id="icon-system" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+            </svg>
+          </button>
+          <div id="theme-dropdown" class="hidden absolute right-0 mt-2 w-36 bg-white dark:bg-[#18181b] border border-gray-200 dark:border-white/[0.06] rounded-lg shadow-lg overflow-hidden z-50">
+            <button data-theme="light" class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-white/[0.06] flex items-center gap-2 transition-colors">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+              亮色
+            </button>
+            <button data-theme="dark" class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-white/[0.06] flex items-center gap-2 transition-colors">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+              暗色
+            </button>
+            <button data-theme="system" class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-white/[0.06] flex items-center gap-2 transition-colors">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+              跟随系统
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* 移动端菜单按钮 */}
+      <div class="sm:hidden flex items-center gap-2">
+        <button
+          id="theme-toggle-mobile"
+          class="p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+          aria-label="切换主题"
+        >
+          <svg id="icon-light-mobile" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+          </svg>
+          <svg id="icon-dark-mobile" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+          </svg>
+          <svg id="icon-system-mobile" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+          </svg>
+        </button>
+        <button
+          id="mobile-menu-btn"
+          class="p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+          aria-label="打开菜单"
+        >
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    {/* 移动端菜单 */}
+    <div id="mobile-menu" class="hidden sm:hidden pb-4">
+      <div class="flex flex-col gap-1">
+        {[
+          { label: '首页', path: '/', icon: 'home', active: currentPath === base, idx: 0 },
+          { label: '笔记', path: '/garden/', icon: 'note', active: currentPath.includes('/garden'), idx: 1 },
+          { label: '项目', path: '/projects/', icon: 'project', active: currentPath.includes('/projects'), idx: 2 },
+          { label: '关于', path: '/about/', icon: 'about', active: currentPath.includes('/about'), idx: 3 },
+        ].map((item) => (
+          <a href={href(item.path)} data-nav-idx={item.idx} class={`px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 ${item.active ? 'bg-garden-50 dark:bg-garden-900/20 text-garden-700 dark:text-garden-400' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/[0.06]'}`}>
+            <img src={href(`/icons/${item.icon}.svg`)} alt="" class="w-4 h-4 dark:invert" /> {item.label}
+          </a>
+        ))}
+      </div>
+    </div>
+  </div>
+</nav>

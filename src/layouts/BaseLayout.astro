@@ -1,0 +1,490 @@
+---
+import { ViewTransitions } from 'astro:transitions';
+import Background from '../components/Background.astro';
+import Navbar from '../components/Navbar.astro';
+import Footer from '../components/Footer.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+  wide?: boolean;
+}
+
+const { title, description = '个人数字花园 - 学习笔记与项目展示', wide = false } = Astro.props;
+const containerClass = wide ? 'max-w-[1400px]' : 'max-w-5xl';
+const currentPath = Astro.url.pathname;
+const base = import.meta.env.BASE_URL;
+
+function href(path: string) {
+  return base + path.replace(/^\//, '');
+}
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/svg+xml" href={href('/favicon.svg')} />
+    <title>{title} | Tommie的花园</title>
+    <link rel="stylesheet" href={href('/katex/katex.min.css')}>
+    <ViewTransitions />
+    {/* 主题 + 导航逻辑 — is:inline 跨 ViewTransitions 持久化 */}
+    <script is:inline>
+      (function() {
+        function getTheme() {
+          return localStorage.getItem('theme') || 'system';
+        }
+
+        function isDark(theme) {
+          if (theme === 'dark') return true;
+          if (theme === 'light') return false;
+          return window.matchMedia('(prefers-color-scheme: dark)').matches;
+        }
+
+        function updateIcons(theme) {
+          var ids = [
+            ['icon-light', theme !== 'light'],
+            ['icon-dark', theme !== 'dark'],
+            ['icon-system', theme !== 'system'],
+            ['icon-light-mobile', theme !== 'light'],
+            ['icon-dark-mobile', theme !== 'dark'],
+            ['icon-system-mobile', theme !== 'system'],
+          ];
+          ids.forEach(function(pair) {
+            var el = document.getElementById(pair[0]);
+            if (el) el.classList.toggle('hidden', pair[1]);
+          });
+        }
+
+        function applyTheme(theme) {
+          var dark = isDark(theme);
+          document.documentElement.classList.toggle('dark', dark);
+          document.documentElement.style.setProperty('--bg-primary', dark ? '#0f0f11' : '#fafaf9');
+          document.documentElement.style.setProperty('--bg-card', dark ? '#18181b' : '#ffffff');
+          document.documentElement.style.setProperty('--border-color', dark ? 'rgba(255,255,255,0.06)' : 'rgba(229,231,235,0.6)');
+          document.documentElement.style.backgroundColor = dark ? '#0f0f11' : '#fafaf9';
+          localStorage.setItem('theme', theme);
+          updateIcons(theme);
+        }
+
+        // before-swap: 复制主题状态到新文档
+        document.addEventListener('astro:before-swap', function(e) {
+          e.newDocument.documentElement.className = document.documentElement.className;
+          e.newDocument.documentElement.style.cssText = document.documentElement.style.cssText;
+        });
+
+        // 首屏
+        applyTheme(getTheme());
+
+        // 页面初始化注册表 — is:inline 页面脚本通过 __pageInits.push(fn) 注册
+        window.__pageInits = [];
+
+        // swap 后重新应用主题
+        document.addEventListener('astro:after-swap', function() {
+          applyTheme(getTheme());
+        });
+
+        // 页面加载后绑定交互（首屏 + 每次 ViewTransitions 导航后）
+        document.addEventListener('astro:page-load', function() {
+          applyTheme(getTheme());
+
+          // 导航指示条
+          document.querySelectorAll('.nav-indicator').forEach(function(el) {
+            var link = el.closest('.nav-item');
+            el.style.opacity = (link && link.dataset.active === 'true') ? '1' : '0';
+          });
+
+          // 代码复制按钮（事件委托：只创建 DOM 节点，点击由文档级委托处理）
+          document.querySelectorAll('pre').forEach(function(pre) {
+            if (pre.querySelector('.code-copy-btn')) return;
+            var copyBtn = document.createElement('button');
+            copyBtn.className = 'code-copy-btn';
+            copyBtn.textContent = '复制';
+            pre.appendChild(copyBtn);
+          });
+
+          // 调用页面注册的 init 函数
+          if (window.__pageInits) {
+            window.__pageInits.forEach(function(fn) { fn(); });
+          }
+
+          // 用 Proxy 替代空数组 —— 后续 push 的函数立即执行
+          // 解决 View Transitions 下内联脚本与 astro:page-load 的竞态条件
+          // 注意：此 Proxy 仅拦截了 push 方法，其他数组方法（如 forEach、length）
+          // 会直接回退到原始数组操作。当前代码中只有 push 被调用，但请注意此限制。
+          window.__pageInits = new Proxy([], {
+            get: function(target, prop) {
+              if (prop === 'push') {
+                return function(fn) {
+                  fn();  // 立即执行，不再排队等待
+                };
+              }
+              return target[prop];
+            }
+          });
+        });
+
+        // === 事件委托：主题切换、移动端菜单、代码复制（只需绑定一次） ===
+
+        // 系统主题变化监听（只需绑定一次）
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function() {
+          if (getTheme() === 'system') applyTheme('system');
+        });
+
+        // 统一 click 事件委托：主题下拉、主题选择、外部点击关闭、移动端主题、移动端菜单、代码复制
+        document.addEventListener('click', function(e) {
+          // 桌面端主题下拉切换
+          var toggle = e.target.closest('#theme-toggle');
+          if (toggle) {
+            var dd = document.getElementById('theme-dropdown');
+            if (dd) dd.classList.toggle('hidden');
+            return;
+          }
+
+          // 主题选择按钮（桌面下拉内的 [data-theme]）
+          var themeBtn = e.target.closest('#theme-dropdown [data-theme]');
+          if (themeBtn) {
+            applyTheme(themeBtn.dataset.theme);
+            var dd2 = document.getElementById('theme-dropdown');
+            if (dd2) dd2.classList.add('hidden');
+            return;
+          }
+
+          // 桌面主题下拉 —点击外部关闭
+          var curDD = document.getElementById('theme-dropdown');
+          var curToggle = document.getElementById('theme-toggle');
+          if (curDD && !curDD.classList.contains('hidden') && !curToggle?.contains(e.target) && !curDD.contains(e.target)) {
+            curDD.classList.add('hidden');
+          }
+
+          // 移动端主题切换（循环：system → light → dark → system）
+          var mobileTheme = e.target.closest('#theme-toggle-mobile');
+          if (mobileTheme) {
+            var cur = getTheme();
+            var next = cur === 'system' ? 'light' : cur === 'light' ? 'dark' : 'system';
+            applyTheme(next);
+            return;
+          }
+
+          // 移动端菜单切换
+          var menuBtn = e.target.closest('#mobile-menu-btn');
+          if (menuBtn) {
+            var mobileMenu = document.getElementById('mobile-menu');
+            if (mobileMenu) mobileMenu.classList.toggle('hidden');
+            return;
+          }
+
+          // 代码复制按钮
+          var copyBtn = e.target.closest('.code-copy-btn');
+          if (copyBtn) {
+            var pre = copyBtn.closest('pre');
+            if (pre) {
+              var code = pre.querySelector('code')?.textContent || pre.textContent || '';
+              if (navigator.clipboard) {
+                navigator.clipboard.writeText(code).catch(function() {
+                  fallbackCopy(code);
+                });
+              } else {
+                fallbackCopy(code);
+              }
+              copyBtn.textContent = '✓ 已复制';
+              copyBtn.classList.add('copied');
+              setTimeout(function() {
+                copyBtn.textContent = '复制';
+                copyBtn.classList.remove('copied');
+              }, 1500);
+            }
+            return;
+          }
+        });
+
+        function fallbackCopy(text) {
+          var ta = document.createElement('textarea');
+          ta.value = text;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+        }
+
+        // === 事件委托：搜索和标签筛选（只需绑定一次，不受 View Transitions 影响） ===
+
+        // 笔记/项目页面搜索（事件委托）
+        document.addEventListener('input', function(e) {
+          if (e.target.id !== 'search-input') return;
+
+          // 检查是笔记页面还是项目页面
+          var categoriesGrid = document.getElementById('categories-grid');
+          var projectsGrid = document.getElementById('projects-grid');
+
+          if (categoriesGrid) {
+            // 笔记页面搜索由全局函数处理
+            if (typeof window.__gardenSearch === 'function') {
+              window.__gardenSearch(e.target.value);
+            }
+          } else if (projectsGrid) {
+            // 项目页面搜索（内联处理）
+            var term = (e.target.value || '').toLowerCase().trim();
+            var cards = document.querySelectorAll('.project-card');
+            var visibleCount = 0;
+            var noResults = document.getElementById('no-results');
+
+            cards.forEach(function(card) {
+              var title = card.dataset.title || '';
+              var tech = card.dataset.tech || '';
+              var desc = card.dataset.desc || '';
+              var matches = !term || title.includes(term) || tech.includes(term) || desc.includes(term);
+              card.style.display = matches ? '' : 'none';
+              if (matches) visibleCount++;
+            });
+
+            if (noResults) {
+              noResults.classList.toggle('hidden', visibleCount > 0 || !term);
+            }
+          }
+        });
+
+        // 笔记页面标签点击（事件委托）
+        document.addEventListener('click', function(e) {
+          var tagBtn = e.target.closest('#tag-filter button[data-tag]');
+          if (!tagBtn) return;
+
+          if (typeof window.__gardenTagFilter === 'function') {
+            window.__gardenTagFilter(tagBtn);
+          }
+        });
+      })();
+    </script>
+  </head>
+  <body class="bg-transparent text-[#18181b] dark:text-[#e4e4e7] min-h-screen relative overflow-x-hidden">
+    <Background />
+    <Navbar base={base} currentPath={currentPath} />
+
+    <!-- 主内容 -->
+    <main class={`${containerClass} mx-auto px-4 sm:px-6 py-8`} transition:animate="fade">
+      <slot />
+    </main>
+
+    <Footer />
+  </body>
+</html>
+
+<style is:global>
+  .prose {
+    @apply text-gray-800 dark:text-gray-200 leading-relaxed;
+  }
+  .prose h1 {
+    @apply text-3xl font-bold mt-8 mb-4 text-gray-900 dark:text-white;
+  }
+  .prose h2 {
+    @apply text-2xl font-bold mt-6 mb-3 text-gray-900 dark:text-white;
+  }
+  .prose h3 {
+    @apply text-xl font-semibold mt-5 mb-2 text-gray-900 dark:text-white;
+  }
+
+  /* 标题锚点链接样式 */
+  .heading-anchor {
+    @apply ml-1 text-gray-300 dark:text-gray-600 no-underline opacity-0 transition-opacity;
+  }
+  .prose h1:hover .heading-anchor,
+  .prose h2:hover .heading-anchor,
+  .prose h3:hover .heading-anchor {
+    @apply opacity-100;
+  }
+
+  .prose p {
+    @apply mb-4;
+  }
+  .prose ul {
+    @apply list-disc list-inside mb-4 space-y-1;
+  }
+  .prose ol {
+    @apply list-decimal list-inside mb-4 space-y-1;
+  }
+  .prose a {
+    @apply text-garden-600 dark:text-garden-400 hover:text-garden-500 dark:hover:text-garden-300 underline;
+  }
+  /* 行内代码（非代码块） */
+  .prose :not(pre) > code {
+    @apply bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded text-sm font-mono text-gray-800 dark:text-gray-200;
+  }
+  .prose pre {
+    @apply p-4 rounded-lg overflow-x-auto mb-4 border;
+    background-color: #f6f8fa;
+    color: #24292f;
+    border-color: #e1e4e8;
+  }
+  html.dark .prose pre,
+  html.dark .prose pre.astro-code {
+    background-color: var(--shiki-dark-bg, #24292e) !important;
+    color: var(--shiki-dark, #e1e4e8) !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
+  }
+  html:not(.dark) .prose pre {
+    background-color: var(--shiki-bg, #f6f8fa) !important;
+    color: var(--shiki-fg, #24292f) !important;
+  }
+  .prose pre code {
+    background: transparent !important;
+    @apply p-0;
+    color: inherit !important;
+  }
+  .prose blockquote {
+    @apply border-l-4 border-garden-300 dark:border-garden-600 pl-4 italic text-gray-600 dark:text-gray-400 mb-4;
+  }
+  .prose img {
+    @apply rounded-lg shadow-md my-4;
+  }
+  .prose hr {
+    @apply border-gray-200 dark:border-gray-700 my-8;
+  }
+  .prose table {
+    @apply w-full border-collapse mb-4;
+  }
+  .prose th {
+    @apply bg-gray-100 dark:bg-gray-800 px-4 py-2 text-left font-semibold border border-gray-200 dark:border-gray-700;
+  }
+  .prose td {
+    @apply px-4 py-2 border border-gray-200 dark:border-gray-700;
+  }
+
+  /* Shiki 暗色模式 */
+  html.dark .astro-code { background-color: #24292e !important; color: #e1e4e8 !important; }
+  html.dark .astro-code code { background-color: transparent !important; color: #e1e4e8 !important; }
+  html.dark .astro-code span { color: var(--shiki-dark) !important; }
+
+  /* Shiki 亮色模式 */
+  html:not(.dark) .astro-code { background-color: #f6f8fa !important; color: #24292f !important; }
+  html:not(.dark) .astro-code code { background-color: transparent !important; }
+
+  /* Code block container */
+  pre {
+    position: relative;
+  }
+
+  /* Copy button */
+  .code-copy-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    color: #9ca3af;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s, background 0.2s;
+  }
+
+  pre:hover .code-copy-btn {
+    opacity: 1;
+  }
+
+  .code-copy-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+  }
+
+  .code-copy-btn.copied {
+    color: #4ade80;
+  }
+
+  /* h2 heading divider */
+  .prose h2 {
+    @apply pb-2 border-b border-gray-200 dark:border-gray-700;
+  }
+
+  /* Table zebra stripes */
+  .prose table {
+    @apply rounded-lg overflow-hidden;
+  }
+  .prose tbody tr:nth-child(even) {
+    @apply bg-gray-50 dark:bg-gray-800/50;
+  }
+
+  /* Blockquote */
+  .prose blockquote {
+    @apply border-l-4 border-garden-500 bg-garden-50 dark:bg-garden-900/20 rounded-r-lg;
+  }
+
+  /* SVG icon dark mode adaptation */
+  html.dark .icon-dark-adapt {
+    filter: invert(0.85) brightness(1.2);
+  }
+  html.dark .icon-colorful {
+    filter: brightness(1.15);
+  }
+  .nav-icon {
+    @apply w-4 h-4;
+  }
+  html.dark .nav-icon {
+    filter: invert(1);
+  }
+
+  /* 背景浮动光斑动画 */
+  @keyframes float-a {
+    0%, 100% { transform: translate(0,0) scale(1); }
+    33% { transform: translate(3%, 2%) scale(1.05); }
+    66% { transform: translate(-2%, 3%) scale(0.97); }
+  }
+  @keyframes float-b {
+    0%, 100% { transform: translate(0,0) scale(1); }
+    50% { transform: translate(-3%, 3%) scale(1.06); }
+  }
+  @keyframes float-c {
+    0%, 100% { transform: translate(0,0) scale(1); }
+    50% { transform: translate(-4%, -2%) scale(1.08); }
+  }
+  @keyframes float-d {
+    0%, 100% { transform: translate(0,0) scale(1); }
+    50% { transform: translate(2%, -3%) scale(1.04); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    /* 禁用所有 CSS transition 和 animation，确保无障碍访问 */
+    *,
+    *::before,
+    *::after {
+      transition-duration: 0.01ms !important;
+      transition-delay: 0ms !important;
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+    }
+    /* 禁用含内联 animation 的固定背景元素 */
+    .fixed [style*="animation"] {
+      animation: none !important;
+    }
+    /* View Transition 动画由 Astro 内置 viewtransitions.css 统一处理 */
+  }
+
+  /* View Transitions 页面切换动画（方向感知） */
+  :root {
+    --slide-dir: 0;
+    --bg-primary: #fafaf9;
+    --bg-card: #ffffff;
+    --border-color: rgba(229,231,235,0.6);
+  }
+  html.dark {
+    --bg-primary: #0f0f11;
+    --bg-card: #18181b;
+    --border-color: rgba(255,255,255,0.06);
+  }
+  ::view-transition-old(root) {
+    animation: vt-old 0.08s ease-in forwards;
+  }
+  ::view-transition-new(root) {
+    animation: vt-new 0.12s ease-out forwards;
+  }
+  @keyframes vt-old {
+    from { opacity: 1; transform: translateX(0); }
+    to { opacity: 0; transform: translateX(calc(-15px * var(--slide-dir))); }
+  }
+  @keyframes vt-new {
+    from { opacity: 0; transform: translateX(calc(15px * var(--slide-dir))); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+</style>

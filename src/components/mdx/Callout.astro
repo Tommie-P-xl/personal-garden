@@ -1,0 +1,52 @@
+---
+interface Props {
+  type?: 'info' | 'warning' | 'error' | 'tip';
+  title?: string;
+}
+
+const { type = 'info', title } = Astro.props;
+
+const config = {
+  info: {
+    icon: '💡',
+    defaultTitle: '提示',
+    borderColor: 'border-blue-400 dark:border-blue-500',
+    bgColor: 'bg-blue-50/50 dark:bg-blue-900/20',
+    textColor: 'text-blue-800 dark:text-blue-200',
+  },
+  warning: {
+    icon: '⚠️',
+    defaultTitle: '注意',
+    borderColor: 'border-amber-400 dark:border-amber-500',
+    bgColor: 'bg-amber-50/50 dark:bg-amber-900/20',
+    textColor: 'text-amber-800 dark:text-amber-200',
+  },
+  error: {
+    icon: '🚫',
+    defaultTitle: '警告',
+    borderColor: 'border-red-400 dark:border-red-500',
+    bgColor: 'bg-red-50/50 dark:bg-red-900/20',
+    textColor: 'text-red-800 dark:text-red-200',
+  },
+  tip: {
+    icon: '✨',
+    defaultTitle: '技巧',
+    borderColor: 'border-emerald-400 dark:border-emerald-500',
+    bgColor: 'bg-emerald-50/50 dark:bg-emerald-900/20',
+    textColor: 'text-emerald-800 dark:text-emerald-200',
+  },
+};
+
+const { icon, defaultTitle, borderColor, bgColor, textColor } = config[type];
+const displayTitle = title || defaultTitle;
+---
+
+<div class={`my-6 rounded-r-lg border-l-4 ${borderColor} ${bgColor} px-4 py-3`}>
+  <div class={`flex items-center gap-2 font-semibold mb-2 ${textColor}`}>
+    <span>{icon}</span>
+    <span>{displayTitle}</span>
+  </div>
+  <div class="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
+    <slot />
+  </div>
+</div>

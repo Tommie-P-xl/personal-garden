@@ -1,0 +1,28 @@
+---
+interface Props {
+  columns?: 2 | 3 | 4;
+}
+
+const { columns = 3 } = Astro.props;
+
+const gridClass = {
+  2: 'grid-cols-1 sm:grid-cols-2',
+  3: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3',
+  4: 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4',
+}[columns];
+---
+
+<div class={`my-6 grid ${gridClass} gap-3`}>
+  <slot />
+</div>
+
+<style>
+  :global(.gallery-item) {
+    @apply rounded-lg overflow-hidden border border-gray-200/60 dark:border-white/[0.06];
+    @apply transition-transform hover:scale-[1.02] cursor-pointer;
+  }
+
+  :global(.gallery-item img) {
+    @apply w-full h-auto object-cover;
+  }
+</style>

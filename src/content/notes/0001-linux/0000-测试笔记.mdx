@@ -1,0 +1,61 @@
+---
+title: 测试笔记
+summary: 验证笔记和子目录可以并列排列
+tags: [测试]
+---
+
+# 测试笔记
+
+这是一篇测试笔记，用于验证笔记文件和子目录可以在同一层级并列排列。
+
+## 目录结构
+
+```
+0001-linux/
+├── _meta.json
+├── 0000-测试笔记.mdx      ← 笔记（本文件）
+├── 0001-memory-management/ ← 子目录
+│   ├── 0001-虚拟内存.mdx
+│   └── 0002-分页机制.mdx
+└── 0002-process-scheduling/
+    └── 0001-CFS调度器.mdx
+```
+
+---
+
+## LaTeX 公式测试
+
+行内公式：$E = mc^2$
+
+块级公式：
+
+$$\text{vruntime} += \Delta_{exec} \times \frac{NICE\_0\_LOAD}{weight}$$
+
+---
+
+## 双向链接测试
+
+参见 [[虚拟内存]] 和 [[CFS调度器]]。
+
+---
+
+## 代码块测试
+
+```python
+def hello():
+    print("Hello, World!")
+```
+
+---
+
+## 组件测试
+
+<Callout type="info">
+这是一个提示框组件，支持 **Markdown** 语法。
+</Callout>
+
+<Collapse title="点击展开更多内容">
+这里是折叠内容，可以放置详细说明或参考资料。
+</Collapse>
+
+<Progress value={100} label="测试进度" color="green" />

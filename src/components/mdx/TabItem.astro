@@ -1,0 +1,16 @@
+---
+interface Props {
+  index: number;
+  active?: boolean;
+}
+
+const { index, active = false } = Astro.props;
+---
+
+<div
+  data-tab-panel
+  style={`display: ${active ? 'block' : 'none'}`}
+  class="prose-sm"
+>
+  <slot />
+</div>

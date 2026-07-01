@@ -1,0 +1,192 @@
+---
+interface Props {
+  headings: Array<{
+    depth: number;
+    slug: string;
+    text: string;
+  }>;
+}
+
+const { headings } = Astro.props;
+
+// 只显示 h2 和 h3
+const tocHeadings = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
+---
+
+{tocHeadings.length > 0 && (
+  <>
+    <!-- 桌面端固定 TOC -->
+    <aside class="hidden xl:block w-44 flex-shrink-0">
+      <nav class="sticky top-20 overflow-y-auto max-h-[calc(100vh-6rem)] pb-8">
+        <h4 class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3">
+          目录
+        </h4>
+        <ul class="space-y-1 border-l-2 border-gray-200 dark:border-gray-700">
+          {tocHeadings.map((heading) => (
+            <li>
+              <a
+                href={`#${heading.slug}`}
+                class:list={[
+                  'block py-1 text-sm transition-colors hover:text-garden-600 dark:hover:text-garden-400',
+                  heading.depth === 2 ? 'pl-3 font-medium' : 'pl-6',
+                  'text-gray-500 dark:text-gray-400',
+                ]}
+                data-toc-link={heading.slug}
+              >
+                {heading.text}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    </aside>
+
+    <!-- 移动端浮动按钮 -->
+    <button
+      id="toc-mobile-btn"
+      class="xl:hidden fixed bottom-20 right-6 z-40 p-2.5 rounded-full shadow-lg
+        bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200/60 dark:border-white/[0.06]
+        text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+      aria-label="打开目录"
+    >
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" />
+      </svg>
+    </button>
+
+    <!-- 移动端抽屉 -->
+    <div
+      id="toc-mobile-overlay"
+      class="xl:hidden fixed inset-0 bg-black/50 z-40 hidden"
+    />
+    <div
+      id="toc-mobile-drawer"
+      class="xl:hidden fixed top-0 right-0 bottom-0 w-72 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm z-50 transform translate-x-full transition-transform overflow-y-auto"
+    >
+      <div class="p-4">
+        <div class="flex items-center justify-between mb-4">
+          <h4 class="text-sm font-semibold text-gray-900 dark:text-white">目录</h4>
+          <button
+            id="toc-mobile-close"
+            class="p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        <ul class="space-y-1 border-l-2 border-gray-200 dark:border-gray-700">
+          {tocHeadings.map((heading) => (
+            <li>
+              <a
+                href={`#${heading.slug}`}
+                class:list={[
+                  'block py-1.5 text-sm transition-colors',
+                  heading.depth === 2 ? 'pl-3 font-medium' : 'pl-6',
+                  'text-gray-600 dark:text-gray-400 hover:text-garden-600 dark:hover:text-garden-400',
+                ]}
+                data-toc-link={heading.slug}
+              >
+                {heading.text}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  </>
+)}
+
+<script>
+  // 高亮指定 slug 的 TOC 项
+  function highlightTocItem(slug: string) {
+    document.querySelectorAll('[data-toc-link]').forEach((link) => {
+      const isActive = link.getAttribute('data-toc-link') === slug;
+      if (isActive) {
+        link.classList.add('text-garden-600', 'dark:text-garden-400', 'border-l-2', 'border-garden-500', 'dark:border-garden-400', '-ml-[2px]');
+        link.classList.remove('text-gray-500', 'dark:text-gray-400');
+      } else {
+        link.classList.remove('text-garden-600', 'dark:text-garden-400', 'border-l-2', 'border-garden-500', 'dark:border-garden-400', '-ml-[2px]');
+        link.classList.add('text-gray-500', 'dark:text-gray-400');
+      }
+    });
+  }
+
+  // 滚动高亮
+  function initTocHighlight() {
+    const tocLinks = document.querySelectorAll('[data-toc-link]');
+    if (tocLinks.length === 0) return;
+
+    const headingElements: HTMLElement[] = [];
+    tocLinks.forEach((link) => {
+      const slug = link.getAttribute('data-toc-link');
+      const el = document.getElementById(slug || '');
+      if (el) headingElements.push(el);
+    });
+
+    if (headingElements.length === 0) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            highlightTocItem(entry.target.id);
+          }
+        });
+      },
+      {
+        rootMargin: '-80px 0px -80% 0px',
+        threshold: 0,
+      }
+    );
+
+    headingElements.forEach((el) => observer.observe(el));
+
+    // 点击 TOC 链接时立即高亮
+    tocLinks.forEach((link) => {
+      link.addEventListener('click', () => {
+        const slug = link.getAttribute('data-toc-link');
+        if (slug) highlightTocItem(slug);
+      });
+    });
+  }
+
+  // 移动端抽屉
+  function initTocMobile() {
+    const btn = document.getElementById('toc-mobile-btn');
+    const overlay = document.getElementById('toc-mobile-overlay');
+    const drawer = document.getElementById('toc-mobile-drawer');
+    const closeBtn = document.getElementById('toc-mobile-close');
+
+    if (!btn || !overlay || !drawer) return;
+
+    function openDrawer() {
+      overlay.classList.remove('hidden');
+      drawer.classList.remove('translate-x-full');
+    }
+
+    function closeDrawer() {
+      overlay.classList.add('hidden');
+      drawer.classList.add('translate-x-full');
+    }
+
+    btn.addEventListener('click', openDrawer);
+    overlay.addEventListener('click', closeDrawer);
+    closeBtn?.addEventListener('click', closeDrawer);
+
+    // 点击链接后关闭抽屉
+    drawer.querySelectorAll('[data-toc-link]').forEach((link) => {
+      link.addEventListener('click', closeDrawer);
+    });
+  }
+
+  // 初始化
+  initTocHighlight();
+  initTocMobile();
+
+  // View Transitions 重新初始化
+  document.addEventListener('astro:page-load', () => {
+    initTocHighlight();
+    initTocMobile();
+  });
+</script>

@@ -1,0 +1,206 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Sidebar from '../../components/Sidebar.astro';
+import TableOfContents from '../../components/TableOfContents.astro';
+import PrevNextNav from '../../components/PrevNextNav.astro';
+import Backlinks from '../../components/Backlinks.astro';
+import NoteLayout from '../../layouts/NoteLayout.astro';
+import { getCollection, render } from 'astro:content';
+import { scanNotes, getPrevNext, getAllFlatNotes, buildBacklinksIndex } from '../../lib/scan-notes';
+import type { NoteFile } from '../../lib/scan-notes';
+
+const base = import.meta.env.BASE_URL;
+
+export async function getStaticPaths() {
+  const tree = scanNotes();
+  const notes = await getCollection('notes', ({ data }) => !data.draft);
+  const paths: Array<{ params: { slug: string }; props: any }> = [];
+
+  // 笔记文件路径
+  for (const note of notes) {
+    paths.push({
+      params: { slug: note.id },
+      props: { isDir: false, note },
+    });
+  }
+
+  // 目录路径
+  function walkDirs(items: NoteFile[]) {
+    for (const item of items) {
+      if (item.type === 'dir') {
+        paths.push({
+          params: { slug: item.slug },
+          props: { isDir: true, dirItem: item },
+        });
+        if (item.children) walkDirs(item.children);
+      }
+    }
+  }
+  walkDirs(tree);
+
+  return paths;
+}
+
+const { isDir } = Astro.props;
+const tree = scanNotes();
+
+// 查找顶级分类
+function findTopLevelAncestor(slug: string): NoteFile | undefined {
+  const parts = slug.split('/');
+  for (let i = parts.length; i > 0; i--) {
+    const prefix = parts.slice(0, i).join('/');
+    const found = tree.find((item) => item.slug === prefix && item.type === 'dir');
+    if (found) return found;
+  }
+  return undefined;
+}
+
+// 公共数据
+const currentSlug = isDir ? Astro.props.dirItem.slug : Astro.props.note.id;
+const backlinksIndex = buildBacklinksIndex();
+const topLevelAncestor = findTopLevelAncestor(currentSlug);
+const sidebarIsRoot = !topLevelAncestor;
+const finalSidebarTree = sidebarIsRoot ? tree : (topLevelAncestor.children || []);
+
+// ====== 目录页面数据 ======
+let dirTitle = '';
+let dirDescription = '';
+let dirChildren: NoteFile[] = [];
+let dirFlatNotes: Array<{ title: string; slug: string; summary?: string }> = [];
+
+if (isDir) {
+  const dirItem: NoteFile = Astro.props.dirItem;
+  dirTitle = dirItem.meta?.title || dirItem.title;
+  dirDescription = dirItem.meta?.description || '';
+  dirChildren = dirItem.children || [];
+  dirFlatNotes = getAllFlatNotes()
+    .filter((n) => n.slug.startsWith(dirItem.slug))
+    .map((n) => ({ title: n.title, slug: n.slug, summary: n.summary }));
+}
+
+// ====== 笔记页面数据 ======
+let noteTitle = '';
+let noteSummary = '';
+let tags: string[] = [];
+let headings: Array<{ depth: number; slug: string; text: string }> = [];
+let prev: NoteFile | undefined;
+let next: NoteFile | undefined;
+let backlinks: Array<{ title: string; slug: string; summary?: string }> = [];
+let Content: any = null;
+
+if (!isDir) {
+  const note = Astro.props.note;
+  const rendered = await render(note);
+  Content = rendered.Content;
+  headings = rendered.headings;
+
+  noteTitle = note.data.title;
+  noteSummary = note.data.summary || '';
+  tags = note.data.tags || [];
+
+  const nav = getPrevNext(currentSlug);
+  prev = nav.prev;
+  next = nav.next;
+
+  // Use pre-built backlinks index instead of scanning all files
+  backlinks = backlinksIndex.get(noteTitle) || [];
+}
+---
+
+<BaseLayout title={isDir ? dirTitle : noteTitle} description={isDir ? dirDescription : noteSummary} wide={!isDir}>
+  <div class="flex gap-3 xl:gap-4">
+    {/* 左侧边栏 */}
+    <Sidebar
+      tree={finalSidebarTree}
+      currentSlug={currentSlug}
+      categoryTitle={topLevelAncestor ? (topLevelAncestor.meta?.title || topLevelAncestor.title) : undefined}
+    />
+
+    {/* 中间内容区 */}
+    <article class="flex-1 min-w-0">
+      {/* 面包屑 */}
+      <nav class="mb-6 text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
+        <a href={`${base}garden/`} class="hover:text-garden-600 dark:hover:text-garden-400 transition-colors">笔记</a>
+        <span class="text-gray-300 dark:text-gray-600">/</span>
+        <span class="text-gray-700 dark:text-gray-200 font-medium">{isDir ? dirTitle : noteTitle}</span>
+      </nav>
+
+      {isDir ? (
+        /* ====== 目录页面 ====== */
+        <>
+          <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
+            <img src={`${base}icons/笔记总.svg`} alt="" class="w-6 h-6 icon-colorful" /> {dirTitle}
+          </h1>
+          {dirDescription && <p class="text-gray-600 dark:text-gray-300 mb-8">{dirDescription}</p>}
+
+          <div class="space-y-3">
+            {dirChildren.map((child) => (
+              child.type === 'dir' ? (
+                <a href={`${base}garden/${child.slug}/`}
+                  class="flex items-center gap-3 p-4 bg-white/50 dark:bg-[#18181b]/60 backdrop-blur-sm rounded-xl border border-gray-200/60 dark:border-white/[0.06] hover:shadow-sm hover:border-garden-300/60 dark:hover:border-garden-700/40 transition-all group">
+                  <img src={`${base}icons/文件夹.svg`} alt="" class="w-5 h-5 icon-colorful" />
+                  <div class="flex-1">
+                    <h3 class="font-semibold text-gray-900 dark:text-white group-hover:text-garden-700 dark:group-hover:text-garden-400 transition-colors">
+                      {child.meta?.title || child.title}
+                    </h3>
+                    {child.meta?.description && <p class="text-sm text-gray-500 dark:text-gray-400">{child.meta.description}</p>}
+                  </div>
+                  <svg class="w-4 h-4 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                  </svg>
+                </a>
+              ) : (
+                <a href={`${base}garden/${child.slug}/`}
+                  class="flex items-center gap-3 p-4 bg-white/50 dark:bg-[#18181b]/60 backdrop-blur-sm rounded-xl border border-gray-200/60 dark:border-white/[0.06] hover:shadow-sm hover:border-garden-300/60 dark:hover:border-garden-700/40 transition-all group">
+                  <img src={`${base}icons/文档.svg`} alt="" class="w-5 h-5 icon-colorful" />
+                  <h3 class="font-medium text-gray-900 dark:text-white group-hover:text-garden-700 dark:group-hover:text-garden-400 transition-colors">
+                    {child.title}
+                  </h3>
+                </a>
+              )
+            ))}
+          </div>
+
+          {dirFlatNotes.length > 0 && (
+            <div class="mt-8 pt-6 border-t border-gray-200/60 dark:border-white/[0.06]">
+              <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">所有笔记</h2>
+              <div class="grid sm:grid-cols-2 gap-3">
+                {dirFlatNotes.map((note) => (
+                  <a href={`${base}garden/${note.slug}/`}
+                    class="p-3 bg-gray-50/70 dark:bg-white/[0.04] backdrop-blur-sm rounded-lg hover:bg-garden-50/50 dark:hover:bg-garden-900/10 transition-colors border border-gray-200/60 dark:border-white/[0.06]">
+                    <h4 class="font-medium text-gray-900 dark:text-white text-sm">{note.title}</h4>
+                    {note.summary && <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">{note.summary}</p>}
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+        </>
+      ) : (
+        /* ====== 笔记详情页面 ====== */
+        <>
+          <header class="mb-8">
+            <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">{noteTitle}</h1>
+            {tags.length > 0 && (
+              <div class="flex flex-wrap gap-2">
+                {tags.map((tag) => (
+                  <span class="bg-gray-50/70 dark:bg-white/[0.04] backdrop-blur-sm text-gray-600 dark:text-gray-400 px-3 py-1 rounded-lg text-xs border border-gray-200/60 dark:border-white/[0.06]">
+                    #{tag}
+                  </span>
+                ))}
+              </div>
+            )}
+          </header>
+
+          <NoteLayout Content={Content} headings={headings} />
+
+          <PrevNextNav prev={prev} next={next} />
+          <Backlinks backlinks={backlinks} />
+        </>
+      )}
+    </article>
+
+    {/* 右侧 TOC（仅笔记页面显示） */}
+    {!isDir && <TableOfContents headings={headings} />}
+  </div>
+</BaseLayout>

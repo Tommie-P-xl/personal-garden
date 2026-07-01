@@ -1,0 +1,58 @@
+---
+import type { NoteFile } from '../lib/scan-notes';
+
+interface Props {
+  items: NoteFile[];
+  currentSlug: string;
+  depth?: number;
+}
+
+const { items, currentSlug, depth = 0 } = Astro.props;
+const base = import.meta.env.BASE_URL;
+
+function renderTitle(item: NoteFile): string {
+  return item.meta?.title || item.title;
+}
+---
+
+{items.map((item) => (
+  item.type === 'file' ? (
+    <a
+      href={`${base}garden/${item.slug}/`}
+      class:list={[
+        'flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors',
+        item.slug === currentSlug
+          ? 'bg-garden-50 dark:bg-garden-900/20 text-garden-700 dark:text-garden-400 font-semibold'
+          : depth === 0
+            ? 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/[0.06] hover:text-gray-900 dark:hover:text-white'
+            : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/[0.06] hover:text-gray-900 dark:hover:text-white',
+      ]}
+    >
+      <img src={`${base}icons/${depth === 0 ? '文档' : '文档'}.svg`} alt="" class:list={[depth === 0 ? 'w-3.5 h-3.5' : 'w-3 h-3', 'icon-colorful']} />
+      <span>{renderTitle(item)}</span>
+    </a>
+  ) : (
+    <div class:list={['sidebar-group', depth > 0 && 'sidebar-subgroup']} data-slug={item.slug}>
+      <button
+        class:list={[
+          'sidebar-toggle w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors',
+          depth === 0
+            ? 'font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-white/[0.06]'
+            : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/[0.06]',
+        ]}
+        data-slug={item.slug}
+      >
+        <img src={`${base}icons/文件夹.svg`} alt="" class:list={[depth === 0 ? 'w-3.5 h-3.5' : 'w-3 h-3', 'icon-colorful']} />
+        <span class="flex-1 text-left">{renderTitle(item)}</span>
+        <svg class:list={[depth === 0 ? 'w-3.5 h-3.5' : 'w-3 h-3', 'transition-transform chevron']} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+        </svg>
+      </button>
+      <div class="sidebar-children ml-5 hidden">
+        {item.children && (
+          <Astro.self items={item.children} currentSlug={currentSlug} depth={depth + 1} />
+        )}
+      </div>
+    </div>
+  )
+))}

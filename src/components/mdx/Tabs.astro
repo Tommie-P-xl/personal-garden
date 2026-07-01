@@ -1,0 +1,88 @@
+---
+interface Props {
+  labels: string[];
+  id?: string;
+}
+
+const { labels, id = `tabs-${Math.random().toString(36).slice(2, 8)}` } = Astro.props;
+---
+
+<div class="my-6 rounded-lg border border-gray-200/60 dark:border-white/[0.06] overflow-hidden">
+  <div class="flex border-b border-gray-200/60 dark:border-white/[0.06] bg-gray-50/50 dark:bg-white/[0.02]">
+    {labels.map((label, i) => (
+      <label
+        class:list={[
+          'px-4 py-2.5 text-sm font-medium cursor-pointer transition-colors relative',
+          i === 0
+            ? 'text-garden-700 dark:text-garden-400'
+            : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300',
+        ]}
+        data-tab-group={id}
+        data-tab-index={i}
+      >
+        <input
+          type="radio"
+          name={id}
+          value={i}
+          class="sr-only"
+          checked={i === 0}
+        />
+        {label}
+        <span
+          class:list={[
+            'absolute bottom-0 left-0 right-0 h-0.5 transition-colors',
+            i === 0 ? 'bg-garden-500 dark:bg-garden-400' : 'bg-transparent',
+          ]}
+          data-tab-indicator
+        />
+      </label>
+    ))}
+  </div>
+  <div class="p-4">
+    <slot />
+  </div>
+</div>
+
+<script>
+  function initTabs() {
+    document.querySelectorAll('[data-tab-group]').forEach((label) => {
+      if ((label as HTMLElement).dataset.bound) return;
+      (label as HTMLElement).dataset.bound = 'true';
+      label.addEventListener('click', () => {
+        const group = label.getAttribute('data-tab-group');
+        const index = label.getAttribute('data-tab-index');
+        const container = label.closest('.my-6');
+
+        if (!container) return;
+
+        // 更新标签样式
+        container.querySelectorAll(`[data-tab-group="${group}"]`).forEach((l) => {
+          const isActive = l.getAttribute('data-tab-index') === index;
+          const span = l.querySelector('span:last-child');
+
+          if (isActive) {
+            l.classList.add('text-garden-700', 'dark:text-garden-400');
+            l.classList.remove('text-gray-500', 'dark:text-gray-400');
+            span?.classList.add('bg-garden-500', 'dark:bg-garden-400');
+            span?.classList.remove('bg-transparent');
+          } else {
+            l.classList.remove('text-garden-700', 'dark:text-garden-400');
+            l.classList.add('text-gray-500', 'dark:text-gray-400');
+            span?.classList.remove('bg-garden-500', 'dark:bg-garden-400');
+            span?.classList.add('bg-transparent');
+          }
+        });
+
+        // 更新内容显示
+        const panels = container.querySelectorAll('[data-tab-panel]');
+        panels.forEach((panel, i) => {
+          const panelEl = panel as HTMLElement;
+          panelEl.style.display = i.toString() === index ? 'block' : 'none';
+        });
+      });
+    });
+  }
+
+  initTabs();
+  document.addEventListener('astro:page-load', initTabs);
+</script>

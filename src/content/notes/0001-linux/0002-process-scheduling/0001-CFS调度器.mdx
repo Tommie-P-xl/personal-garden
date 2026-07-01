@@ -1,0 +1,94 @@
+---
+title: CFS 调度器
+summary: Linux 完全公平调度器的工作原理
+tags: [内核, 进程, 调度, CFS]
+---
+
+# CFS 调度器
+
+CFS（Completely Fair Scheduler）是 Linux 的默认调度策略。
+
+## 核心思想
+
+CFS 的核心思想是**公平性**——让每个进程都能获得公平的 CPU 时间。
+
+关键概念：
+
+- **虚拟运行时间（vruntime）**：记录进程已经使用的 CPU 时间
+- **红黑树**：CFS 使用红黑树按 vruntime 排序所有可运行进程
+- **时间片**：每个进程获得的 CPU 时间份额
+
+```c
+// 简化的 CFS 调度逻辑
+struct sched_entity {
+    struct rb_node run_node;  // 红黑树节点
+    u64 vruntime;             // 虚拟运行时间
+    // ...
+};
+```
+
+---
+
+## vruntime 计算公式
+
+$$\text{vruntime} += \Delta_{exec} \times \frac{NICE\_0\_LOAD}{weight}$$
+
+- nice 值越低，权重越高，获得的 CPU 时间越多
+- 实时进程优先级高于普通进程
+
+<Callout type="tip">
+nice 值范围是 -20 到 19，默认值为 0。nice 值越低，进程优先级越高。
+</Callout>
+
+---
+
+## 进程状态
+
+Linux 进程有以下几种状态：
+
+| 状态 | 说明 |
+|------|------|
+| TASK_RUNNING | 可运行或正在运行 |
+| TASK_INTERRUPTIBLE | 等待中断，可被信号唤醒 |
+| TASK_UNINTERRUPTIBLE | 等待中断，不可被信号唤醒 |
+| TASK_STOPPED | 被停止（如收到 SIGSTOP） |
+| TASK_ZOMBIE | 已终止但未被父进程回收 |
+
+---
+
+## 调度策略对比
+
+<Tabs labels={['CFS', '实时调度', 'Deadline']}>
+<TabItem index={0} active>
+
+**完全公平调度（SCHED_NORMAL）**
+
+适用于普通进程，基于 vruntime 的公平调度。
+
+</TabItem>
+<TabItem index={1}>
+
+**实时调度（SCHED_FIFO / SCHED_RR）**
+
+适用于实时进程，优先级高于 CFS。
+
+</TabItem>
+<TabItem index={2}>
+
+**Deadline 调度（SCHED_DEADLINE）**
+
+适用于有严格截止时间的任务。
+
+</TabItem>
+</Tabs>
+
+---
+
+## 参考资料
+
+<Collapse title="书籍推荐">
+
+- 《Linux 内核设计与实现》第 4 章
+- 《深入理解 Linux 内核》第 7 章
+
+</Collapse>

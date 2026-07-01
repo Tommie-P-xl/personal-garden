@@ -1,0 +1,51 @@
+{/* 动态背景层：极客风格多层视觉效果 */}
+<div class="fixed inset-0 -z-10 pointer-events-none" aria-hidden="true">
+  {/* 基础底色 */}
+  <div class="absolute inset-0 bg-[#fbfaf7] dark:bg-[#0e0e10]"></div>
+
+  {/* 颗粒质感 - SVG feTurbulence 噪声纹理 */}
+  <div class="absolute inset-0 opacity-[0.035] dark:opacity-[0.05]" style="background-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22140%22 height=%22140%22%3E%3Cfilter id=%22n%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.85%22 numOctaves=%222%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23n)%22/%3E%3C/svg%3E');"></div>
+
+  {/* 点阵纹理 - 科技感 */}
+  <div class="absolute inset-0 opacity-[0.35] dark:opacity-[0.14]" style="background-image: radial-gradient(circle, #94a3b8 1px, transparent 1px); background-size: 26px 26px;"></div>
+
+  {/* 细网格纹理 - 几何结构 */}
+  <div class="absolute inset-0 opacity-[0.14] dark:opacity-[0.07]" style="background-image: linear-gradient(rgba(148,163,184,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(148,163,184,0.5) 1px, transparent 1px); background-size: 88px 88px;"></div>
+
+  {/* 柔和的整体色彩叠层 */}
+  <div class="absolute inset-0 dark:hidden" style="background: linear-gradient(160deg, rgba(217,119,6,0.10) 0%, transparent 35%, transparent 65%, rgba(99,102,241,0.10) 100%);"></div>
+  <div class="absolute inset-0 hidden dark:block" style="background: linear-gradient(160deg, rgba(217,119,6,0.06) 0%, transparent 35%, transparent 65%, rgba(99,102,241,0.08) 100%);"></div>
+
+  {/* 5 个光斑 */}
+  <div class="absolute -top-[8%] -left-[6%] w-[560px] h-[560px] rounded-full" style="background: radial-gradient(circle, rgba(217,119,6,0.55) 0%, rgba(217,119,6,0.12) 45%, transparent 72%); filter: blur(4px); animation: float-a 24s ease-in-out infinite;"></div>
+  <div class="absolute -top-[8%] -left-[6%] w-[560px] h-[560px] rounded-full hidden dark:block" style="background: radial-gradient(circle, rgba(251,191,36,0.32) 0%, rgba(251,191,36,0.06) 45%, transparent 72%); filter: blur(4px); animation: float-a 24s ease-in-out infinite; mix-blend-mode: screen;"></div>
+
+  <div class="absolute -top-[12%] -right-[8%] w-[460px] h-[460px] rounded-full" style="background: radial-gradient(circle, rgba(244,63,94,0.4) 0%, rgba(244,63,94,0.08) 45%, transparent 72%); filter: blur(4px); animation: float-b 20s ease-in-out infinite;"></div>
+  <div class="absolute -top-[12%] -right-[8%] w-[460px] h-[460px] rounded-full hidden dark:block" style="background: radial-gradient(circle, rgba(251,113,133,0.2) 0%, rgba(251,113,133,0.05) 45%, transparent 72%); filter: blur(4px); animation: float-b 20s ease-in-out infinite; mix-blend-mode: screen;"></div>
+
+  <div class="absolute top-[28%] left-[55%] w-[500px] h-[500px] rounded-full" style="background: radial-gradient(circle, rgba(99,102,241,0.32) 0%, rgba(99,102,241,0.06) 45%, transparent 72%); filter: blur(4px); animation: float-c 26s ease-in-out infinite;"></div>
+  <div class="absolute top-[28%] left-[55%] w-[500px] h-[500px] rounded-full hidden dark:block" style="background: radial-gradient(circle, rgba(129,140,248,0.18) 0%, rgba(129,140,248,0.04) 45%, transparent 72%); filter: blur(4px); animation: float-c 26s ease-in-out infinite; mix-blend-mode: screen;"></div>
+
+  <div class="absolute -bottom-[14%] left-[12%] w-[380px] h-[380px] rounded-full" style="background: radial-gradient(circle, rgba(252,211,77,0.4) 0%, rgba(252,211,77,0.08) 45%, transparent 72%); filter: blur(4px); animation: float-d 22s ease-in-out infinite;"></div>
+  <div class="absolute -bottom-[14%] left-[12%] w-[380px] h-[380px] rounded-full hidden dark:block" style="background: radial-gradient(circle, rgba(252,211,77,0.16) 0%, rgba(252,211,77,0.03) 45%, transparent 72%); filter: blur(4px); animation: float-d 22s ease-in-out infinite; mix-blend-mode: screen;"></div>
+
+  <div class="absolute -bottom-[10%] right-[6%] w-[320px] h-[320px] rounded-full" style="background: radial-gradient(circle, rgba(79,70,229,0.3) 0%, rgba(79,70,229,0.06) 45%, transparent 72%); filter: blur(4px); animation: float-a 28s ease-in-out infinite reverse;"></div>
+  <div class="absolute -bottom-[10%] right-[6%] w-[320px] h-[320px] rounded-full hidden dark:block" style="background: radial-gradient(circle, rgba(129,140,248,0.14) 0%, rgba(129,140,248,0.03) 45%, transparent 72%); filter: blur(4px); animation: float-a 28s ease-in-out infinite reverse; mix-blend-mode: screen;"></div>
+
+  {/* 六边形电路装饰角标 */}
+  <div class="absolute -top-10 -right-10 w-80 h-80 opacity-50 dark:opacity-28">
+    <svg viewBox="0 0 320 320" fill="none" class="w-full h-full">
+      <path d="M40 280 L40 180 L100 180 L100 120 L180 120 L180 60 L260 60" stroke-width="1.2" stroke-linecap="round" class="stroke-[#92400e] dark:stroke-[#fbbf24]"/>
+      <path d="M20 220 L80 220 L80 260 L160 260" stroke-width="1.2" stroke-linecap="round" class="stroke-[#92400e] dark:stroke-[#fbbf24]"/>
+      <path d="M140 40 L140 90 L220 90 L220 160 L280 160" stroke-width="1.2" stroke-linecap="round" class="stroke-[#92400e] dark:stroke-[#fbbf24]"/>
+      <circle cx="40" cy="280" r="3" class="fill-[#92400e] dark:fill-[#fbbf24]"/>
+      <circle cx="100" cy="120" r="3" class="fill-[#92400e] dark:fill-[#fbbf24]"/>
+      <circle cx="180" cy="60" r="3" class="fill-[#92400e] dark:fill-[#fbbf24]"/>
+      <circle cx="260" cy="60" r="3" class="fill-[#92400e] dark:fill-[#fbbf24]"/>
+      <circle cx="80" cy="260" r="3" class="fill-[#92400e] dark:fill-[#fbbf24]"/>
+      <circle cx="160" cy="260" r="3" class="fill-[#92400e] dark:fill-[#fbbf24]"/>
+      <circle cx="220" cy="160" r="3" class="fill-[#92400e] dark:fill-[#fbbf24]"/>
+      <circle cx="280" cy="160" r="3" class="fill-[#92400e] dark:fill-[#fbbf24]"/>
+    </svg>
+  </div>
+</div>
