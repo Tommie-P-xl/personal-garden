@@ -1,0 +1,30 @@
+# build output
+dist/
+
+# generated types
+.astro/
+
+# dependencies
+node_modules/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# OMC state
+.omc/
+
+# Superpowers brainstorm
+.superpowers/
+
+# screenshots and temp files
+*.png
+.playwright-mcp/
+
+# environment
+.env
+.env.production

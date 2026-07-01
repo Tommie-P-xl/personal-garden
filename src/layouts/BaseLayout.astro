@@ -1,0 +1,674 @@
+---
+import { ViewTransitions } from 'astro:transitions';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = '个人数字花园 - 学习笔记与项目展示' } = Astro.props;
+const currentPath = Astro.url.pathname;
+const base = import.meta.env.BASE_URL;
+
+function href(path: string) {
+  return base + path.replace(/^\//, '');
+}
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/svg+xml" href={href('/favicon.svg')} />
+    <title>{title} | Tommie的花园</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" crossorigin="anonymous">
+    <ViewTransitions />
+    {/* 主题初始化 + View Transitions 生命周期管理（全部在 is:inline 中，跨页面持久） */}
+    <script is:inline>
+      (function() {
+        // ====== 主题核心 ======
+        function getTheme() {
+          return localStorage.getItem('theme') || 'system';
+        }
+
+        function isDark(theme) {
+          if (theme === 'dark') return true;
+          if (theme === 'light') return false;
+          return window.matchMedia('(prefers-color-scheme: dark)').matches;
+        }
+
+        function applyTheme(theme) {
+          var dark = isDark(theme);
+          document.documentElement.classList.toggle('dark', dark);
+          // 同时设置 CSS 变量，确保所有元素立即响应
+          document.documentElement.style.setProperty('--bg-primary', dark ? '#0f0f11' : '#fafaf9');
+          document.documentElement.style.setProperty('--bg-card', dark ? '#18181b' : '#ffffff');
+          document.documentElement.style.setProperty('--border-color', dark ? 'rgba(255,255,255,0.06)' : 'rgba(229,231,235,0.6)');
+          document.documentElement.style.backgroundColor = dark ? '#0f0f11' : '#fafaf9';
+          localStorage.setItem('theme', theme);
+          updateIcons(theme);
+        }
+
+        function updateIcons(theme) {
+          var ids = [
+            ['icon-light', theme !== 'light'],
+            ['icon-dark', theme !== 'dark'],
+            ['icon-system', theme !== 'system'],
+            ['icon-light-mobile', theme !== 'light'],
+            ['icon-dark-mobile', theme !== 'dark'],
+            ['icon-system-mobile', theme !== 'system'],
+          ];
+          ids.forEach(function(pair) {
+            var el = document.getElementById(pair[0]);
+            if (el) el.classList.toggle('hidden', pair[1]);
+          });
+        }
+
+        // ====== 导航方向追踪 ======
+        var navLinks = [
+          { path: '/', idx: 0 },
+          { path: '/garden/', idx: 1 },
+          { path: '/projects/', idx: 2 },
+          { path: '/about/', idx: 3 }
+        ];
+
+        function getPathIdx(pathname) {
+          var base = document.querySelector('base')?.href || '/';
+          var cleanPath = pathname.replace(new RegExp('^' + base.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'), '/');
+          for (var i = 0; i < navLinks.length; i++) {
+            if (cleanPath === navLinks[i].path || cleanPath.startsWith(navLinks[i].path.replace(/\/$/, ''))) {
+              return navLinks[i].idx;
+            }
+          }
+          return 0;
+        }
+
+        // ====== FOUC 修复：在 before-swap 中复制主题状态 ======
+        document.addEventListener('astro:before-swap', function(e) {
+          // 1. 复制当前 html 的 class（包含 .dark）和 style 到新文档
+          e.newDocument.documentElement.className = document.documentElement.className;
+          e.newDocument.documentElement.style.cssText = document.documentElement.style.cssText;
+
+          // 2. 记录当前导航方向
+          var currentIdx = getPathIdx(window.location.pathname);
+          sessionStorage.setItem('vt-from-idx', String(currentIdx));
+
+          // 3. 记录当前导航指示器位置（用于跨页滑动）- 只存数值，不带单位
+          var indicator = document.getElementById('nav-indicator');
+          if (indicator) {
+            sessionStorage.setItem('vt-indicator-left', String(parseFloat(indicator.style.left) || 0));
+            sessionStorage.setItem('vt-indicator-width', String(parseFloat(indicator.style.width) || 0));
+          }
+
+          // 4. 注入临时样式禁用所有 transition，防止 FOUC
+          var style = e.newDocument.createElement('style');
+          style.setAttribute('data-vt-disable', 'true'); // 必须补上这行标记
+          style.textContent = '*, *::before, *::after { transition: none !important; animation: none !important; }';
+          e.newDocument.head.appendChild(style);
+          // 在页面加载后移除该临时样式
+          sessionStorage.setItem('vt-disable-transitions', 'true');
+        });
+
+        // ====== 初始化（首屏 + View Transitions swap 后） ======
+        function initTheme() {
+          applyTheme(getTheme());
+        }
+
+        // 首屏
+        initTheme();
+
+        // View Transitions: swap 后立即应用主题 + 计算方向
+        document.addEventListener('astro:after-swap', function() {
+          // 立即应用主题，防止闪变
+          initTheme();
+
+          // 立即移除 before-swap 注入的临时禁用样式
+          var disableStyle = document.querySelector('style[data-vt-disable]');
+          if (disableStyle) {
+            disableStyle.remove();
+          }
+          sessionStorage.removeItem('vt-disable-transitions');
+
+          // 计算导航方向
+          var fromIdx = parseInt(sessionStorage.getItem('vt-from-idx') || '0', 10);
+          var toIdx = getPathIdx(window.location.pathname);
+          var dir = toIdx > fromIdx ? 1 : toIdx < fromIdx ? -1 : 0;
+          document.documentElement.style.setProperty('--slide-dir', String(dir));
+
+          // ====== 导航指示器跨页滑动动效 ======
+          var indicator = document.getElementById('nav-indicator');
+          if (indicator) {
+            // 1. 获取老页面记录的位置
+            var oldLeft = sessionStorage.getItem('vt-indicator-left') || '0';
+            var oldWidth = sessionStorage.getItem('vt-indicator-width') || '0';
+
+            // 2. 先将指示器设置为老页面的位置，禁用动画
+            indicator.style.transition = 'none';
+            indicator.style.left = oldLeft + 'px';
+            indicator.style.width = oldWidth + 'px';
+            indicator.style.opacity = '1';
+
+            // 3. 计算新目标位置
+            var container = document.getElementById('nav-links');
+            if (container) {
+              var active = container.querySelector('[data-active="true"]');
+              if (active) {
+                var cr = container.getBoundingClientRect();
+                var ar = active.getBoundingClientRect();
+                var newLeft = (ar.left - cr.left) + 'px';
+                var newWidth = ar.width + 'px';
+
+                // 4. 强制重绘后，恢复动画并滑动到新位置
+                indicator.offsetHeight; // 强制重绘
+                indicator.style.transition = 'width 0.4s cubic-bezier(0.25,0.1,0.25,1), left 0.4s cubic-bezier(0.25,0.1,0.25,1), opacity 0.2s ease';
+                indicator.style.left = newLeft;
+                indicator.style.width = newWidth;
+              }
+            }
+          }
+        });
+
+        // View Transitions: 页面准备好后重新绑定事件
+        document.addEventListener('astro:page-load', function() {
+          applyTheme(getTheme());
+
+          // 移除临时禁用的 transition 样式
+          var disableStyle = document.querySelector('style[data-vt-disable]');
+          if (disableStyle) {
+            disableStyle.remove();
+          }
+          sessionStorage.removeItem('vt-disable-transitions');
+
+          // 主题切换按钮
+          var themeToggle = document.getElementById('theme-toggle');
+          var themeDropdown = document.getElementById('theme-dropdown');
+
+          themeToggle?.addEventListener('click', function() {
+            themeDropdown?.classList.toggle('hidden');
+          });
+
+          themeDropdown?.querySelectorAll('[data-theme]').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+              var theme = btn.dataset.theme;
+              applyTheme(theme);
+              themeDropdown.classList.add('hidden');
+            });
+          });
+
+          // 移动端主题按钮
+          var themeToggleMobile = document.getElementById('theme-toggle-mobile');
+          themeToggleMobile?.addEventListener('click', function() {
+            var current = getTheme();
+            var next = current === 'system' ? 'light' : current === 'light' ? 'dark' : 'system';
+            applyTheme(next);
+          });
+
+          // 点击外部关闭下拉
+          document.addEventListener('click', function(e) {
+            if (!themeToggle?.contains(e.target) && !themeDropdown?.contains(e.target)) {
+              themeDropdown?.classList.add('hidden');
+            }
+          });
+
+          // 系统主题变化监听
+          window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function() {
+            if (getTheme() === 'system') applyTheme('system');
+          });
+
+          // 移动端菜单
+          var menuBtn = document.getElementById('mobile-menu-btn');
+          var mobileMenu = document.getElementById('mobile-menu');
+          menuBtn?.addEventListener('click', function() {
+            mobileMenu?.classList.toggle('hidden');
+          });
+
+          // 代码复制按钮
+          document.querySelectorAll('pre').forEach(function(pre) {
+            if (pre.querySelector('.code-copy-btn')) return;
+            var copyBtn = document.createElement('button');
+            copyBtn.className = 'code-copy-btn';
+            copyBtn.textContent = '复制';
+            copyBtn.addEventListener('click', async function() {
+              var code = pre.querySelector('code')?.textContent || pre.textContent || '';
+              try {
+                await navigator.clipboard.writeText(code);
+                copyBtn.textContent = '✓ 已复制';
+                copyBtn.classList.add('copied');
+                setTimeout(function() { copyBtn.textContent = '复制'; copyBtn.classList.remove('copied'); }, 1500);
+              } catch {
+                var ta = document.createElement('textarea');
+                ta.value = code;
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                document.body.removeChild(ta);
+                copyBtn.textContent = '✓ 已复制';
+                copyBtn.classList.add('copied');
+                setTimeout(function() { copyBtn.textContent = '复制'; copyBtn.classList.remove('copied'); }, 1500);
+              }
+            });
+            pre.appendChild(copyBtn);
+          });
+
+          // 滑动导航指示条（首次加载时）
+          updateNavIndicator();
+        });
+
+        // ====== 导航指示条（带平滑动画） ======
+        function updateNavIndicator() {
+          var indicator = document.getElementById('nav-indicator');
+          var container = document.getElementById('nav-links');
+          if (!indicator || !container) return;
+
+          var active = container.querySelector('[data-active="true"]');
+          if (!active) {
+            indicator.style.width = '0';
+            indicator.style.opacity = '0';
+            return;
+          }
+
+          var cr = container.getBoundingClientRect();
+          var ar = active.getBoundingClientRect();
+          var targetLeft = ar.left - cr.left;
+          var targetWidth = ar.width;
+
+          // 设置新位置（CSS transition 会处理动画）
+          indicator.style.width = targetWidth + 'px';
+          indicator.style.left = targetLeft + 'px';
+          indicator.style.opacity = '1';
+        }
+
+        window.addEventListener('resize', updateNavIndicator);
+      })();
+    </script>
+  </head>
+  <body class="bg-transparent text-[#18181b] dark:text-[#e4e4e7] min-h-screen relative overflow-x-hidden">
+    {/* 动态背景层：极客风格多层视觉效果 - 参考 background-preview-v2 */}
+    <div class="fixed inset-0 -z-10 pointer-events-none" aria-hidden="true">
+      {/* 基础底色 */}
+      <div class="absolute inset-0 bg-[#fbfaf7] dark:bg-[#0e0e10]"></div>
+
+      {/* 颗粒质感 - SVG feTurbulence 噪声纹理 */}
+      <div class="absolute inset-0 opacity-[0.035] dark:opacity-[0.05]" style="background-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22140%22 height=%22140%22%3E%3Cfilter id=%22n%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.85%22 numOctaves=%222%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23n)%22/%3E%3C/svg%3E');"></div>
+
+      {/* 点阵纹理 - 科技感 */}
+      <div class="absolute inset-0 opacity-[0.35] dark:opacity-[0.14]" style="background-image: radial-gradient(circle, #94a3b8 1px, transparent 1px); background-size: 26px 26px;"></div>
+
+      {/* 细网格纹理 - 几何结构 */}
+      <div class="absolute inset-0 opacity-[0.14] dark:opacity-[0.07]" style="background-image: linear-gradient(rgba(148,163,184,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(148,163,184,0.5) 1px, transparent 1px); background-size: 88px 88px;"></div>
+
+      {/* 柔和的整体色彩叠层 - 统一冷暖过渡 */}
+      <div class="absolute inset-0" style="background: linear-gradient(160deg, rgba(217,119,6,0.10) 0%, transparent 35%, transparent 65%, rgba(99,102,241,0.10) 100%);"></div>
+      <div class="absolute inset-0 dark:hidden" style="background: linear-gradient(160deg, rgba(217,119,6,0.10) 0%, transparent 35%, transparent 65%, rgba(99,102,241,0.10) 100%);"></div>
+      <div class="absolute inset-0 hidden dark:block" style="background: linear-gradient(160deg, rgba(217,119,6,0.06) 0%, transparent 35%, transparent 65%, rgba(99,102,241,0.08) 100%);"></div>
+
+      {/* ===== 5 个光斑：配色收敛在「琥珀·玫瑰·靛蓝」三色体系 ===== */}
+
+      {/* 光斑 1：琥珀主光 - 左上偏中 */}
+      <div class="absolute -top-[8%] -left-[6%] w-[560px] h-[560px] rounded-full" style="background: radial-gradient(circle, rgba(217,119,6,0.55) 0%, rgba(217,119,6,0.12) 45%, transparent 72%); filter: blur(4px); animation: float-a 24s ease-in-out infinite;"></div>
+      <div class="absolute -top-[8%] -left-[6%] w-[560px] h-[560px] rounded-full hidden dark:block" style="background: radial-gradient(circle, rgba(251,191,36,0.32) 0%, rgba(251,191,36,0.06) 45%, transparent 72%); filter: blur(4px); animation: float-a 24s ease-in-out infinite; mix-blend-mode: screen;"></div>
+
+      {/* 光斑 2：玫瑰暖调 - 右上 */}
+      <div class="absolute -top-[12%] -right-[8%] w-[460px] h-[460px] rounded-full" style="background: radial-gradient(circle, rgba(244,63,94,0.4) 0%, rgba(244,63,94,0.08) 45%, transparent 72%); filter: blur(4px); animation: float-b 20s ease-in-out infinite;"></div>
+      <div class="absolute -top-[12%] -right-[8%] w-[460px] h-[460px] rounded-full hidden dark:block" style="background: radial-gradient(circle, rgba(251,113,133,0.2) 0%, rgba(251,113,133,0.05) 45%, transparent 72%); filter: blur(4px); animation: float-b 20s ease-in-out infinite; mix-blend-mode: screen;"></div>
+
+      {/* 光斑 3：靛蓝冷调 - 中部偏右，制造中心呼吸感 */}
+      <div class="absolute top-[28%] left-[55%] w-[500px] h-[500px] rounded-full" style="background: radial-gradient(circle, rgba(99,102,241,0.32) 0%, rgba(99,102,241,0.06) 45%, transparent 72%); filter: blur(4px); animation: float-c 26s ease-in-out infinite;"></div>
+      <div class="absolute top-[28%] left-[55%] w-[500px] h-[500px] rounded-full hidden dark:block" style="background: radial-gradient(circle, rgba(129,140,248,0.18) 0%, rgba(129,140,248,0.04) 45%, transparent 72%); filter: blur(4px); animation: float-c 26s ease-in-out infinite; mix-blend-mode: screen;"></div>
+
+      {/* 光斑 4：金黄小光点 - 左下，补充下半区 */}
+      <div class="absolute -bottom-[14%] left-[12%] w-[380px] h-[380px] rounded-full" style="background: radial-gradient(circle, rgba(252,211,77,0.4) 0%, rgba(252,211,77,0.08) 45%, transparent 72%); filter: blur(4px); animation: float-d 22s ease-in-out infinite;"></div>
+      <div class="absolute -bottom-[14%] left-[12%] w-[380px] h-[380px] rounded-full hidden dark:block" style="background: radial-gradient(circle, rgba(252,211,77,0.16) 0%, rgba(252,211,77,0.03) 45%, transparent 72%); filter: blur(4px); animation: float-d 22s ease-in-out infinite; mix-blend-mode: screen;"></div>
+
+      {/* 光斑 5：靛蓝小光点 - 右下角，呼应光斑 3 */}
+      <div class="absolute -bottom-[10%] right-[6%] w-[320px] h-[320px] rounded-full" style="background: radial-gradient(circle, rgba(79,70,229,0.3) 0%, rgba(79,70,229,0.06) 45%, transparent 72%); filter: blur(4px); animation: float-a 28s ease-in-out infinite reverse;"></div>
+      <div class="absolute -bottom-[10%] right-[6%] w-[320px] h-[320px] rounded-full hidden dark:block" style="background: radial-gradient(circle, rgba(129,140,248,0.14) 0%, rgba(129,140,248,0.03) 45%, transparent 72%); filter: blur(4px); animation: float-a 28s ease-in-out infinite reverse; mix-blend-mode: screen;"></div>
+
+      {/* ===== 六边形电路装饰角标 - 极客细节 ===== */}
+      <div class="absolute -top-10 -right-10 w-80 h-80 opacity-50 dark:opacity-28">
+        <svg viewBox="0 0 320 320" fill="none" class="w-full h-full">
+          <path d="M40 280 L40 180 L100 180 L100 120 L180 120 L180 60 L260 60" stroke-width="1.2" stroke-linecap="round" class="stroke-[#92400e] dark:stroke-[#fbbf24]"/>
+          <path d="M20 220 L80 220 L80 260 L160 260" stroke-width="1.2" stroke-linecap="round" class="stroke-[#92400e] dark:stroke-[#fbbf24]"/>
+          <path d="M140 40 L140 90 L220 90 L220 160 L280 160" stroke-width="1.2" stroke-linecap="round" class="stroke-[#92400e] dark:stroke-[#fbbf24]"/>
+          <circle cx="40" cy="280" r="3" class="fill-[#92400e] dark:fill-[#fbbf24]"/>
+          <circle cx="100" cy="120" r="3" class="fill-[#92400e] dark:fill-[#fbbf24]"/>
+          <circle cx="180" cy="60" r="3" class="fill-[#92400e] dark:fill-[#fbbf24]"/>
+          <circle cx="260" cy="60" r="3" class="fill-[#92400e] dark:fill-[#fbbf24]"/>
+          <circle cx="80" cy="260" r="3" class="fill-[#92400e] dark:fill-[#fbbf24]"/>
+          <circle cx="160" cy="260" r="3" class="fill-[#92400e] dark:fill-[#fbbf24]"/>
+          <circle cx="220" cy="160" r="3" class="fill-[#92400e] dark:fill-[#fbbf24]"/>
+          <circle cx="280" cy="160" r="3" class="fill-[#92400e] dark:fill-[#fbbf24]"/>
+        </svg>
+      </div>
+    </div>
+    <!-- 导航栏 -->
+    <nav class="bg-white/80 dark:bg-[#18181b]/80 backdrop-blur-md border-b border-gray-200/60 dark:border-white/[0.06] sticky top-0 z-50">
+      <div class="max-w-5xl mx-auto px-4 sm:px-6">
+        <div class="flex items-center justify-between h-16">
+          <!-- Logo -->
+          <a href={href('/')} class="flex items-center gap-2 text-gray-900 dark:text-white font-bold text-lg tracking-tight hover:text-garden-600 dark:hover:text-garden-400 transition-colors">
+            <span>Tommie</span>
+          </a>
+
+          <!-- 导航链接 -->
+          <div class="hidden sm:flex items-center gap-1 relative" id="nav-links">
+            {[
+              { label: '首页', path: '/', icon: 'home', match: (p: string) => p === base || p === base + 'index.html', idx: 0 },
+              { label: '笔记', path: '/garden/', icon: 'note', match: (p: string) => p.includes('/garden'), idx: 1 },
+              { label: '项目', path: '/projects/', icon: 'project', match: (p: string) => p.includes('/projects'), idx: 2 },
+              { label: '关于', path: '/about/', icon: 'about', match: (p: string) => p.includes('/about'), idx: 3 },
+            ].map((item) => {
+              const active = item.match(currentPath);
+              return (
+                <a
+                  href={href(item.path)}
+                  class:list={[
+                    'nav-item px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5',
+                    active
+                      ? 'text-garden-700 dark:text-garden-400'
+                      : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/[0.06] hover:text-gray-900 dark:hover:text-white',
+                  ]}
+                  data-active={active ? 'true' : 'false'}
+                  data-nav-idx={item.idx}
+                >
+                  <img src={href(`/icons/${item.icon}.svg`)} alt="" class="w-4 h-4 dark:invert" />
+                  {item.label}
+                </a>
+              );
+            })}
+            {/* 滑动指示条 - 使用 transform 实现平滑滑动 */}
+            <div id="nav-indicator" class="absolute bottom-0 h-0.5 bg-garden-500 dark:bg-garden-400 rounded-full" style="width:0;left:0;opacity:0;transition:width 0.4s cubic-bezier(0.25,0.1,0.25,1),left 0.4s cubic-bezier(0.25,0.1,0.25,1),opacity 0.2s ease;"></div>
+
+            <!-- 主题切换按钮 -->
+            <div class="relative ml-3">
+              <button
+                id="theme-toggle"
+                class="p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                aria-label="切换主题"
+              >
+                <svg id="icon-light" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                </svg>
+                <svg id="icon-dark" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                </svg>
+                <svg id="icon-system" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                </svg>
+              </button>
+              <div id="theme-dropdown" class="hidden absolute right-0 mt-2 w-36 bg-white dark:bg-[#18181b] border border-gray-200 dark:border-white/[0.06] rounded-lg shadow-lg overflow-hidden z-50">
+                <button data-theme="light" class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-white/[0.06] flex items-center gap-2 transition-colors">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                  亮色
+                </button>
+                <button data-theme="dark" class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-white/[0.06] flex items-center gap-2 transition-colors">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                  暗色
+                </button>
+                <button data-theme="system" class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-white/[0.06] flex items-center gap-2 transition-colors">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                  跟随系统
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 移动端菜单按钮 -->
+          <div class="sm:hidden flex items-center gap-2">
+            <button
+              id="theme-toggle-mobile"
+              class="p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+              aria-label="切换主题"
+            >
+              <svg id="icon-light-mobile" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+              </svg>
+              <svg id="icon-dark-mobile" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+              </svg>
+              <svg id="icon-system-mobile" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+              </svg>
+            </button>
+            <button
+              id="mobile-menu-btn"
+              class="p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+              aria-label="打开菜单"
+            >
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- 移动端菜单 -->
+        <div id="mobile-menu" class="hidden sm:hidden pb-4">
+          <div class="flex flex-col gap-1">
+            {[
+              { label: '首页', path: '/', icon: 'home', active: currentPath === base, idx: 0 },
+              { label: '笔记', path: '/garden/', icon: 'note', active: currentPath.includes('/garden'), idx: 1 },
+              { label: '项目', path: '/projects/', icon: 'project', active: currentPath.includes('/projects'), idx: 2 },
+              { label: '关于', path: '/about/', icon: 'about', active: currentPath.includes('/about'), idx: 3 },
+            ].map((item) => (
+              <a href={href(item.path)} data-nav-idx={item.idx} class={`px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 ${item.active ? 'bg-garden-50 dark:bg-garden-900/20 text-garden-700 dark:text-garden-400' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/[0.06]'}`}>
+                <img src={href(`/icons/${item.icon}.svg`)} alt="" class="w-4 h-4 dark:invert" /> {item.label}
+              </a>
+            ))}
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- 主内容 -->
+    <main class="max-w-5xl mx-auto px-4 sm:px-6 py-8" transition:animate="fade">
+      <slot />
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-white/50 dark:bg-[#18181b]/60 backdrop-blur-sm border-t border-gray-200/60 dark:border-white/[0.06] mt-auto">
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 py-6 text-center text-sm text-gray-400 dark:text-gray-500">
+        <p>&copy; {new Date().getFullYear()} Tommie-P-xl</p>
+      </div>
+    </footer>
+  </body>
+</html>
+
+<style is:global>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap');
+
+  .prose {
+    @apply text-gray-800 dark:text-gray-200 leading-relaxed;
+  }
+  .prose h1 {
+    @apply text-3xl font-bold mt-8 mb-4 text-gray-900 dark:text-white;
+  }
+  .prose h2 {
+    @apply text-2xl font-bold mt-6 mb-3 text-gray-900 dark:text-white;
+  }
+  .prose h3 {
+    @apply text-xl font-semibold mt-5 mb-2 text-gray-900 dark:text-white;
+  }
+  .prose p {
+    @apply mb-4;
+  }
+  .prose ul {
+    @apply list-disc list-inside mb-4 space-y-1;
+  }
+  .prose ol {
+    @apply list-decimal list-inside mb-4 space-y-1;
+  }
+  .prose a {
+    @apply text-garden-600 dark:text-garden-400 hover:text-garden-500 dark:hover:text-garden-300 underline;
+  }
+  .prose code {
+    @apply bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded text-sm font-mono text-gray-800 dark:text-gray-200;
+  }
+  .prose pre {
+    @apply bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto mb-4 border border-gray-800;
+  }
+  html.dark .prose pre {
+    background-color: var(--shiki-dark-bg, #161b22) !important;
+    @apply border-white/[0.06];
+  }
+  html:not(.dark) .prose pre {
+    background-color: var(--shiki-bg, #f6f8fa) !important;
+    color: var(--shiki-fg, #24292f) !important;
+    @apply border-gray-200;
+  }
+  .prose pre code {
+    background: transparent !important;
+    @apply p-0 text-inherit;
+  }
+  .prose blockquote {
+    @apply border-l-4 border-garden-300 dark:border-garden-600 pl-4 italic text-gray-600 dark:text-gray-400 mb-4;
+  }
+  .prose img {
+    @apply rounded-lg shadow-md my-4;
+  }
+  .prose hr {
+    @apply border-gray-200 dark:border-gray-700 my-8;
+  }
+  .prose table {
+    @apply w-full border-collapse mb-4;
+  }
+  .prose th {
+    @apply bg-gray-100 dark:bg-gray-800 px-4 py-2 text-left font-semibold border border-gray-200 dark:border-gray-700;
+  }
+  .prose td {
+    @apply px-4 py-2 border border-gray-200 dark:border-gray-700;
+  }
+
+  /* Shiki dual theme: light/dark */
+  html.dark .shiki,
+  html.dark .shiki span,
+  html.dark .shiki code {
+    background-color: var(--shiki-dark-bg) !important;
+    color: var(--shiki-dark) !important;
+  }
+  html:not(.dark) .shiki,
+  html:not(.dark) .shiki span,
+  html:not(.dark) .shiki code {
+    background-color: var(--shiki-bg) !important;
+    color: var(--shiki-fg) !important;
+  }
+
+  /* Code block container */
+  pre {
+    position: relative;
+  }
+
+  /* Copy button */
+  .code-copy-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    color: #9ca3af;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s, background 0.2s;
+  }
+
+  pre:hover .code-copy-btn {
+    opacity: 1;
+  }
+
+  .code-copy-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+  }
+
+  .code-copy-btn.copied {
+    color: #4ade80;
+  }
+
+  /* h2 heading divider */
+  .prose h2 {
+    @apply pb-2 border-b border-gray-200 dark:border-gray-700;
+  }
+
+  /* Table zebra stripes */
+  .prose table {
+    @apply rounded-lg overflow-hidden;
+  }
+  .prose tbody tr:nth-child(even) {
+    @apply bg-gray-50 dark:bg-gray-800/50;
+  }
+
+  /* Blockquote */
+  .prose blockquote {
+    @apply border-l-4 border-garden-500 bg-garden-50 dark:bg-garden-900/20 rounded-r-lg;
+  }
+
+  /* SVG icon dark mode adaptation */
+  html.dark .icon-dark-adapt {
+    filter: invert(0.85) brightness(1.2);
+  }
+  html.dark .icon-colorful {
+    filter: brightness(1.15);
+  }
+  .nav-icon {
+    @apply w-4 h-4;
+  }
+  html.dark .nav-icon {
+    filter: invert(1);
+  }
+
+  /* 背景浮动光斑动画 - 4 个不同轨迹，更自然 */
+  @keyframes float-a {
+    0%, 100% { transform: translate(0,0) scale(1); }
+    33% { transform: translate(3%, 2%) scale(1.05); }
+    66% { transform: translate(-2%, 3%) scale(0.97); }
+  }
+  @keyframes float-b {
+    0%, 100% { transform: translate(0,0) scale(1); }
+    50% { transform: translate(-3%, 3%) scale(1.06); }
+  }
+  @keyframes float-c {
+    0%, 100% { transform: translate(0,0) scale(1); }
+    50% { transform: translate(-4%, -2%) scale(1.08); }
+  }
+  @keyframes float-d {
+    0%, 100% { transform: translate(0,0) scale(1); }
+    50% { transform: translate(2%, -3%) scale(1.04); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .fixed [style*="animation"] {
+      animation: none !important;
+    }
+  }
+
+  /* View Transitions 页面切换动画（方向感知） */
+  :root {
+    --slide-dir: 0;
+    --bg-primary: #fafaf9;
+    --bg-card: #ffffff;
+    --border-color: rgba(229,231,235,0.6);
+  }
+  html.dark {
+    --bg-primary: #0f0f11;
+    --bg-card: #18181b;
+    --border-color: rgba(255,255,255,0.06);
+  }
+  ::view-transition-old(root) {
+    animation: vt-old 0.25s ease-in forwards;
+  }
+  ::view-transition-new(root) {
+    animation: vt-new 0.3s ease-out forwards;
+  }
+  @keyframes vt-old {
+    from { opacity: 1; transform: translateX(0); }
+    to { opacity: 0; transform: translateX(calc(-30px * var(--slide-dir))); }
+  }
+  @keyframes vt-new {
+    from { opacity: 0; transform: translateX(calc(30px * var(--slide-dir))); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+</style>

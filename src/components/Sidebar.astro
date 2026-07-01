@@ -1,0 +1,389 @@
+---
+import type { NoteFile } from '../lib/scan-notes';
+
+interface Props {
+  tree: NoteFile[];
+  currentSlug: string;
+  categoryTitle?: string;
+}
+
+const { tree, currentSlug, categoryTitle } = Astro.props;
+const base = import.meta.env.BASE_URL;
+
+function renderTitle(item: NoteFile): string {
+  return item.meta?.title || item.title;
+}
+
+function isActive(item: NoteFile): boolean {
+  if (item.type === 'file') return item.slug === currentSlug;
+  return item.children?.some(child => isActive(child)) ?? false;
+}
+
+// Collect all dir slugs that should be open (active path)
+function getActiveSlugs(items: NoteFile[]): string[] {
+  const slugs: string[] = [];
+  for (const item of items) {
+    if (item.type === 'dir') {
+      if (isActive(item)) {
+        slugs.push(item.slug);
+      }
+      if (item.children) {
+        slugs.push(...getActiveSlugs(item.children));
+      }
+    }
+  }
+  return slugs;
+}
+const activeSlugs = getActiveSlugs(tree);
+---
+
+<aside id="note-sidebar" class="hidden lg:block w-64 flex-shrink-0">
+  <nav class="sticky top-20 overflow-y-auto max-h-[calc(100vh-6rem)] pr-2 pb-8">
+    <div class="space-y-1">
+      {/* Category title - static, no interaction */}
+      {categoryTitle && (
+        <div class="px-3 py-2 mb-1 flex items-center gap-2">
+          <img src={`${base}icons/笔记总.svg`} alt="" class="w-4 h-4 icon-colorful" />
+          <span class="text-sm font-semibold text-gray-900 dark:text-white">{categoryTitle}</span>
+        </div>
+      )}
+
+      {/* First-level items */}
+      {tree.map((item) => (
+        item.type === 'file' ? (
+          /* Note - direct link, no expand */
+          <a
+            href={`${base}garden/${item.slug}/`}
+            class:list={[
+              'flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors',
+              item.slug === currentSlug
+                ? 'bg-garden-50 dark:bg-garden-900/20 text-garden-700 dark:text-garden-400 font-semibold'
+                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/[0.06] hover:text-gray-900 dark:hover:text-white',
+            ]}
+          >
+            <img src={`${base}icons/文档.svg`} alt="" class="w-3.5 h-3.5 icon-colorful" />
+            <span>{renderTitle(item)}</span>
+          </a>
+        ) : (
+          /* Subdirectory - expandable */
+          <div class="sidebar-group" data-slug={item.slug}>
+            <button
+              class="sidebar-toggle w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium
+                text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-white/[0.06] transition-colors"
+              data-slug={item.slug}
+            >
+              <img src={`${base}icons/文件夹.svg`} alt="" class="w-3.5 h-3.5 icon-colorful" />
+              <span class="flex-1 text-left">{renderTitle(item)}</span>
+              <svg class="w-3.5 h-3.5 transition-transform chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+              </svg>
+            </button>
+            <div class="sidebar-children ml-5 hidden">
+              {item.children?.map((child) => (
+                child.type === 'file' ? (
+                  <a
+                    href={`${base}garden/${child.slug}/`}
+                    class:list={[
+                      'block px-3 py-1.5 rounded-lg text-sm transition-colors',
+                      child.slug === currentSlug
+                        ? 'bg-garden-50 dark:bg-garden-900/20 text-garden-700 dark:text-garden-400 font-semibold'
+                        : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/[0.06] hover:text-gray-900 dark:hover:text-white',
+                    ]}
+                  >
+                    {renderTitle(child)}
+                  </a>
+                ) : (
+                  <div class="sidebar-subgroup" data-slug={child.slug}>
+                    <button
+                      class="sidebar-toggle w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm
+                        text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/[0.06] transition-colors"
+                      data-slug={child.slug}
+                    >
+                      <img src={`${base}icons/文件夹.svg`} alt="" class="w-3 h-3 icon-colorful" />
+                      <span class="flex-1 text-left">{renderTitle(child)}</span>
+                      <svg class="w-3 h-3 transition-transform chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                      </svg>
+                    </button>
+                    <div class="sidebar-children ml-5 hidden">
+                      {child.children?.map((grandchild) => (
+                        <a
+                          href={`${base}garden/${grandchild.slug}/`}
+                          class:list={[
+                            'block px-3 py-1.5 rounded-lg text-sm transition-colors',
+                            grandchild.slug === currentSlug
+                              ? 'bg-garden-50 dark:bg-garden-900/20 text-garden-700 dark:text-garden-400 font-semibold'
+                              : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/[0.06] hover:text-gray-900 dark:hover:text-white',
+                          ]}
+                        >
+                          {renderTitle(grandchild)}
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                )
+              ))}
+            </div>
+          </div>
+        )
+      ))}
+    </div>
+  </nav>
+</aside>
+
+<!-- Mobile sidebar trigger -->
+<button
+  id="sidebar-toggle-btn"
+  class="lg:hidden fixed bottom-6 right-6 z-40 p-3 rounded-full shadow-lg
+    bg-garden-600 text-white hover:bg-garden-700 transition-colors"
+  aria-label="打开目录"
+>
+  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path>
+  </svg>
+</button>
+
+<!-- Mobile overlay -->
+<div id="sidebar-overlay" class="lg:hidden fixed inset-0 bg-black/50 z-40 hidden"></div>
+
+<!-- Mobile drawer -->
+<div id="sidebar-drawer" class="lg:hidden fixed top-0 left-0 bottom-0 w-72 bg-white/50 dark:bg-[#18181b]/60 backdrop-blur-sm z-50 transform -translate-x-full transition-transform overflow-y-auto">
+  <div class="p-4">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-lg font-semibold text-gray-900 dark:text-white">目录</h2>
+      <button id="sidebar-close-btn" class="p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/[0.06]">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+    <nav class="space-y-1">
+      {categoryTitle && (
+        <div class="px-3 py-2 mb-1 flex items-center gap-2">
+          <img src={`${base}icons/笔记总.svg`} alt="" class="w-4 h-4 icon-colorful" />
+          <span class="text-sm font-semibold text-gray-900 dark:text-white">{categoryTitle}</span>
+        </div>
+      )}
+
+      {tree.map((item) => (
+        item.type === 'file' ? (
+          <a
+            href={`${base}garden/${item.slug}/`}
+            class:list={[
+              'flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors',
+              item.slug === currentSlug
+                ? 'bg-garden-50 dark:bg-garden-900/20 text-garden-700 dark:text-garden-400 font-semibold'
+                : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/[0.06]',
+            ]}
+          >
+            <img src={`${base}icons/文档.svg`} alt="" class="w-3.5 h-3.5 icon-colorful" />
+            <span>{renderTitle(item)}</span>
+          </a>
+        ) : (
+          <div class="sidebar-group" data-slug={item.slug}>
+            <button
+              class="sidebar-toggle w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium
+                text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-white/[0.06]"
+              data-slug={item.slug}
+            >
+              <img src={`${base}icons/文件夹.svg`} alt="" class="w-3.5 h-3.5 icon-colorful" />
+              <span class="flex-1 text-left">{renderTitle(item)}</span>
+              <svg class="w-3.5 h-3.5 transition-transform chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+              </svg>
+            </button>
+            <div class="sidebar-children ml-5 hidden">
+              {item.children?.map((child) => (
+                child.type === 'file' ? (
+                  <a
+                    href={`${base}garden/${child.slug}/`}
+                    class:list={[
+                      'block px-3 py-1.5 rounded-lg text-sm transition-colors',
+                      child.slug === currentSlug
+                        ? 'bg-garden-50 dark:bg-garden-900/20 text-garden-700 dark:text-garden-400 font-semibold'
+                        : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/[0.06]',
+                    ]}
+                  >
+                    {renderTitle(child)}
+                  </a>
+                ) : (
+                  <div class="sidebar-subgroup" data-slug={child.slug}>
+                    <button
+                      class="sidebar-toggle w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm
+                        text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
+                      data-slug={child.slug}
+                    >
+                      <img src={`${base}icons/文件夹.svg`} alt="" class="w-3 h-3 icon-colorful" />
+                      <span class="flex-1 text-left">{renderTitle(child)}</span>
+                      <svg class="w-3 h-3 transition-transform chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                      </svg>
+                    </button>
+                    <div class="sidebar-children ml-5 hidden">
+                      {child.children?.map((grandchild) => (
+                        <a
+                          href={`${base}garden/${grandchild.slug}/`}
+                          class:list={[
+                            'block px-3 py-1.5 rounded-lg text-sm transition-colors',
+                            grandchild.slug === currentSlug
+                              ? 'bg-garden-50 dark:bg-garden-900/20 text-garden-700 dark:text-garden-400 font-semibold'
+                              : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/[0.06]',
+                          ]}
+                        >
+                          {renderTitle(grandchild)}
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                )
+              ))}
+            </div>
+          </div>
+        )
+      ))}
+    </nav>
+  </div>
+</div>
+
+<!-- Pass server-computed active slugs to client -->
+<script is:inline define:vars={{ activeSlugs }}>
+  window.__sidebarActiveSlugs = activeSlugs;
+</script>
+
+<script is:inline>
+  (function() {
+    var STORAGE_KEY = 'sidebar-open-slugs';
+
+    function getOpenSlugs() {
+      try {
+        var saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) return new Set(JSON.parse(saved));
+      } catch {}
+      return new Set(window.__sidebarActiveSlugs || []);
+    }
+
+    function saveOpenSlugs(slugs) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(slugs)));
+    }
+
+    function applySidebarState() {
+      var openSlugs = getOpenSlugs();
+      document.querySelectorAll('.sidebar-toggle').forEach(function(btn) {
+        var slug = btn.dataset.slug;
+        var children = btn.nextElementSibling;
+        var chevron = btn.querySelector('.chevron');
+        if (!children || !slug) return;
+        var isOpen = openSlugs.has(slug);
+        children.classList.toggle('hidden', !isOpen);
+        if (chevron) chevron.classList.toggle('rotate-90', isOpen);
+      });
+    }
+
+    function bindSidebarToggles() {
+      document.querySelectorAll('.sidebar-toggle').forEach(function(btn) {
+        if (btn.dataset.bound) return;
+        btn.dataset.bound = 'true';
+        btn.addEventListener('click', function() {
+          var slug = btn.dataset.slug;
+          var children = btn.nextElementSibling;
+          var chevron = btn.querySelector('.chevron');
+          if (!children || !slug) return;
+          var openSlugs = getOpenSlugs();
+          var isNowHidden = children.classList.toggle('hidden');
+          if (chevron) chevron.classList.toggle('rotate-90', !isNowHidden);
+          if (isNowHidden) { openSlugs.delete(slug); }
+          else { openSlugs.add(slug); }
+          saveOpenSlugs(openSlugs);
+        });
+      });
+    }
+
+    function bindMobileSidebar() {
+      var toggleBtn = document.getElementById('sidebar-toggle-btn');
+      var overlay = document.getElementById('sidebar-overlay');
+      var drawer = document.getElementById('sidebar-drawer');
+      var closeBtn = document.getElementById('sidebar-close-btn');
+      if (!toggleBtn || toggleBtn.dataset.bound) return;
+      toggleBtn.dataset.bound = 'true';
+      toggleBtn.addEventListener('click', function() {
+        overlay?.classList.remove('hidden');
+        drawer?.classList.remove('-translate-x-full');
+      });
+      overlay?.addEventListener('click', function() {
+        overlay.classList.add('hidden');
+        drawer?.classList.add('-translate-x-full');
+      });
+      closeBtn?.addEventListener('click', function() {
+        overlay?.classList.add('hidden');
+        drawer?.classList.add('-translate-x-full');
+      });
+    }
+
+    function initSidebar() {
+      applySidebarState();
+      bindSidebarToggles();
+      bindMobileSidebar();
+    }
+
+    // Run on initial load and after every View Transitions swap
+    initSidebar();
+    document.addEventListener('astro:page-load', initSidebar);
+  })();
+</script>
+
+<style>
+  /* 侧边栏子菜单竖线 - 展开时显示，使用伪元素实现真正连续的竖线 */
+  .sidebar-children:not(.hidden) {
+    position: relative;
+    margin-left: 12px;
+    padding-left: 14px; /* 稍微增加内边距，让文字不紧贴竖线 */
+  }
+
+  /* 使用 ::before 伪元素绘制连续竖线 */
+  .sidebar-children:not(.hidden)::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px; /* 增加宽度到 2px */
+    background-color: #9ca3af; /* 亮色模式：更深的灰色 (gray-400) */
+    border-radius: 1px; /* 轻微圆角，更柔和 */
+  }
+
+  html.dark .sidebar-children:not(.hidden)::before {
+    background-color: rgba(255, 255, 255, 0.25); /* 暗色模式：更明显的半透明白色 */
+  }
+
+  /* 激活状态 - 当容器内有激活的子项时，竖线使用 garden 主题色 */
+  .sidebar-children:not(.hidden):has(.bg-garden-50)::before {
+    background-color: #d97706; /* 亮色模式：garden-500 琥珀色 */
+  }
+
+  html.dark .sidebar-children:not(.hidden):has(.dark\:bg-garden-900\/20)::before {
+    background-color: #fbbf24; /* 暗色模式：garden-400 金色 */
+  }
+
+  /* 嵌套的子菜单（第三层） - 稍浅的竖线，区分层级 */
+  .sidebar-subgroup .sidebar-children:not(.hidden) {
+    margin-left: 12px;
+  }
+
+  .sidebar-subgroup .sidebar-children:not(.hidden)::before {
+    background-color: #d1d5db; /* 浅灰色，区分层级 */
+    width: 2px;
+  }
+
+  html.dark .sidebar-subgroup .sidebar-children:not(.hidden)::before {
+    background-color: rgba(255, 255, 255, 0.15);
+  }
+
+  /* 嵌套层级的激活状态 */
+  .sidebar-subgroup .sidebar-children:not(.hidden):has(.bg-garden-50)::before {
+    background-color: #d97706;
+  }
+
+  html.dark .sidebar-subgroup .sidebar-children:not(.hidden):has(.dark\:bg-garden-900\/20)::before {
+    background-color: #fbbf24;
+  }
+</style>

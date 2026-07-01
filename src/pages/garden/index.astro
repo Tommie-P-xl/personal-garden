@@ -1,0 +1,178 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { scanNotes, getAllFlatNotes } from '../../lib/scan-notes';
+
+const base = import.meta.env.BASE_URL;
+
+const tree = scanNotes();
+const allFlatNotes = getAllFlatNotes();
+
+// 获取所有标签（搜索用）
+const allTags = [...new Set(allFlatNotes.flatMap(note => note.tags))];
+
+// 一级分类（只展示顶层目录）
+const topCategories = tree.filter(item => item.type === 'dir');
+---
+
+<BaseLayout title="笔记">
+  <div class="mb-8">
+    <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
+      <img src={`${base}icons/笔记.svg`} alt="" class="w-6 h-6 icon-dark-adapt" />
+      笔记
+    </h1>
+    <p class="text-gray-500 dark:text-gray-400">在这里记录学习的点滴，让知识像花园一样生长</p>
+  </div>
+
+  <!-- 搜索栏 -->
+  <div class="mb-6">
+    <div class="relative">
+      <input
+        type="text"
+        id="search-input"
+        placeholder="搜索笔记标题、内容、标签..."
+        class="w-full px-4 py-3 pl-10 bg-white/50 dark:bg-[#18181b]/60 backdrop-blur-sm border border-gray-200/60 dark:border-white/[0.06] rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-garden-400 dark:focus:border-garden-600 focus:ring-2 focus:ring-garden-100/40 dark:focus:ring-garden-900/20 transition-all"
+      />
+      <svg class="absolute left-3 top-3.5 w-4 h-4 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+      </svg>
+    </div>
+  </div>
+
+  <!-- 笔记大类 -->
+  <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8" id="categories-grid">
+    {topCategories.map((cat) => (
+      <a
+        href={`${base}garden/${cat.slug}/`}
+        class="category-item block bg-white/50 dark:bg-[#18181b]/60 backdrop-blur-sm rounded-xl border border-gray-200/60 dark:border-white/[0.06] p-6 hover:shadow-sm hover:border-garden-300/60 dark:hover:border-garden-700/40 transition-all duration-200 group"
+        data-name={cat.meta?.title || cat.title}
+      >
+        <div class="flex items-center gap-3 mb-2">
+          <img src={`${base}icons/文件夹.svg`} alt="" class="w-5 h-5 icon-colorful" />
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-garden-700 dark:group-hover:text-garden-400 transition-colors">
+            {cat.meta?.title || cat.title}
+          </h3>
+        </div>
+        {cat.meta?.description && (
+          <p class="text-sm text-gray-500 dark:text-gray-400">{cat.meta.description}</p>
+        )}
+        <div class="mt-3 text-xs text-gray-400 dark:text-gray-500">
+          {(() => {
+            let count = 0;
+            function countFiles(items) {
+              for (const item of items) {
+                if (item.type === 'file') count++;
+                else if (item.children) countFiles(item.children);
+              }
+            }
+            countFiles(cat.children || []);
+            return count;
+          })()} 篇笔记
+        </div>
+      </a>
+    ))}
+  </div>
+
+  <!-- 标签云 -->
+  {allTags.length > 0 && (
+    <div class="mb-6">
+      <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">标签</h2>
+      <div class="flex flex-wrap gap-2" id="tag-filter">
+        {allTags.map((tag) => (
+          <button
+            data-tag={tag}
+            class="px-3 py-1 bg-gray-100/70 dark:bg-white/[0.06] backdrop-blur-sm text-gray-600 dark:text-gray-300 rounded-lg text-xs hover:bg-garden-50 dark:hover:bg-garden-900/20 hover:text-garden-700 dark:hover:text-garden-400 transition-colors whitespace-nowrap"
+          >
+            #{tag}
+          </button>
+        ))}
+      </div>
+    </div>
+  )}
+
+  <!-- 搜索结果（隐藏，搜索时显示） -->
+  <div id="search-results" class="hidden">
+    <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">搜索结果</h2>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4" id="search-results-grid"></div>
+    <div id="search-empty" class="hidden text-center py-8">
+      <p class="text-gray-500 dark:text-gray-400">没有找到匹配的笔记</p>
+    </div>
+  </div>
+</BaseLayout>
+
+<script define:vars={{ notesData: allFlatNotes.map(n => ({ title: n.title, slug: n.slug, tags: n.tags, summary: n.summary || '', category: n.category })) }}>
+  const searchInput = document.getElementById('search-input');
+  const categoriesGrid = document.getElementById('categories-grid');
+  const searchResults = document.getElementById('search-results');
+  const searchResultsGrid = document.getElementById('search-results-grid');
+  const searchEmpty = document.getElementById('search-empty');
+  const tagButtons = document.querySelectorAll('#tag-filter button');
+
+  let activeTag = null;
+
+  function getBase() {
+    const baseEl = document.querySelector('base');
+    return baseEl ? baseEl.href : '/personal-garden/';
+  }
+
+  function doSearch() {
+    const term = searchInput?.value.toLowerCase() || '';
+    const hasSearch = term.length > 0 || activeTag;
+
+    if (!hasSearch) {
+      categoriesGrid?.classList.remove('hidden');
+      searchResults?.classList.add('hidden');
+      return;
+    }
+
+    categoriesGrid?.classList.add('hidden');
+    searchResults?.classList.remove('hidden');
+
+    const results = notesData.filter(n => {
+      const matchesTag = !activeTag || n.tags.includes(activeTag);
+      const matchesSearch = !term ||
+        n.title.toLowerCase().includes(term) ||
+        n.summary.toLowerCase().includes(term) ||
+        n.tags.some(t => t.toLowerCase().includes(term));
+      return matchesTag && matchesSearch;
+    });
+
+    const base = getBase();
+    if (searchResultsGrid) {
+      if (results.length === 0) {
+        searchResultsGrid.innerHTML = '';
+        searchEmpty?.classList.remove('hidden');
+      } else {
+        searchEmpty?.classList.add('hidden');
+        searchResultsGrid.innerHTML = results.map(n => `
+          <a href="${base}garden/${n.slug}/"
+            class="block bg-white/50 dark:bg-[#18181b]/60 backdrop-blur-sm rounded-xl border border-gray-200/60 dark:border-white/[0.06] p-4 hover:shadow-sm hover:border-garden-300/60 dark:hover:border-garden-700/40 transition-all duration-200 group">
+            <div class="flex items-center gap-2 mb-1">
+              <span class="text-xs text-gray-400 dark:text-gray-500">${n.category}</span>
+            </div>
+            <h3 class="font-medium text-gray-900 dark:text-white group-hover:text-garden-700 dark:group-hover:text-garden-400 transition-colors line-clamp-2 mb-1">${n.title}</h3>
+            ${n.summary ? `<p class="text-xs text-gray-500 dark:text-gray-400 line-clamp-2">${n.summary}</p>` : ''}
+            ${n.tags.length > 0 ? `<div class="flex gap-1 mt-2 flex-wrap">${n.tags.slice(0,3).map(t => `<span class="bg-gray-50 dark:bg-white/[0.04] px-2 py-0.5 rounded-md text-xs text-gray-500 dark:text-gray-400 border border-gray-200/60 dark:border-white/[0.06]">#${t}</span>`).join('')}</div>` : ''}
+          </a>
+        `).join('');
+      }
+    }
+  }
+
+  searchInput?.addEventListener('input', doSearch);
+
+  tagButtons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const tag = btn.dataset.tag || '';
+      activeTag = activeTag === tag ? null : tag;
+
+      tagButtons.forEach((b) => {
+        const isActive = b.dataset.tag === activeTag;
+        b.className = isActive
+          ? 'px-3 py-1 bg-garden-600 dark:bg-garden-700 text-white rounded-lg text-xs transition-colors whitespace-nowrap'
+          : 'px-3 py-1 bg-gray-100 dark:bg-white/[0.06] text-gray-600 dark:text-gray-300 rounded-lg text-xs hover:bg-garden-50 dark:hover:bg-garden-900/20 hover:text-garden-700 dark:hover:text-garden-400 transition-colors whitespace-nowrap';
+      });
+
+      doSearch();
+    });
+  });
+</script>

@@ -1,0 +1,133 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ProjectCard from '../../components/ProjectCard.astro';
+import { getCollection } from 'astro:content';
+
+const base = import.meta.env.BASE_URL;
+
+// 从 GitHub URL 提取 owner/repo
+function extractRepo(githubUrl?: string): string | null {
+  if (!githubUrl) return null;
+  const match = githubUrl.match(/github\.com\/([^/]+\/[^/]+)/);
+  return match ? match[1] : null;
+}
+
+// 构建时从 GitHub API 获取 star 数量（带 gh CLI 备选）
+async function fetchStars(repo: string): Promise<number> {
+  try {
+    const res = await fetch(`https://api.github.com/repos/${repo}`, {
+      headers: { 'Accept': 'application/vnd.github.v3+json' }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      return data.stargazers_count ?? 0;
+    }
+  } catch {}
+  // 备选：使用 gh CLI
+  try {
+    const { execSync } = await import('node:child_process');
+    const result = execSync(`gh api repos/${repo} --jq .stargazers_count`, { encoding: 'utf-8', timeout: 10000 });
+    return parseInt(result.trim(), 10) || 0;
+  } catch {
+    return 0;
+  }
+}
+
+const projects = await getCollection('projects');
+
+// 为每个项目获取 star 数量
+const projectsWithStars = await Promise.all(
+  projects.map(async (project) => {
+    const repo = extractRepo(project.data.github);
+    const stars = repo ? await fetchStars(repo) : 0;
+    return { ...project, stars };
+  })
+);
+
+// 排序：stars 降序 → date 降序
+projectsWithStars.sort((a, b) => {
+  if (b.stars !== a.stars) return b.stars - a.stars;
+  return b.data.date.valueOf() - a.data.date.valueOf();
+});
+---
+
+<BaseLayout title="项目展示">
+  <div class="mb-8">
+    <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
+      <img src={`${base}icons/项目.svg`} alt="" class="w-6 h-6 icon-colorful" />
+      项目展示
+    </h1>
+    <p class="text-gray-500 dark:text-gray-400">我做过的项目，展示我的技术能力和实践经验</p>
+  </div>
+
+  <!-- 搜索栏 -->
+  <div class="mb-6">
+    <div class="relative">
+      <input
+        type="text"
+        id="search-input"
+        placeholder="搜索项目名称、技术栈..."
+        class="w-full px-4 py-3 pl-10 bg-white/50 dark:bg-[#18181b]/60 backdrop-blur-sm border border-gray-200/60 dark:border-white/[0.06] rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-garden-400 dark:focus:border-garden-600 focus:ring-2 focus:ring-garden-100/40 dark:focus:ring-garden-900/20 transition-all"
+      />
+      <svg class="absolute left-3 top-3.5 w-4 h-4 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+      </svg>
+    </div>
+  </div>
+
+  {projectsWithStars.length > 0 ? (
+    <div class="grid sm:grid-cols-2 gap-5" id="projects-grid">
+      {projectsWithStars.map((project) => (
+        <div class="project-card" data-title={project.data.title.toLowerCase()} data-tech={project.data.tech.join(' ').toLowerCase()} data-desc={project.data.description.toLowerCase()}>
+          <ProjectCard
+            title={project.data.title}
+            description={project.data.description}
+            tech={project.data.tech}
+            link={project.data.link}
+            github={project.data.github}
+            image={project.data.image}
+            date={project.data.date}
+            slug={project.id.replace(/\.md$/, '')}
+            stars={project.stars}
+          />
+        </div>
+      ))}
+    </div>
+  ) : (
+    <div class="text-center py-16">
+      <img src={`${base}icons/项目.svg`} alt="" class="w-12 h-12 mx-auto mb-4 opacity-30 icon-colorful" />
+      <p class="text-gray-400 dark:text-gray-500">还没有项目展示</p>
+    </div>
+  )}
+
+  <!-- 搜索无结果提示 -->
+  <div id="no-results" class="hidden text-center py-16">
+    <p class="text-gray-400 dark:text-gray-500">没有找到匹配的项目</p>
+  </div>
+</BaseLayout>
+
+<script>
+  const searchInput = document.getElementById('search-input') as HTMLInputElement;
+  const projectsGrid = document.getElementById('projects-grid');
+  const noResults = document.getElementById('no-results');
+
+  searchInput?.addEventListener('input', () => {
+    const term = searchInput.value.toLowerCase().trim();
+    const cards = document.querySelectorAll('.project-card');
+    let visibleCount = 0;
+
+    cards.forEach((card) => {
+      const el = card as HTMLElement;
+      const title = el.dataset.title || '';
+      const tech = el.dataset.tech || '';
+      const desc = el.dataset.desc || '';
+      const matches = !term || title.includes(term) || tech.includes(term) || desc.includes(term);
+      el.style.display = matches ? '' : 'none';
+      if (matches) visibleCount++;
+    });
+
+    if (noResults) {
+      noResults.classList.toggle('hidden', visibleCount > 0 || !term);
+    }
+  });
+</script>

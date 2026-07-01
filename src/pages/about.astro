@@ -1,0 +1,65 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const base = import.meta.env.BASE_URL;
+---
+
+<BaseLayout title="关于我">
+  <div class="max-w-3xl mx-auto">
+    <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-8 flex items-center gap-2">
+      <img src={`${base}icons/about.svg`} alt="" class="w-6 h-6 dark:invert" />
+      关于我
+    </h1>
+
+    <!-- 个人介绍 -->
+    <section class="bg-white/50 dark:bg-[#18181b]/60 backdrop-blur-sm rounded-xl border border-gray-200/60 dark:border-white/[0.06] p-8 mb-8">
+      <div class="prose">
+        <h2>你好</h2>
+        <p>
+          这里是我的个人数字花园，一个记录学习、思考和创造的地方。
+        </p>
+        <p>
+          我相信知识不是写完就结束的文章，而是不断生长、修剪的植物。
+          在这个花园里，你可以看到我学习的轨迹——从刚种下的种子，到逐渐成长的发芽笔记，
+          再到成熟的常青内容。
+        </p>
+        <h2>这个网站是什么</h2>
+        <p>
+          这是一个 <strong>Digital Garden（数字花园）</strong>，不同于传统的按时间排列的博客，
+          数字花园更注重：
+        </p>
+        <ul>
+          <li><strong>链接思维</strong> —— 笔记之间通过双向链接相互关联，形成知识网络</li>
+          <li><strong>持续生长</strong> —— 内容不需要"写完"才能发布，随时可以补充和完善</li>
+          <li><strong>个人 Wiki</strong> —— 既是学习笔记，也是随时查阅的参考资料</li>
+        </ul>
+        <h2>我在学什么</h2>
+        <p>目前我的学习方向包括：</p>
+        <ul>
+          <li>Linux 内核 —— 进程管理、内存管理、文件系统等</li>
+          <li>编程技术 —— Python、JavaScript、数据结构与算法等</li>
+          <li>深度学习 —— 开集识别、射频信号分类、Vision Transformer</li>
+          <li>工具开发 —— 桌面应用、CLI 工具、自动化脚本</li>
+        </ul>
+        <h2>联系方式</h2>
+        <p>如果你想联系我，可以通过以下方式：</p>
+        <ul>
+          <li>邮箱：<a href="mailto:wux4948@gmail.com">wux4948@gmail.com</a></li>
+          <li>GitHub：<a href="https://github.com/Tommie-P-xl" target="_blank">@Tommie-P-xl</a></li>
+          <li>微信：w9519539</li>
+        </ul>
+        <h2>关于本站</h2>
+        <p>本站使用以下技术构建：</p>
+        <ul>
+          <li><a href="https://astro.build" target="_blank">Astro</a> —— 静态站点生成器</li>
+          <li><a href="https://tailwindcss.com" target="_blank">Tailwind CSS</a> —— CSS 框架</li>
+          <li><a href="https://pages.github.com" target="_blank">GitHub Pages</a> —— 托管服务</li>
+        </ul>
+        <p>
+          网站源码托管在 <a href="https://github.com/Tommie-P-xl/personal-garden" target="_blank">GitHub</a>，
+          采用 Digital Garden 的理念构建。
+        </p>
+      </div>
+    </section>
+  </div>
+</BaseLayout>
