@@ -1,0 +1,287 @@
+---
+interface Props {
+  data: {
+    name: string;
+    children?: Array<{
+      name: string;
+      children?: Array<{
+        name: string;
+        children?: Array<{ name: string }>;
+      }>;
+    }>;
+  };
+  config?: {
+    nodeWidth?: number;
+    nodeHeight?: number;
+    levelGap?: number;
+    siblingGap?: number;
+    fontSize?: number;
+    braceWidth?: number;
+    braceColor?: string;
+    textColor?: string;
+    bgColor?: string;
+    borderColor?: string;
+    rootBgColor?: string;
+    rootTextColor?: string;
+  };
+}
+
+const { data, config = {} } = Astro.props;
+
+const defaultConfig = {
+  nodeWidth: 160,
+  nodeHeight: 32,
+  levelGap: 60,
+  siblingGap: 12,
+  fontSize: 14,
+  braceWidth: 14,
+  braceColor: '#666',
+  textColor: '#333',
+  bgColor: '#f0f4ff',
+  borderColor: '#a0b4d0',
+  rootBgColor: '#4a7cff',
+  rootTextColor: '#fff',
+};
+
+const mergedConfig = { ...defaultConfig, ...config };
+
+// 生成唯一 ID 避免多个实例冲突
+const containerId = `brace-map-${Math.random().toString(36).slice(2, 9)}`;
+---
+
+<div
+  id={containerId}
+  class="brace-map-container"
+  style="width: 100%; overflow-x: auto; padding: 16px 0;"
+  data-brace-map
+  data-config={JSON.stringify(mergedConfig)}
+  data-data={JSON.stringify(data)}
+/>
+
+<script>
+  import * as d3 from 'd3';
+
+  // 大括号 SVG 路径生成器
+  function curlyBracePath(x: number, y1: number, y2: number, width = 12) {
+    const midY = (y1 + y2) / 2;
+    const halfH = Math.abs(y2 - y1) / 2;
+
+    if (halfH < 2) {
+      return `M ${x},${y1} L ${x},${y2}`;
+    }
+
+    const w = Math.min(width, halfH * 0.6);
+    const tipX = x - w;
+
+    return [
+      `M ${x},${y1}`,
+      `C ${x - w * 0.3},${y1}`,
+      `  ${tipX},${midY - halfH * 0.15}`,
+      `  ${tipX},${midY}`,
+      `C ${tipX},${midY + halfH * 0.15}`,
+      `  ${x - w * 0.3},${y2}`,
+      `  ${x},${y2}`,
+    ].join(' ');
+  }
+
+  // 渲染 BraceMap
+  function renderBraceMap(container: HTMLElement) {
+    const dataStr = container.dataset.data;
+    const configStr = container.dataset.config;
+    if (!dataStr || !configStr) return;
+
+    const data = JSON.parse(dataStr);
+    const config = JSON.parse(configStr);
+
+    const {
+      nodeWidth,
+      nodeHeight,
+      levelGap,
+      siblingGap,
+      fontSize,
+      braceWidth,
+      braceColor,
+      textColor,
+      bgColor,
+      borderColor,
+      rootBgColor,
+      rootTextColor,
+    } = config;
+
+    // 清空旧内容
+    d3.select(container).selectAll('*').remove();
+
+    // 构建 d3 层级数据
+    const root = d3.hierarchy(data);
+
+    // 计算树布局
+    let leafIndex = 0;
+    root.eachAfter((node: any) => {
+      if (node.children) {
+        const first = node.children[0];
+        const last = node.children[node.children.length - 1];
+        node.y = (first.y + last.y) / 2;
+      } else {
+        node.y = leafIndex * (nodeHeight + siblingGap);
+        leafIndex++;
+      }
+    });
+
+    root.each((node: any) => {
+      node.x = node.depth * (nodeWidth + levelGap);
+    });
+
+    // 计算画布尺寸
+    let maxX = 0,
+      maxY = 0;
+    root.each((d: any) => {
+      if (d.x + nodeWidth > maxX) maxX = d.x + nodeWidth;
+      if (d.y + nodeHeight > maxY) maxY = d.y + nodeHeight;
+    });
+
+    const margin = { top: 20, right: 30, bottom: 20, left: 20 };
+    const svgWidth = maxX + margin.left + margin.right;
+    const svgHeight = maxY + margin.top + margin.bottom;
+
+    // 创建 SVG
+    const svg = d3
+      .select(container)
+      .append('svg')
+      .attr('viewBox', `0 0 ${svgWidth} ${svgHeight}`)
+      .attr('width', '100%')
+      .attr('height', svgHeight)
+      .style('font-family', "'Inter', 'Noto Sans SC', sans-serif")
+      .style('user-select', 'none');
+
+    const g = svg
+      .append('g')
+      .attr('transform', `translate(${margin.left},${margin.top})`);
+
+    // 绘制大括号连线
+    const links: any[] = [];
+    root.each((node: any) => {
+      if (node.children && node.children.length > 0) {
+        links.push(node);
+      }
+    });
+
+    g.selectAll('.brace-link')
+      .data(links)
+      .join('path')
+      .attr('class', 'brace-link')
+      .attr('d', (d: any) => {
+        const parentRightX = d.x + nodeWidth;
+        const firstChild = d.children[0];
+        const lastChild = d.children[d.children.length - 1];
+        const topY = firstChild.y + nodeHeight / 2;
+        const bottomY = lastChild.y + nodeHeight / 2;
+        const parentMidY = d.y + nodeHeight / 2;
+
+        if (d.children.length === 1) {
+          return `M ${parentRightX},${parentMidY} L ${d.children[0].x},${parentMidY}`;
+        }
+
+        const braceX = parentRightX + levelGap * 0.5;
+        return curlyBracePath(braceX, topY, bottomY, braceWidth);
+      })
+      .attr('fill', 'none')
+      .attr('stroke', braceColor)
+      .attr('stroke-width', 1.8)
+      .attr('stroke-linecap', 'round');
+
+    // 绘制从括号尖端到父节点的短横线
+    g.selectAll('.brace-tail')
+      .data(links.filter((d: any) => d.children.length > 1))
+      .join('line')
+      .attr('class', 'brace-tail')
+      .attr('x1', (d: any) => d.x + nodeWidth)
+      .attr('y1', (d: any) => d.y + nodeHeight / 2)
+      .attr('x2', (d: any) => d.x + nodeWidth + levelGap * 0.5 - braceWidth)
+      .attr('y2', (d: any) => d.y + nodeHeight / 2)
+      .attr('stroke', braceColor)
+      .attr('stroke-width', 1.5);
+
+    // 绘制从括号两端到子节点的短横线
+    root.each((node: any) => {
+      if (node.children && node.children.length > 1) {
+        const braceX = node.x + nodeWidth + levelGap * 0.5;
+        node.children.forEach((child: any) => {
+          g.append('line')
+            .attr('x1', braceX)
+            .attr('y1', child.y + nodeHeight / 2)
+            .attr('x2', child.x)
+            .attr('y2', child.y + nodeHeight / 2)
+            .attr('stroke', braceColor)
+            .attr('stroke-width', 1.2)
+            .attr('stroke-dasharray', 'none');
+        });
+      }
+    });
+
+    // 绘制节点
+    const nodes: any[] = [];
+    root.each((d: any) => nodes.push(d));
+
+    const nodeGroups = g
+      .selectAll('.node')
+      .data(nodes)
+      .join('g')
+      .attr('class', 'node')
+      .attr('transform', (d: any) => `translate(${d.x},${d.y})`);
+
+    // 背景矩形
+    nodeGroups
+      .append('rect')
+      .attr('width', nodeWidth)
+      .attr('height', nodeHeight)
+      .attr('rx', 6)
+      .attr('ry', 6)
+      .attr('fill', (d: any) => (d.depth === 0 ? rootBgColor : bgColor))
+      .attr('stroke', (d: any) => (d.depth === 0 ? rootBgColor : borderColor))
+      .attr('stroke-width', 1.2);
+
+    // 文字
+    nodeGroups
+      .append('text')
+      .attr('x', nodeWidth / 2)
+      .attr('y', nodeHeight / 2)
+      .attr('dy', '0.35em')
+      .attr('text-anchor', 'middle')
+      .attr('fill', (d: any) => (d.depth === 0 ? rootTextColor : textColor))
+      .attr('font-size', fontSize)
+      .attr('font-weight', (d: any) => (d.depth === 0 ? '600' : '400'))
+      .text((d: any) => d.data.name);
+
+    // 暗色模式适配
+    const isDark = document.documentElement.classList.contains('dark');
+    if (isDark) {
+      svg.selectAll('rect')
+        .attr('fill', function(this: any) {
+          const d = d3.select(this).datum() as any;
+          return d.depth === 0 ? '#3b82f6' : '#1e293b';
+        })
+        .attr('stroke', function(this: any) {
+          const d = d3.select(this).datum() as any;
+          return d.depth === 0 ? '#3b82f6' : '#475569';
+        });
+      svg.selectAll('text').attr('fill', function(this: any) {
+        const d = d3.select(this).datum() as any;
+        return d.depth === 0 ? '#fff' : '#e2e8f0';
+      });
+      svg.selectAll('.brace-link, .brace-tail, line').attr('stroke', '#94a3b8');
+    }
+  }
+
+  // 初始化所有 BraceMap
+  function initAllBraceMaps() {
+    document.querySelectorAll('[data-brace-map]').forEach((el) => {
+      renderBraceMap(el as HTMLElement);
+    });
+  }
+
+  // 首屏加载
+  initAllBraceMaps();
+
+  // View Transitions 兼容
+  document.addEventListener('astro:page-load', initAllBraceMaps);
+</script>
