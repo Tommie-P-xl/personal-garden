@@ -99,7 +99,7 @@ const topCategories = tree.filter(item => item.type === 'dir');
   </div>
 </BaseLayout>
 
-<script define:vars={{ notesData: allFlatNotes.map(n => ({ title: n.title, slug: n.slug, tags: n.tags, summary: n.summary || '', category: n.category })) }}>
+<script data-astro-rerun define:vars={{ notesData: allFlatNotes.map(n => ({ title: n.title, slug: n.slug, tags: n.tags, summary: n.summary || '', category: n.category })) }}>
   const searchInput = document.getElementById('search-input');
   const categoriesGrid = document.getElementById('categories-grid');
   const searchResults = document.getElementById('search-results');
@@ -158,21 +158,27 @@ const topCategories = tree.filter(item => item.type === 'dir');
     }
   }
 
-  searchInput?.addEventListener('input', doSearch);
+  if (searchInput && !searchInput.dataset.bound) {
+    searchInput.dataset.bound = 'true';
+    searchInput.addEventListener('input', doSearch);
+  }
 
   tagButtons.forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const tag = btn.dataset.tag || '';
-      activeTag = activeTag === tag ? null : tag;
+    if (!(btn as HTMLElement).dataset.bound) {
+      (btn as HTMLElement).dataset.bound = 'true';
+      btn.addEventListener('click', () => {
+        const tag = btn.dataset.tag || '';
+        activeTag = activeTag === tag ? null : tag;
 
-      tagButtons.forEach((b) => {
-        const isActive = b.dataset.tag === activeTag;
-        b.className = isActive
-          ? 'px-3 py-1 bg-garden-600 dark:bg-garden-700 text-white rounded-lg text-xs transition-colors whitespace-nowrap'
-          : 'px-3 py-1 bg-gray-100 dark:bg-white/[0.06] text-gray-600 dark:text-gray-300 rounded-lg text-xs hover:bg-garden-50 dark:hover:bg-garden-900/20 hover:text-garden-700 dark:hover:text-garden-400 transition-colors whitespace-nowrap';
+        tagButtons.forEach((b) => {
+          const isActive = b.dataset.tag === activeTag;
+          b.className = isActive
+            ? 'px-3 py-1 bg-garden-600 dark:bg-garden-700 text-white rounded-lg text-xs transition-colors whitespace-nowrap'
+            : 'px-3 py-1 bg-gray-100 dark:bg-white/[0.06] text-gray-600 dark:text-gray-300 rounded-lg text-xs hover:bg-garden-50 dark:hover:bg-garden-900/20 hover:text-garden-700 dark:hover:text-garden-400 transition-colors whitespace-nowrap';
+        });
+
+        doSearch();
       });
-
-      doSearch();
-    });
+    }
   });
 </script>

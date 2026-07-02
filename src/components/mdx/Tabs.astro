@@ -43,9 +43,10 @@ const { labels, id = `tabs-${Math.random().toString(36).slice(2, 8)}` } = Astro.
   </div>
 </div>
 
-<script>
+<script data-astro-rerun>
   // 处理标签页切换
-  document.querySelectorAll('[data-tab-group]').forEach((label) => {
+  document.querySelectorAll('[data-tab-group]:not([data-tab-bound])').forEach((label) => {
+    (label as HTMLElement).dataset.tabBound = 'true';
     label.addEventListener('click', () => {
       const group = label.getAttribute('data-tab-group');
       const index = label.getAttribute('data-tab-index');
@@ -57,7 +58,6 @@ const { labels, id = `tabs-${Math.random().toString(36).slice(2, 8)}` } = Astro.
       container.querySelectorAll(`[data-tab-group="${group}"]`).forEach((l) => {
         const isActive = l.getAttribute('data-tab-index') === index;
         const span = l.querySelector('span:last-child');
-        const text = l.querySelector('input')?.parentElement;
 
         if (isActive) {
           l.classList.add('text-garden-700', 'dark:text-garden-400');

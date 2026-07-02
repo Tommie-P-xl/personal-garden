@@ -248,21 +248,25 @@ const remainingTags = sortedTags.slice(12);
     </section>
   )}
 
-  <script>
+  <script data-astro-rerun>
     // 展开更多标签
     const showMoreBtn = document.getElementById('show-more-tags');
     const remainingTags = document.getElementById('remaining-tags');
-    showMoreBtn?.addEventListener('click', () => {
-      remainingTags?.classList.toggle('hidden');
-      if (remainingTags?.classList.contains('hidden')) {
-        showMoreBtn.textContent = `+${remainingTags?.children.length || 0} 更多`;
-      } else {
-        showMoreBtn.textContent = '收起';
-      }
-    });
+    if (showMoreBtn && !showMoreBtn.dataset.bound) {
+      showMoreBtn.dataset.bound = 'true';
+      showMoreBtn.addEventListener('click', () => {
+        remainingTags?.classList.toggle('hidden');
+        if (remainingTags?.classList.contains('hidden')) {
+          showMoreBtn.textContent = `+${remainingTags?.children.length || 0} 更多`;
+        } else {
+          showMoreBtn.textContent = '收起';
+        }
+      });
+    }
 
     // 复制到剪贴板
-    document.querySelectorAll('.copy-btn').forEach(btn => {
+    document.querySelectorAll('.copy-btn:not([data-bound])').forEach(btn => {
+      (btn as HTMLElement).dataset.bound = 'true';
       btn.addEventListener('click', async () => {
         const text = (btn as HTMLElement).dataset.copy;
         if (!text) return;
