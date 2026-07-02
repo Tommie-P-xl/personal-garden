@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const NOTES_DIR = path.resolve('src/content/notes');
-const BASE = process.env.CF_PAGES ? '/' : '/personal-garden/';
+const BASE = process.env.DEPLOY_TARGET === 'cloudflare' ? '/' : '/personal-garden/';
 
 // 构建标题到 slug 的映射表
 function buildTitleSlugMap(): Map<string, string> {

@@ -8,7 +8,7 @@ import rehypeSlug from 'rehype-slug';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 import rehypeExternalLinks from 'rehype-external-links';
 
-const isCloudflare = !!process.env.CF_PAGES;
+const isCloudflare = process.env.DEPLOY_TARGET === 'cloudflare';
 
 export default defineConfig({
   site: isCloudflare ? 'https://tommie-p-xl.pages.dev' : 'https://tommie-p-xl.github.io',
