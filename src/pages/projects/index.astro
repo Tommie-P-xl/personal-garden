@@ -106,30 +106,32 @@ projectsWithStars.sort((a, b) => {
   </div>
 </BaseLayout>
 
-<script data-astro-rerun>
-  const searchInput = document.getElementById('search-input') as HTMLInputElement;
-  const noResults = document.getElementById('no-results');
+<script is:inline>
+  document.addEventListener('astro:page-load', () => {
+    const searchInput = document.getElementById('search-input') as HTMLInputElement;
+    const noResults = document.getElementById('no-results');
 
-  if (searchInput && !searchInput.dataset.bound) {
-    searchInput.dataset.bound = 'true';
-    searchInput.addEventListener('input', () => {
-      const term = searchInput.value.toLowerCase().trim();
-      const cards = document.querySelectorAll('.project-card');
-      let visibleCount = 0;
+    if (searchInput && !searchInput.dataset.bound) {
+      searchInput.dataset.bound = 'true';
+      searchInput.addEventListener('input', () => {
+        const term = searchInput.value.toLowerCase().trim();
+        const cards = document.querySelectorAll('.project-card');
+        let visibleCount = 0;
 
-      cards.forEach((card) => {
-        const el = card as HTMLElement;
-        const title = el.dataset.title || '';
-        const tech = el.dataset.tech || '';
-        const desc = el.dataset.desc || '';
-        const matches = !term || title.includes(term) || tech.includes(term) || desc.includes(term);
-        el.style.display = matches ? '' : 'none';
-        if (matches) visibleCount++;
+        cards.forEach((card) => {
+          const el = card as HTMLElement;
+          const title = el.dataset.title || '';
+          const tech = el.dataset.tech || '';
+          const desc = el.dataset.desc || '';
+          const matches = !term || title.includes(term) || tech.includes(term) || desc.includes(term);
+          el.style.display = matches ? '' : 'none';
+          if (matches) visibleCount++;
+        });
+
+        if (noResults) {
+          noResults.classList.toggle('hidden', visibleCount > 0 || !term);
+        }
       });
-
-      if (noResults) {
-        noResults.classList.toggle('hidden', visibleCount > 0 || !term);
-      }
-    });
-  }
+    }
+  });
 </script>
