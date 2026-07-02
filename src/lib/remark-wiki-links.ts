@@ -18,12 +18,12 @@ function buildTitleSlugMap(): Map<string, string> {
 
       if (entry.isDirectory()) {
         const dirPath = path.join(dir, entry.name);
-        const slug = parentSlug ? `${parentSlug}/${entry.name}` : entry.name;
+        const slug = (parentSlug ? `${parentSlug}/${entry.name}` : entry.name).toLowerCase();
         scanDir(dirPath, slug);
       } else if (entry.name.endsWith('.md') || entry.name.endsWith('.mdx')) {
-        const slug = parentSlug
+        const slug = (parentSlug
           ? `${parentSlug}/${entry.name.replace(/\.(md|mdx)$/, '')}`
-          : entry.name.replace(/\.(md|mdx)$/, '');
+          : entry.name.replace(/\.(md|mdx)$/, '')).toLowerCase();
 
         const fullPath = path.join(dir, entry.name);
         const content = fs.readFileSync(fullPath, 'utf-8');
