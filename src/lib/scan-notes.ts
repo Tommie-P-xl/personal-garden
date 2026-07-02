@@ -19,9 +19,9 @@ export interface NoteFile {
 const NOTES_DIR = path.resolve('src/content/notes');
 
 function parseFileName(fileName: string, isDir: boolean): { order: number; title: string } {
-  const match = fileName.match(/^(\d{4})-(.+?)(?:\.md)?$/);
+  const match = fileName.match(/^(\d{4})-(.+?)(?:\.(?:md|mdx))?$/);
   if (!match) {
-    return { order: 9999, title: isDir ? fileName : fileName.replace(/\.md$/, '') };
+    return { order: 9999, title: isDir ? fileName : fileName.replace(/\.(md|mdx)$/, '') };
   }
   return {
     order: parseInt(match[1], 10),
@@ -65,10 +65,11 @@ export function scanNotes(dir: string = NOTES_DIR, parentSlug: string = ''): Not
         children,
         meta,
       });
-    } else if (entry.name.endsWith('.md')) {
+    } else if (entry.name.endsWith('.md') || entry.name.endsWith('.mdx')) {
+      const ext = entry.name.endsWith('.mdx') ? '.mdx' : '.md';
       const slug = parentSlug
-        ? `${parentSlug}/${entry.name.replace(/\.md$/, '')}`
-        : entry.name.replace(/\.md$/, '');
+        ? `${parentSlug}/${entry.name.replace(/\.(md|mdx)$/, '')}`
+        : entry.name.replace(/\.(md|mdx)$/, '');
 
       items.push({
         title,
@@ -159,7 +160,7 @@ export function getPrevNext(currentSlug: string): { prev?: NoteFile; next?: Note
   }
   collect(tree);
 
-  const idx = allFiles.findIndex(f => f.slug === currentSlug);
+  const idx = allFiles.findIndex((f) => f.slug === currentSlug);
   if (idx === -1) return {};
 
   return {

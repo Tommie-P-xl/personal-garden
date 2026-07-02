@@ -4,9 +4,11 @@ import { ViewTransitions } from 'astro:transitions';
 interface Props {
   title: string;
   description?: string;
+  wide?: boolean;
 }
 
-const { title, description = '个人数字花园 - 学习笔记与项目展示' } = Astro.props;
+const { title, description = '个人数字花园 - 学习笔记与项目展示', wide = false } = Astro.props;
+const containerClass = wide ? 'max-w-[1400px]' : 'max-w-5xl';
 const currentPath = Astro.url.pathname;
 const base = import.meta.env.BASE_URL;
 
@@ -463,7 +465,7 @@ function href(path: string) {
     </nav>
 
     <!-- 主内容 -->
-    <main class="max-w-5xl mx-auto px-4 sm:px-6 py-8" transition:animate="fade">
+    <main class={`${containerClass} mx-auto px-4 sm:px-6 py-8`} transition:animate="fade">
       <slot />
     </main>
 
@@ -491,6 +493,17 @@ function href(path: string) {
   .prose h3 {
     @apply text-xl font-semibold mt-5 mb-2 text-gray-900 dark:text-white;
   }
+
+  /* 标题锚点链接样式 */
+  .heading-anchor {
+    @apply ml-1 text-gray-300 dark:text-gray-600 no-underline opacity-0 transition-opacity;
+  }
+  .prose h1:hover .heading-anchor,
+  .prose h2:hover .heading-anchor,
+  .prose h3:hover .heading-anchor {
+    @apply opacity-100;
+  }
+
   .prose p {
     @apply mb-4;
   }
@@ -503,24 +516,30 @@ function href(path: string) {
   .prose a {
     @apply text-garden-600 dark:text-garden-400 hover:text-garden-500 dark:hover:text-garden-300 underline;
   }
-  .prose code {
+  /* 行内代码（非代码块） */
+  .prose :not(pre) > code {
     @apply bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded text-sm font-mono text-gray-800 dark:text-gray-200;
   }
   .prose pre {
-    @apply bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto mb-4 border border-gray-800;
+    @apply p-4 rounded-lg overflow-x-auto mb-4 border;
+    background-color: #f6f8fa;
+    color: #24292f;
+    border-color: #e1e4e8;
   }
-  html.dark .prose pre {
-    background-color: var(--shiki-dark-bg, #161b22) !important;
-    @apply border-white/[0.06];
+  html.dark .prose pre,
+  html.dark .prose pre.astro-code {
+    background-color: var(--shiki-dark-bg, #24292e) !important;
+    color: var(--shiki-dark, #e1e4e8) !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
   }
   html:not(.dark) .prose pre {
     background-color: var(--shiki-bg, #f6f8fa) !important;
     color: var(--shiki-fg, #24292f) !important;
-    @apply border-gray-200;
   }
   .prose pre code {
     background: transparent !important;
-    @apply p-0 text-inherit;
+    @apply p-0;
+    color: inherit !important;
   }
   .prose blockquote {
     @apply border-l-4 border-garden-300 dark:border-garden-600 pl-4 italic text-gray-600 dark:text-gray-400 mb-4;
@@ -541,19 +560,14 @@ function href(path: string) {
     @apply px-4 py-2 border border-gray-200 dark:border-gray-700;
   }
 
-  /* Shiki dual theme: light/dark */
-  html.dark .shiki,
-  html.dark .shiki span,
-  html.dark .shiki code {
-    background-color: var(--shiki-dark-bg) !important;
-    color: var(--shiki-dark) !important;
-  }
-  html:not(.dark) .shiki,
-  html:not(.dark) .shiki span,
-  html:not(.dark) .shiki code {
-    background-color: var(--shiki-bg) !important;
-    color: var(--shiki-fg) !important;
-  }
+  /* Shiki 暗色模式 */
+  html.dark .astro-code { background-color: #24292e !important; color: #e1e4e8 !important; }
+  html.dark .astro-code code { background-color: transparent !important; color: #e1e4e8 !important; }
+  html.dark .astro-code span { color: var(--shiki-dark) !important; }
+
+  /* Shiki 亮色模式：只设背景，不覆盖 span 的 inline 颜色 */
+  html:not(.dark) .astro-code { background-color: #f6f8fa !important; color: #24292f !important; }
+  html:not(.dark) .astro-code code { background-color: transparent !important; }
 
   /* Code block container */
   pre {

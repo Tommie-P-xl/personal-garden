@@ -1,0 +1,66 @@
+---
+title: 数据结构
+summary: Python 内置数据结构详解
+tags: [Python, 数据结构, 列表, 字典]
+---
+
+# Python 数据结构
+
+## 列表（List）
+
+```python
+fruits = ["apple", "banana", "cherry"]
+fruits.append("date")
+fruits.sort()
+```
+
+<Callout type="info">
+列表是有序、可变的序列类型，支持索引、切片、追加等操作。
+</Callout>
+
+---
+
+## 字典（Dictionary）
+
+```python
+person = {
+    "name": "Alice",
+    "age": 25,
+    "city": "Beijing"
+}
+
+for key, value in person.items():
+    print(f"{key}: {value}")
+```
+
+<Callout type="tip">
+字典使用哈希表实现，查找时间复杂度为 O(1)。
+</Callout>
+
+---
+
+## 集合（Set）
+
+```python
+a = {1, 2, 3}
+b = {3, 4, 5}
+print(a & b)  # 交集: {3}
+print(a | b)  # 并集: {1, 2, 3, 4, 5}
+```
+
+---
+
+## 数据结构对比
+
+| 特性 | 列表 | 字典 | 集合 |
+|------|------|------|------|
+| 有序 | ✅ | ❌（Python 3.7+ 插入有序） | ❌ |
+| 可变 | ✅ | ✅ | ✅ |
+| 重复元素 | ✅ | 键唯一 | ❌ |
+| 索引访问 | ✅ | ❌ | ❌ |
+
+---
+
+## 参考资料
+
+- [Python 数据结构](https://docs.python.org/3/tutorial/datastructures.html)

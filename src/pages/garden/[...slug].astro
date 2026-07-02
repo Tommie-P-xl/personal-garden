@@ -1,75 +1,70 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Sidebar from '../../components/Sidebar.astro';
+import TableOfContents from '../../components/TableOfContents.astro';
 import PrevNextNav from '../../components/PrevNextNav.astro';
 import Backlinks from '../../components/Backlinks.astro';
-import { scanNotes, getPrevNext, readFrontmatter, getAllFlatNotes } from '../../lib/scan-notes';
+import NoteLayout from '../../layouts/NoteLayout.astro';
+import { getCollection, render } from 'astro:content';
+import { scanNotes, getPrevNext, getAllFlatNotes } from '../../lib/scan-notes';
 import type { NoteFile } from '../../lib/scan-notes';
 import fs from 'node:fs';
 import path from 'node:path';
-import { marked } from 'marked';
-import katex from 'katex';
-import { createHighlighter } from 'shiki';
 
 const base = import.meta.env.BASE_URL;
 
-// Shiki highlighter (cached at module level)
-const highlighter = await createHighlighter({
-  themes: ['github-light', 'github-dark'],
-  langs: ['javascript', 'typescript', 'python', 'c', 'cpp', 'java', 'rust', 'go', 'bash', 'shell', 'json', 'html', 'css', 'markdown', 'sql', 'yaml', 'toml', 'xml', 'makefile', 'cmake'],
-});
-
 export async function getStaticPaths() {
   const tree = scanNotes();
+  const notes = await getCollection('notes', ({ data }) => !data.draft);
   const paths: Array<{ params: { slug: string }; props: any }> = [];
 
-  function walk(items: NoteFile[]) {
+  // 笔记文件路径
+  for (const note of notes) {
+    paths.push({
+      params: { slug: note.id },
+      props: { isDir: false, note },
+    });
+  }
+
+  // 目录路径
+  function walkDirs(items: NoteFile[]) {
     for (const item of items) {
-      if (item.type === 'file') {
+      if (item.type === 'dir') {
         paths.push({
           params: { slug: item.slug },
-          props: { noteFile: item, isDir: false },
+          props: { isDir: true, dirItem: item },
         });
-      } else if (item.type === 'dir' && item.children) {
-        paths.push({
-          params: { slug: item.slug },
-          props: { dirItem: item, isDir: true },
-        });
-        walk(item.children);
+        if (item.children) walkDirs(item.children);
       }
     }
   }
+  walkDirs(tree);
 
-  walk(tree);
   return paths;
 }
 
 const { isDir } = Astro.props;
-const currentSlug = isDir ? Astro.props.dirItem.slug : Astro.props.noteFile.slug;
 const tree = scanNotes();
 
-// Determine which top-level category we're in
-// Find the top-level ancestor for the current slug
+// 查找顶级分类
 function findTopLevelAncestor(slug: string): NoteFile | undefined {
   const parts = slug.split('/');
-  // Try progressively shorter slugs to find a top-level directory
   for (let i = parts.length; i > 0; i--) {
     const prefix = parts.slice(0, i).join('/');
-    const found = tree.find(item => item.slug === prefix && item.type === 'dir');
+    const found = tree.find((item) => item.slug === prefix && item.type === 'dir');
     if (found) return found;
   }
   return undefined;
 }
 
+// 公共数据
+const currentSlug = isDir ? Astro.props.dirItem.slug : Astro.props.note.id;
 const topLevelAncestor = findTopLevelAncestor(currentSlug);
-// If no ancestor found (root-level note), show full tree without category title
-// If inside a category (including the category page itself), show category's children with static title
 const sidebarIsRoot = !topLevelAncestor;
 const finalSidebarTree = sidebarIsRoot ? tree : (topLevelAncestor.children || []);
 
-// ====== DIRECTORY DATA ======
+// ====== 目录页面数据 ======
 let dirTitle = '';
-let dirIcon = '';
 let dirDescription = '';
 let dirChildren: NoteFile[] = [];
 let dirFlatNotes: Array<{ title: string; slug: string; summary?: string }> = [];
@@ -77,51 +72,32 @@ let dirFlatNotes: Array<{ title: string; slug: string; summary?: string }> = [];
 if (isDir) {
   const dirItem: NoteFile = Astro.props.dirItem;
   dirTitle = dirItem.meta?.title || dirItem.title;
-  dirIcon = '';
   dirDescription = dirItem.meta?.description || '';
   dirChildren = dirItem.children || [];
   dirFlatNotes = getAllFlatNotes()
-    .filter(n => n.slug.startsWith(dirItem.slug))
-    .map(n => ({ title: n.title, slug: n.slug, summary: n.summary }));
+    .filter((n) => n.slug.startsWith(dirItem.slug))
+    .map((n) => ({ title: n.title, slug: n.slug, summary: n.summary }));
 }
 
-// ====== NOTE DATA ======
-let title = '';
-let summary = '';
+// ====== 笔记页面数据 ======
+let noteTitle = '';
+let noteSummary = '';
 let tags: string[] = [];
-let htmlContent = '';
+let headings: Array<{ depth: number; slug: string; text: string }> = [];
 let prev: NoteFile | undefined;
 let next: NoteFile | undefined;
 let backlinks: Array<{ title: string; slug: string; summary?: string }> = [];
+let Content: any = null;
 
 if (!isDir) {
-  const noteFile: NoteFile = Astro.props.noteFile;
-  const filePath = path.resolve('src/content/notes', noteFile.filePath);
-  const fileContent = fs.readFileSync(filePath, 'utf-8');
+  const note = Astro.props.note;
+  const rendered = await render(note);
+  Content = rendered.Content;
+  headings = rendered.headings;
 
-  const fmMatch = fileContent.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
-  let frontmatter: Record<string, any> = {};
-  let markdownContent = fileContent;
-
-  if (fmMatch) {
-    const fmLines = fmMatch[1].split('\n');
-    for (const line of fmLines) {
-      const kv = line.match(/^(\w+):\s*(.+)/);
-      if (kv) {
-        const key = kv[1].trim();
-        let value: any = kv[2].trim();
-        if (value.startsWith('[') && value.endsWith(']')) {
-          value = value.slice(1, -1).split(',').map((s: string) => s.trim().replace(/['"]/g, ''));
-        }
-        frontmatter[key] = value;
-      }
-    }
-    markdownContent = fmMatch[2];
-  }
-
-  title = frontmatter.title || noteFile.title;
-  summary = frontmatter.summary || '';
-  tags = Array.isArray(frontmatter.tags) ? frontmatter.tags : [];
+  noteTitle = note.data.title;
+  noteSummary = note.data.summary || '';
+  tags = note.data.tags || [];
 
   const nav = getPrevNext(currentSlug);
   prev = nav.prev;
@@ -129,88 +105,37 @@ if (!isDir) {
 
   const allFlatNotes = getAllFlatNotes();
   backlinks = allFlatNotes
-    .filter(n => {
+    .filter((n) => {
       if (n.slug === currentSlug) return false;
       const fullPath = path.resolve('src/content/notes', n.filePath);
       if (!fs.existsSync(fullPath)) return false;
       const body = fs.readFileSync(fullPath, 'utf-8');
-      return body.includes(`[[${title}]]`);
+      return body.includes(`[[${noteTitle}]]`);
     })
-    .map(n => ({ title: n.title, slug: n.slug, summary: n.summary }));
-
-  // === Step 1: LaTeX rendering (before marked) ===
-  let processed = markdownContent;
-  processed = processed.replace(/\$\$([\s\S]+?)\$\$/g, (_, math) => {
-    try { return katex.renderToString(math.trim(), { displayMode: true, throwOnError: false }); }
-    catch { return `<pre class="katex-error">${math}</pre>`; }
-  });
-  processed = processed.replace(/(?<!\$)\$(?!\$)(.+?)(?<!\$)\$(?!\$)/g, (_, math) => {
-    try { return katex.renderToString(math.trim(), { displayMode: false, throwOnError: false }); }
-    catch { return `<code>${math}</code>`; }
-  });
-
-  // === Step 2: Shiki code highlighting (before marked) ===
-  // Replace ```lang ... ``` blocks with Shiki-highlighted HTML
-  processed = processed.replace(/```(\w*)\n([\s\S]*?)```/g, (_, lang, code) => {
-    const language = lang || 'text';
-    const supportedLangs = highlighter.getLoadedLanguages();
-    const resolvedLang = supportedLangs.includes(language) ? language : 'text';
-    try {
-      const html = highlighter.codeToHtml(code.trimEnd(), {
-        lang: resolvedLang,
-        themes: { light: 'github-light', dark: 'github-dark' },
-        defaultColor: false,
-      });
-      return html;
-    } catch {
-      return `<pre><code class="language-${language}">${code}</code></pre>`;
-    }
-  });
-
-  // === Step 3: Wiki links ===
-  const titleToSlug = new Map<string, string>();
-  const titleToSlugNorm = new Map<string, string>();
-  function buildMap(items: NoteFile[]) {
-    for (const item of items) {
-      if (item.type === 'file') {
-        const fm = readFrontmatter(item.filePath);
-        const t = fm.title || item.title;
-        titleToSlug.set(t, item.slug);
-        titleToSlugNorm.set(t.replace(/\s+/g, ''), item.slug);
-      } else if (item.children) buildMap(item.children);
-    }
-  }
-  buildMap(tree);
-
-  processed = processed.replace(/\[\[([^\]]+)\]\]/g, (_, lt) => {
-    let slug = titleToSlug.get(lt) || titleToSlugNorm.get(lt.replace(/\s+/g, ''));
-    if (slug) return `[${lt}](${base}garden/${slug}/)`;
-    return `[${lt}](${base}garden/?search=${encodeURIComponent(lt)})`;
-  });
-
-  // === Step 4: Parse markdown (skip code blocks since they're already HTML) ===
-  htmlContent = marked.parse(processed);
+    .map((n) => ({ title: n.title, slug: n.slug, summary: n.summary }));
 }
 ---
 
-<BaseLayout title={isDir ? dirTitle : title} description={isDir ? dirDescription : summary}>
-  <div class="flex gap-8">
+<BaseLayout title={isDir ? dirTitle : noteTitle} description={isDir ? dirDescription : noteSummary} wide={!isDir}>
+  <div class="flex gap-3 xl:gap-4">
+    {/* 左侧边栏 */}
     <Sidebar
       tree={finalSidebarTree}
       currentSlug={currentSlug}
       categoryTitle={topLevelAncestor ? (topLevelAncestor.meta?.title || topLevelAncestor.title) : undefined}
     />
 
-    <article class="flex-1 min-w-0 max-w-3xl">
-      <!-- Breadcrumb -->
+    {/* 中间内容区 */}
+    <article class="flex-1 min-w-0">
+      {/* 面包屑 */}
       <nav class="mb-6 text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
         <a href={`${base}garden/`} class="hover:text-garden-600 dark:hover:text-garden-400 transition-colors">笔记</a>
         <span class="text-gray-300 dark:text-gray-600">/</span>
-        <span class="text-gray-700 dark:text-gray-200 font-medium">{isDir ? `${dirIcon} ${dirTitle}` : title}</span>
+        <span class="text-gray-700 dark:text-gray-200 font-medium">{isDir ? dirTitle : noteTitle}</span>
       </nav>
 
       {isDir ? (
-        /* ====== DIRECTORY INDEX ====== */
+        /* ====== 目录页面 ====== */
         <>
           <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
             <img src={`${base}icons/笔记总.svg`} alt="" class="w-6 h-6 icon-colorful" /> {dirTitle}
@@ -261,25 +186,30 @@ if (!isDir) {
           )}
         </>
       ) : (
-        /* ====== NOTE DETAIL ====== */
+        /* ====== 笔记详情页面 ====== */
         <>
           <header class="mb-8">
-            <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">{title}</h1>
+            <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">{noteTitle}</h1>
             {tags.length > 0 && (
               <div class="flex flex-wrap gap-2">
                 {tags.map((tag) => (
-                  <span class="bg-gray-50/70 dark:bg-white/[0.04] backdrop-blur-sm text-gray-600 dark:text-gray-400 px-3 py-1 rounded-lg text-xs border border-gray-200/60 dark:border-white/[0.06]">#{tag}</span>
+                  <span class="bg-gray-50/70 dark:bg-white/[0.04] backdrop-blur-sm text-gray-600 dark:text-gray-400 px-3 py-1 rounded-lg text-xs border border-gray-200/60 dark:border-white/[0.06]">
+                    #{tag}
+                  </span>
                 ))}
               </div>
             )}
           </header>
 
-          <div class="prose" set:html={htmlContent} />
+          <NoteLayout Content={Content} headings={headings} />
 
           <PrevNextNav prev={prev} next={next} />
           <Backlinks backlinks={backlinks} />
         </>
       )}
     </article>
+
+    {/* 右侧 TOC（仅笔记页面显示） */}
+    {!isDir && <TableOfContents headings={headings} />}
   </div>
 </BaseLayout>
