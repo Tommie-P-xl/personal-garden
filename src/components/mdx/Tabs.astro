@@ -43,42 +43,39 @@ const { labels, id = `tabs-${Math.random().toString(36).slice(2, 8)}` } = Astro.
   </div>
 </div>
 
-<script is:inline>
-  document.addEventListener('astro:page-load', () => {
-    // 处理标签页切换
-    document.querySelectorAll('[data-tab-group]:not([data-tab-bound])').forEach((label) => {
-      (label as HTMLElement).dataset.tabBound = 'true';
-      label.addEventListener('click', () => {
-        const group = label.getAttribute('data-tab-group');
-        const index = label.getAttribute('data-tab-index');
-        const container = label.closest('.my-6');
+<script>
+  // 处理标签页切换
+  document.querySelectorAll('[data-tab-group]').forEach((label) => {
+    label.addEventListener('click', () => {
+      const group = label.getAttribute('data-tab-group');
+      const index = label.getAttribute('data-tab-index');
+      const container = label.closest('.my-6');
 
-        if (!container) return;
+      if (!container) return;
 
-        // 更新标签样式
-        container.querySelectorAll(`[data-tab-group="${group}"]`).forEach((l) => {
-          const isActive = l.getAttribute('data-tab-index') === index;
-          const span = l.querySelector('span:last-child');
+      // 更新标签样式
+      container.querySelectorAll(`[data-tab-group="${group}"]`).forEach((l) => {
+        const isActive = l.getAttribute('data-tab-index') === index;
+        const span = l.querySelector('span:last-child');
 
-          if (isActive) {
-            l.classList.add('text-garden-700', 'dark:text-garden-400');
-            l.classList.remove('text-gray-500', 'dark:text-gray-400');
-            span?.classList.add('bg-garden-500', 'dark:bg-garden-400');
-            span?.classList.remove('bg-transparent');
-          } else {
-            l.classList.remove('text-garden-700', 'dark:text-garden-400');
-            l.classList.add('text-gray-500', 'dark:text-gray-400');
-            span?.classList.remove('bg-garden-500', 'dark:bg-garden-400');
-            span?.classList.add('bg-transparent');
-          }
-        });
+        if (isActive) {
+          l.classList.add('text-garden-700', 'dark:text-garden-400');
+          l.classList.remove('text-gray-500', 'dark:text-gray-400');
+          span?.classList.add('bg-garden-500', 'dark:bg-garden-400');
+          span?.classList.remove('bg-transparent');
+        } else {
+          l.classList.remove('text-garden-700', 'dark:text-garden-400');
+          l.classList.add('text-gray-500', 'dark:text-gray-400');
+          span?.classList.remove('bg-garden-500', 'dark:bg-garden-400');
+          span?.classList.add('bg-transparent');
+        }
+      });
 
-        // 更新内容显示
-        const panels = container.querySelectorAll('[data-tab-panel]');
-        panels.forEach((panel, i) => {
-          const panelEl = panel as HTMLElement;
-          panelEl.style.display = i.toString() === index ? 'block' : 'none';
-        });
+      // 更新内容显示
+      const panels = container.querySelectorAll('[data-tab-panel]');
+      panels.forEach((panel, i) => {
+        const panelEl = panel as HTMLElement;
+        panelEl.style.display = i.toString() === index ? 'block' : 'none';
       });
     });
   });

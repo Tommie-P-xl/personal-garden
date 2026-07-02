@@ -99,95 +99,80 @@ const topCategories = tree.filter(item => item.type === 'dir');
   </div>
 </BaseLayout>
 
-<!-- 通过 data 属性传递笔记数据，避免 define:vars 与 is:inline 冲突 -->
-<div id="notes-data" data-notes={JSON.stringify(allFlatNotes.map(n => ({ title: n.title, slug: n.slug, tags: n.tags, summary: n.summary || '', category: n.category })))} class="hidden"></div>
+<script define:vars={{ notesData: allFlatNotes.map(n => ({ title: n.title, slug: n.slug, tags: n.tags, summary: n.summary || '', category: n.category })) }}>
+  const searchInput = document.getElementById('search-input');
+  const categoriesGrid = document.getElementById('categories-grid');
+  const searchResults = document.getElementById('search-results');
+  const searchResultsGrid = document.getElementById('search-results-grid');
+  const searchEmpty = document.getElementById('search-empty');
+  const tagButtons = document.querySelectorAll('#tag-filter button');
 
-<script is:inline>
-  document.addEventListener('astro:page-load', () => {
-    const dataEl = document.getElementById('notes-data');
-    const notesData = dataEl ? JSON.parse(dataEl.dataset.notes || '[]') : [];
-    const searchInput = document.getElementById('search-input');
-    const categoriesGrid = document.getElementById('categories-grid');
-    const searchResults = document.getElementById('search-results');
-    const searchResultsGrid = document.getElementById('search-results-grid');
-    const searchEmpty = document.getElementById('search-empty');
-    const tagButtons = document.querySelectorAll('#tag-filter button');
+  let activeTag = null;
 
-    if (searchInput && searchInput.dataset.bound) return;
+  function getBase() {
+    const baseEl = document.querySelector('base');
+    return baseEl ? baseEl.href : '/';
+  }
 
-    let activeTag = null;
+  function doSearch() {
+    const term = searchInput?.value.toLowerCase() || '';
+    const hasSearch = term.length > 0 || activeTag;
 
-    function getBase() {
-      const baseEl = document.querySelector('base');
-      return baseEl ? baseEl.href : '/';
+    if (!hasSearch) {
+      categoriesGrid?.classList.remove('hidden');
+      searchResults?.classList.add('hidden');
+      return;
     }
 
-    function doSearch() {
-      const term = searchInput?.value.toLowerCase() || '';
-      const hasSearch = term.length > 0 || activeTag;
+    categoriesGrid?.classList.add('hidden');
+    searchResults?.classList.remove('hidden');
 
-      if (!hasSearch) {
-        categoriesGrid?.classList.remove('hidden');
-        searchResults?.classList.add('hidden');
-        return;
+    const results = notesData.filter(n => {
+      const matchesTag = !activeTag || n.tags.includes(activeTag);
+      const matchesSearch = !term ||
+        n.title.toLowerCase().includes(term) ||
+        n.summary.toLowerCase().includes(term) ||
+        n.tags.some(t => t.toLowerCase().includes(term));
+      return matchesTag && matchesSearch;
+    });
+
+    const base = getBase();
+    if (searchResultsGrid) {
+      if (results.length === 0) {
+        searchResultsGrid.innerHTML = '';
+        searchEmpty?.classList.remove('hidden');
+      } else {
+        searchEmpty?.classList.add('hidden');
+        searchResultsGrid.innerHTML = results.map(n => `
+          <a href="${base}garden/${n.slug}/"
+            class="block bg-white/50 dark:bg-[#18181b]/60 backdrop-blur-sm rounded-xl border border-gray-200/60 dark:border-white/[0.06] p-4 hover:shadow-sm hover:border-garden-300/60 dark:hover:border-garden-700/40 transition-all duration-200 group">
+            <div class="flex items-center gap-2 mb-1">
+              <span class="text-xs text-gray-400 dark:text-gray-500">${n.category}</span>
+            </div>
+            <h3 class="font-medium text-gray-900 dark:text-white group-hover:text-garden-700 dark:group-hover:text-garden-400 transition-colors line-clamp-2 mb-1">${n.title}</h3>
+            ${n.summary ? `<p class="text-xs text-gray-500 dark:text-gray-400 line-clamp-2">${n.summary}</p>` : ''}
+            ${n.tags.length > 0 ? `<div class="flex gap-1 mt-2 flex-wrap">${n.tags.slice(0,3).map(t => `<span class="bg-gray-50 dark:bg-white/[0.04] px-2 py-0.5 rounded-md text-xs text-gray-500 dark:text-gray-400 border border-gray-200/60 dark:border-white/[0.06]">#${t}</span>`).join('')}</div>` : ''}
+          </a>
+        `).join('');
       }
+    }
+  }
 
-      categoriesGrid?.classList.add('hidden');
-      searchResults?.classList.remove('hidden');
+  searchInput?.addEventListener('input', doSearch);
 
-      const results = notesData.filter(n => {
-        const matchesTag = !activeTag || n.tags.includes(activeTag);
-        const matchesSearch = !term ||
-          n.title.toLowerCase().includes(term) ||
-          n.summary.toLowerCase().includes(term) ||
-          n.tags.some(t => t.toLowerCase().includes(term));
-        return matchesTag && matchesSearch;
+  tagButtons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const tag = btn.dataset.tag || '';
+      activeTag = activeTag === tag ? null : tag;
+
+      tagButtons.forEach((b) => {
+        const isActive = b.dataset.tag === activeTag;
+        b.className = isActive
+          ? 'px-3 py-1 bg-garden-600 dark:bg-garden-700 text-white rounded-lg text-xs transition-colors whitespace-nowrap'
+          : 'px-3 py-1 bg-gray-100 dark:bg-white/[0.06] text-gray-600 dark:text-gray-300 rounded-lg text-xs hover:bg-garden-50 dark:hover:bg-garden-900/20 hover:text-garden-700 dark:hover:text-garden-400 transition-colors whitespace-nowrap';
       });
 
-      const base = getBase();
-      if (searchResultsGrid) {
-        if (results.length === 0) {
-          searchResultsGrid.innerHTML = '';
-          searchEmpty?.classList.remove('hidden');
-        } else {
-          searchEmpty?.classList.add('hidden');
-          searchResultsGrid.innerHTML = results.map(n => `
-            <a href="${base}garden/${n.slug}/"
-              class="block bg-white/50 dark:bg-[#18181b]/60 backdrop-blur-sm rounded-xl border border-gray-200/60 dark:border-white/[0.06] p-4 hover:shadow-sm hover:border-garden-300/60 dark:hover:border-garden-700/40 transition-all duration-200 group">
-              <div class="flex items-center gap-2 mb-1">
-                <span class="text-xs text-gray-400 dark:text-gray-500">${n.category}</span>
-              </div>
-              <h3 class="font-medium text-gray-900 dark:text-white group-hover:text-garden-700 dark:group-hover:text-garden-400 transition-colors line-clamp-2 mb-1">${n.title}</h3>
-              ${n.summary ? `<p class="text-xs text-gray-500 dark:text-gray-400 line-clamp-2">${n.summary}</p>` : ''}
-              ${n.tags.length > 0 ? `<div class="flex gap-1 mt-2 flex-wrap">${n.tags.slice(0,3).map(t => `<span class="bg-gray-50 dark:bg-white/[0.04] px-2 py-0.5 rounded-md text-xs text-gray-500 dark:text-gray-400 border border-gray-200/60 dark:border-white/[0.06]">#${t}</span>`).join('')}</div>` : ''}
-            </a>
-          `).join('');
-        }
-      }
-    }
-
-    if (searchInput) {
-      searchInput.dataset.bound = 'true';
-      searchInput.addEventListener('input', doSearch);
-    }
-
-    tagButtons.forEach((btn) => {
-      if (!(btn as HTMLElement).dataset.bound) {
-        (btn as HTMLElement).dataset.bound = 'true';
-        btn.addEventListener('click', () => {
-          const tag = btn.dataset.tag || '';
-          activeTag = activeTag === tag ? null : tag;
-
-          tagButtons.forEach((b) => {
-            const isActive = b.dataset.tag === activeTag;
-            b.className = isActive
-              ? 'px-3 py-1 bg-garden-600 dark:bg-garden-700 text-white rounded-lg text-xs transition-colors whitespace-nowrap'
-              : 'px-3 py-1 bg-gray-100 dark:bg-white/[0.06] text-gray-600 dark:text-gray-300 rounded-lg text-xs hover:bg-garden-50 dark:hover:bg-garden-900/20 hover:text-garden-700 dark:hover:text-garden-400 transition-colors whitespace-nowrap';
-          });
-
-          doSearch();
-        });
-      }
+      doSearch();
     });
   });
 </script>

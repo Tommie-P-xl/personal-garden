@@ -248,49 +248,43 @@ const remainingTags = sortedTags.slice(12);
     </section>
   )}
 
-  <script is:inline>
-    document.addEventListener('astro:page-load', () => {
-      // 展开更多标签
-      const showMoreBtn = document.getElementById('show-more-tags');
-      const remainingTags = document.getElementById('remaining-tags');
-      if (showMoreBtn && !showMoreBtn.dataset.bound) {
-        showMoreBtn.dataset.bound = 'true';
-        showMoreBtn.addEventListener('click', () => {
-          remainingTags?.classList.toggle('hidden');
-          if (remainingTags?.classList.contains('hidden')) {
-            showMoreBtn.textContent = `+${remainingTags?.children.length || 0} 更多`;
-          } else {
-            showMoreBtn.textContent = '收起';
-          }
-        });
+  <script>
+    // 展开更多标签
+    const showMoreBtn = document.getElementById('show-more-tags');
+    const remainingTags = document.getElementById('remaining-tags');
+    showMoreBtn?.addEventListener('click', () => {
+      remainingTags?.classList.toggle('hidden');
+      if (remainingTags?.classList.contains('hidden')) {
+        showMoreBtn.textContent = `+${remainingTags?.children.length || 0} 更多`;
+      } else {
+        showMoreBtn.textContent = '收起';
       }
+    });
 
-      // 复制到剪贴板
-      document.querySelectorAll('.copy-btn:not([data-bound])').forEach(btn => {
-        (btn as HTMLElement).dataset.bound = 'true';
-        btn.addEventListener('click', async () => {
-          const text = (btn as HTMLElement).dataset.copy;
-          if (!text) return;
-          try {
-            await navigator.clipboard.writeText(text);
-            const original = btn.innerHTML;
-            const label = btn.textContent?.trim().split(':')[0]?.trim() || '';
-            btn.innerHTML = `<svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Copied!`;
-            btn.classList.add('text-green-600', 'dark:text-green-400');
-            setTimeout(() => {
-              btn.innerHTML = original;
-              btn.classList.remove('text-green-600', 'dark:text-green-400');
-            }, 1500);
-          } catch {
-            // fallback
-            const ta = document.createElement('textarea');
-            ta.value = text;
-            document.body.appendChild(ta);
-            ta.select();
-            document.execCommand('copy');
-            document.body.removeChild(ta);
-          }
-        });
+    // 复制到剪贴板
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const text = (btn as HTMLElement).dataset.copy;
+        if (!text) return;
+        try {
+          await navigator.clipboard.writeText(text);
+          const original = btn.innerHTML;
+          const label = btn.textContent?.trim().split(':')[0]?.trim() || '';
+          btn.innerHTML = `<svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Copied!`;
+          btn.classList.add('text-green-600', 'dark:text-green-400');
+          setTimeout(() => {
+            btn.innerHTML = original;
+            btn.classList.remove('text-green-600', 'dark:text-green-400');
+          }, 1500);
+        } catch {
+          // fallback
+          const ta = document.createElement('textarea');
+          ta.value = text;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+        }
       });
     });
   </script>

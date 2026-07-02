@@ -189,9 +189,4 @@ const tocHeadings = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
     initTocHighlight();
     initTocMobile();
   });
-
-  // 防止重复绑定
-  if (!(document.currentScript as HTMLElement)?.dataset.tocInit) {
-    (document.currentScript as HTMLElement).dataset.tocInit = 'true';
-  }
 </script>
