@@ -8,9 +8,11 @@ import rehypeSlug from 'rehype-slug';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 import rehypeExternalLinks from 'rehype-external-links';
 
+const isCloudflare = !!process.env.CF_PAGES;
+
 export default defineConfig({
-  site: 'https://tommie-p-xl.github.io',
-  base: '/personal-garden/',
+  site: isCloudflare ? 'https://tommie-p-xl.pages.dev' : 'https://tommie-p-xl.github.io',
+  base: isCloudflare ? '/' : '/personal-garden/',
   output: 'static',
   integrations: [
     mdx(),

@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const NOTES_DIR = path.resolve('src/content/notes');
+const BASE = process.env.CF_PAGES ? '/' : '/personal-garden/';
 
 // 构建标题到 slug 的映射表
 function buildTitleSlugMap(): Map<string, string> {
@@ -34,7 +35,7 @@ function buildTitleSlugMap(): Map<string, string> {
           if (titleMatch) {
             const title = titleMatch[1].trim().replace(/['"]/g, '');
             // 使用 base URL 构建完整路径
-            map.set(title, `/personal-garden/garden/${slug}/`);
+            map.set(title, `${BASE}garden/${slug}/`);
           }
         }
       }
@@ -94,7 +95,7 @@ export default function remarkWikiLinks() {
         // 创建链接节点
         parts.push({
           type: 'link',
-          url: href || `/personal-garden/garden/?search=${encodeURIComponent(title)}`,
+          url: href || `${BASE}garden/?search=${encodeURIComponent(title)}`,
           children: [{ type: 'text', value: title }],
         } as Link);
 
