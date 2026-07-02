@@ -11,6 +11,7 @@ import rehypeExternalLinks from 'rehype-external-links';
 export default defineConfig({
   site: 'https://tommie-p-xl.github.io',
   base: '/personal-garden/',
+  output: 'static',
   integrations: [
     mdx(),
     tailwind(),

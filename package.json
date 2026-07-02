@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
-    "build": "astro build && node -e \"require('fs').rmSync('dist/_worker.js',{recursive:true,force:true})\"",
+    "build": "astro build",
     "preview": "astro preview",
     "astro": "astro"
   },
