@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { scanNotes, getAllFlatNotes } from '../../lib/scan-notes';
+import { registerSlug } from '../../lib/slug-hash';
 
 const base = import.meta.env.BASE_URL;
 
@@ -40,9 +41,11 @@ const topCategories = tree.filter(item => item.type === 'dir');
 
   <!-- 笔记大类 -->
   <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8" id="categories-grid">
-    {topCategories.map((cat) => (
+    {topCategories.map((cat) => {
+      const hashedSlug = registerSlug(cat.slug);
+      return (
       <a
-        href={`${base}garden/${cat.slug}/`}
+        href={`${base}garden/${hashedSlug}/`}
         class="category-item block bg-white/50 dark:bg-[#18181b]/60 backdrop-blur-sm rounded-xl border border-gray-200/60 dark:border-white/[0.06] p-6 hover:shadow-sm hover:border-garden-300/60 dark:hover:border-garden-700/40 transition-all duration-200 group"
         data-name={cat.meta?.title || cat.title}
       >
@@ -69,7 +72,8 @@ const topCategories = tree.filter(item => item.type === 'dir');
           })()} 篇笔记
         </div>
       </a>
-    ))}
+      );
+    })}
   </div>
 
   <!-- 标签云 -->
@@ -98,7 +102,7 @@ const topCategories = tree.filter(item => item.type === 'dir');
     </div>
   </div>
 
-  <script is:inline define:vars={{ notesJson: JSON.stringify(allFlatNotes.map(n => ({ title: n.title, slug: n.slug, tags: n.tags, summary: n.summary || '', category: n.category }))) }}>
+  <script is:inline define:vars={{ notesJson: JSON.stringify(allFlatNotes.map(n => ({ title: n.title, slug: registerSlug(n.slug), tags: n.tags, summary: n.summary || '', category: n.category }))) }}>
     (function() {
       var notesData = JSON.parse(notesJson);
       var activeTag = null;

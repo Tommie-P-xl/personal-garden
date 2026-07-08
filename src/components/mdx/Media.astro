@@ -1,0 +1,158 @@
+---
+// src/components/mdx/Media.astro
+import path from 'node:path';
+import fs from 'node:fs';
+
+interface Props {
+  /** 媒体类型 */
+  type: 'image' | 'video' | 'document';
+  /** 媒体源路径（相对于当前笔记的 _media 目录） */
+  src: string;
+  /** 替代文本（图片）或文件名（文档） */
+  alt?: string;
+  /** 宽度 */
+  width?: string;
+  /** 高度 */
+  height?: string;
+  /** 标题说明 */
+  caption?: string;
+}
+
+const {
+  type,
+  src,
+  alt = '',
+  width,
+  height,
+  caption
+} = Astro.props;
+
+const base = import.meta.env.BASE_URL;
+
+// 解析媒体文件的绝对路径
+function resolveMediaPath(srcPath: string): string {
+  // 如果已经是绝对路径或外部URL，直接返回
+  if (srcPath.startsWith('http://') || srcPath.startsWith('https://') || srcPath.startsWith('/')) {
+    return srcPath;
+  }
+
+  // 获取当前文件路径
+  const currentFile = Astro.url.pathname;
+  // 从URL提取笔记路径信息
+  // URL格式: /personal-garden/garden/{hash}/
+  // 需要找到对应的笔记文件来计算相对路径
+
+  // 对于Media组件，我们需要知道当前笔记的目录
+  // 由于Astro在构建时会处理，我们需要从文件系统获取信息
+
+  // 简单处理：直接返回原始路径，让浏览器通过相对路径解析
+  // 但需要确保文件在public目录中存在
+
+  // 从src提取文件名
+  const fileName = srcPath.split('/').pop() || '';
+
+  // 构建public目录下的可能路径
+  const publicMediaDir = path.resolve('public/media');
+
+  // 扫描public/media目录找到匹配的文件
+  function findFileInMedia(dir: string, targetFile: string): string | null {
+    if (!fs.existsSync(dir)) return null;
+
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    for (const entry of entries) {
+      const fullPath = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        const found = findFileInMedia(fullPath, targetFile);
+        if (found) return found;
+      } else if (entry.name === targetFile) {
+        return path.relative('public', fullPath).replace(/\\/g, '/');
+      }
+    }
+    return null;
+  }
+
+  const foundPath = findFileInMedia(publicMediaDir, fileName);
+  if (foundPath) {
+    return `${base}${foundPath}`;
+  }
+
+  // 如果找不到，返回原始路径
+  return srcPath;
+}
+
+const processedSrc = resolveMediaPath(src);
+
+const sizeStyle = [
+  width ? `width: ${width}` : '',
+  height ? `height: ${height}` : '',
+].filter(Boolean).join('; ');
+---
+
+{type === 'video' && (
+  <figure class="media-wrapper media-align-center">
+    <video
+      controls
+      class="media-video"
+      style={sizeStyle || undefined}
+    >
+      <source src={processedSrc} />
+      您的浏览器不支持视频播放。
+    </video>
+    {caption && <figcaption class="media-caption">{caption}</figcaption>}
+  </figure>
+)}
+
+{type === 'document' && (
+  <div class="media-doc-wrapper media-align-center">
+    <a
+      href={processedSrc}
+      download
+      class="media-doc-link"
+    >
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+      </svg>
+      <span>{alt || src.split('/').pop()}</span>
+    </a>
+  </div>
+)}
+
+<style>
+  /* 媒体容器 */
+  .media-wrapper {
+    @apply my-6;
+  }
+
+  .media-align-center {
+    text-align: center;
+  }
+
+  /* 视频样式 */
+  .media-video {
+    @apply rounded-lg shadow-md;
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* 标题样式 */
+  .media-caption {
+    @apply text-center text-sm text-gray-500 dark:text-gray-400 mt-2 italic;
+  }
+
+  /* 文档下载样式 */
+  .media-doc-wrapper {
+    @apply my-4;
+    text-align: center;
+  }
+
+  .media-doc-link {
+    @apply inline-flex items-center gap-2 px-4 py-2 rounded-lg;
+    @apply bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700;
+    @apply text-gray-700 dark:text-gray-300 hover:text-garden-600 dark:hover:text-garden-400;
+    @apply hover:bg-garden-50 dark:hover:bg-garden-900/20;
+    @apply transition-colors cursor-pointer;
+  }
+</style>

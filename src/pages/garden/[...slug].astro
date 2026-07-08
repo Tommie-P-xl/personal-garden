@@ -8,6 +8,7 @@ import NoteLayout from '../../layouts/NoteLayout.astro';
 import { getCollection, render } from 'astro:content';
 import { scanNotes, getPrevNext, getAllFlatNotes, buildBacklinksIndex } from '../../lib/scan-notes';
 import type { NoteFile } from '../../lib/scan-notes';
+import { registerSlug } from '../../lib/slug-hash';
 
 const base = import.meta.env.BASE_URL;
 
@@ -16,21 +17,23 @@ export async function getStaticPaths() {
   const notes = await getCollection('notes', ({ data }) => !data.draft);
   const paths: Array<{ params: { slug: string }; props: any }> = [];
 
-  // 笔记文件路径
+  // 笔记文件路径 - 使用哈希slug
   for (const note of notes) {
+    const hashedSlug = registerSlug(note.id);
     paths.push({
-      params: { slug: note.id },
-      props: { isDir: false, note },
+      params: { slug: hashedSlug },
+      props: { isDir: false, note, realSlug: note.id },
     });
   }
 
-  // 目录路径
+  // 目录路径 - 使用哈希slug
   function walkDirs(items: NoteFile[]) {
     for (const item of items) {
       if (item.type === 'dir') {
+        const hashedSlug = registerSlug(item.slug);
         paths.push({
-          params: { slug: item.slug },
-          props: { isDir: true, dirItem: item },
+          params: { slug: hashedSlug },
+          props: { isDir: true, dirItem: item, realSlug: item.slug },
         });
         if (item.children) walkDirs(item.children);
       }
@@ -41,7 +44,7 @@ export async function getStaticPaths() {
   return paths;
 }
 
-const { isDir } = Astro.props;
+const { isDir, realSlug } = Astro.props;
 const tree = scanNotes();
 
 // 查找顶级分类
@@ -75,7 +78,7 @@ if (isDir) {
   dirChildren = dirItem.children || [];
   dirFlatNotes = getAllFlatNotes()
     .filter((n) => n.slug.startsWith(dirItem.slug))
-    .map((n) => ({ title: n.title, slug: n.slug, summary: n.summary }));
+    .map((n) => ({ title: n.title, slug: registerSlug(n.slug), summary: n.summary }));
 }
 
 // ====== 笔记页面数据 ======
@@ -134,9 +137,10 @@ if (!isDir) {
           {dirDescription && <p class="text-gray-600 dark:text-gray-300 mb-8">{dirDescription}</p>}
 
           <div class="space-y-3">
-            {dirChildren.map((child) => (
-              child.type === 'dir' ? (
-                <a href={`${base}garden/${child.slug}/`}
+            {dirChildren.map((child) => {
+              const childHashedSlug = registerSlug(child.slug);
+              return child.type === 'dir' ? (
+                <a href={`${base}garden/${childHashedSlug}/`}
                   class="flex items-center gap-3 p-4 bg-white/50 dark:bg-[#18181b]/60 backdrop-blur-sm rounded-xl border border-gray-200/60 dark:border-white/[0.06] hover:shadow-sm hover:border-garden-300/60 dark:hover:border-garden-700/40 transition-all group">
                   <img src={`${base}icons/文件夹.svg`} alt="" class="w-5 h-5 icon-colorful" />
                   <div class="flex-1">
@@ -150,15 +154,15 @@ if (!isDir) {
                   </svg>
                 </a>
               ) : (
-                <a href={`${base}garden/${child.slug}/`}
+                <a href={`${base}garden/${childHashedSlug}/`}
                   class="flex items-center gap-3 p-4 bg-white/50 dark:bg-[#18181b]/60 backdrop-blur-sm rounded-xl border border-gray-200/60 dark:border-white/[0.06] hover:shadow-sm hover:border-garden-300/60 dark:hover:border-garden-700/40 transition-all group">
                   <img src={`${base}icons/文档.svg`} alt="" class="w-5 h-5 icon-colorful" />
                   <h3 class="font-medium text-gray-900 dark:text-white group-hover:text-garden-700 dark:group-hover:text-garden-400 transition-colors">
                     {child.title}
                   </h3>
                 </a>
-              )
-            ))}
+              );
+            })}
           </div>
 
           {dirFlatNotes.length > 0 && (

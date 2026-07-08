@@ -3,6 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
 import { scanNotes, getAllFlatNotes } from '../lib/scan-notes';
 import { enrichWithStars } from '../lib/github';
+import { registerSlug } from '../lib/slug-hash';
 
 const base = import.meta.env.BASE_URL;
 
@@ -155,9 +156,11 @@ const remainingTags = sortedTags.slice(12);
       </a>
     </div>
     <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      {topCategories.map((cat) => (
+      {topCategories.map((cat) => {
+        const hashedSlug = registerSlug(cat.slug);
+        return (
         <a
-          href={`${base}garden/${cat.slug}/`}
+          href={`${base}garden/${hashedSlug}/`}
           class="block bg-white/50 dark:bg-[#18181b]/60 backdrop-blur-sm rounded-xl border border-gray-200/60 dark:border-white/[0.06] p-5 hover:shadow-sm hover:border-garden-300/60 dark:hover:border-garden-700/40 transition-all duration-200 group"
         >
           <div class="flex items-center gap-3 mb-2">
@@ -170,7 +173,8 @@ const remainingTags = sortedTags.slice(12);
             <p class="text-sm text-gray-500 dark:text-gray-400 line-clamp-2">{cat.meta.description}</p>
           )}
         </a>
-      ))}
+        );
+      })}
     </div>
   </section>
 

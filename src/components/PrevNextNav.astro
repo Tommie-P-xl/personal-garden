@@ -1,5 +1,6 @@
 ---
 import type { NoteFile } from '../lib/scan-notes';
+import { registerSlug } from '../lib/slug-hash';
 
 interface Props {
   prev?: NoteFile;
@@ -19,7 +20,7 @@ function renderTitle(item: NoteFile): string {
     <div class="flex-1">
       {prev && (
         <a
-          href={`${base}garden/${prev.slug}/`}
+          href={`${base}garden/${registerSlug(prev.slug)}/`}
           class="group flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-garden-600 dark:hover:text-garden-400 transition-colors"
         >
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -35,7 +36,7 @@ function renderTitle(item: NoteFile): string {
     <div class="flex-1 text-right">
       {next && (
         <a
-          href={`${base}garden/${next.slug}/`}
+          href={`${base}garden/${registerSlug(next.slug)}/`}
           class="group inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-garden-600 dark:hover:text-garden-400 transition-colors"
         >
           <div>

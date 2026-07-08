@@ -337,6 +337,11 @@ function href(path: string) {
   }
   .prose img {
     @apply rounded-lg shadow-md my-4;
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
   }
   .prose hr {
     @apply border-gray-200 dark:border-gray-700 my-8;
@@ -345,10 +350,57 @@ function href(path: string) {
     @apply w-full border-collapse mb-4;
   }
   .prose th {
-    @apply bg-gray-100 dark:bg-gray-800 px-4 py-2 text-left font-semibold border border-gray-200 dark:border-gray-700;
+    @apply bg-gray-100 dark:bg-gray-800 px-4 py-2 font-semibold border border-gray-200 dark:border-gray-700;
   }
   .prose td {
     @apply px-4 py-2 border border-gray-200 dark:border-gray-700;
+  }
+
+  /* Table组件对齐样式 - 最高优先级 */
+  .table-wrapper th,
+  .table-wrapper td {
+    text-align: inherit;
+  }
+  .table-wrapper.table-align-left {
+    text-align: left;
+  }
+  .table-wrapper.table-align-left th,
+  .table-wrapper.table-align-left td {
+    text-align: left;
+  }
+  .table-wrapper.table-align-center {
+    text-align: center;
+  }
+  .table-wrapper.table-align-center th,
+  .table-wrapper.table-align-center td {
+    text-align: center;
+  }
+  .table-wrapper.table-align-right {
+    text-align: right;
+  }
+  .table-wrapper.table-align-right th,
+  .table-wrapper.table-align-right td {
+    text-align: right;
+  }
+  .table-wrapper .table-caption {
+    text-align: inherit;
+  }
+
+  /* 媒体组件标题对齐 */
+  .media-wrapper {
+    text-align: center;
+  }
+  .media-wrapper figcaption {
+    text-align: inherit;
+  }
+  .media-wrapper.media-align-left {
+    text-align: left;
+  }
+  .media-wrapper.media-align-center {
+    text-align: center;
+  }
+  .media-wrapper.media-align-right {
+    text-align: right;
   }
 
   /* Shiki 暗色模式 */

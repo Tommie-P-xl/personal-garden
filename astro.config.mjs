@@ -4,6 +4,7 @@ import tailwind from '@astrojs/tailwind';
 import sitemap from '@astrojs/sitemap';
 import remarkMath from 'remark-math';
 import remarkWikiLinks from './src/lib/remark-wiki-links';
+import remarkMedia from './src/lib/remark-media';
 import rehypeKatex from 'rehype-katex';
 import rehypeSlug from 'rehype-slug';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
@@ -21,7 +22,7 @@ export default defineConfig({
     sitemap(),
   ],
   markdown: {
-    remarkPlugins: [remarkMath, remarkWikiLinks],
+    remarkPlugins: [remarkMath, remarkWikiLinks, remarkMedia],
     rehypePlugins: [
       rehypeKatex,
       rehypeSlug,

@@ -1,0 +1,59 @@
+---
+// src/components/mdx/Latex.astro
+interface Props {
+  /** 对齐方式 */
+  align?: 'left' | 'center' | 'right';
+  /** 是否为块级显示 */
+  block?: boolean;
+}
+
+const { align = 'center', block = true } = Astro.props;
+
+const alignClass = {
+  left: 'latex-left',
+  center: 'latex-center',
+  right: 'latex-right',
+}[align];
+
+const displayClass = block ? 'block' : 'inline';
+---
+
+<div class:list={['latex-wrapper', alignClass, displayClass]}>
+  <slot />
+</div>
+
+<style>
+  .latex-wrapper {
+    @apply my-4;
+  }
+
+  .latex-wrapper.block {
+    @apply w-full;
+  }
+
+  .latex-wrapper.inline {
+    @apply inline-block;
+  }
+
+  .latex-left {
+    text-align: left;
+  }
+
+  .latex-center {
+    text-align: center;
+  }
+
+  .latex-right {
+    text-align: right;
+  }
+
+  /* 重置KaTeX display的默认margin */
+  :global(.latex-wrapper .katex-display) {
+    margin: 0 !important;
+  }
+
+  /* 行内公式样式 */
+  :global(.latex-wrapper .katex) {
+    font-size: 1.1em;
+  }
+</style>

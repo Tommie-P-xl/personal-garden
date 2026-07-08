@@ -1,5 +1,6 @@
 ---
 import type { NoteFile } from '../lib/scan-notes';
+import { registerSlug } from '../lib/slug-hash';
 
 interface Props {
   items: NoteFile[];
@@ -15,10 +16,11 @@ function renderTitle(item: NoteFile): string {
 }
 ---
 
-{items.map((item) => (
-  item.type === 'file' ? (
+{items.map((item) => {
+  const itemHashedSlug = registerSlug(item.slug);
+  return item.type === 'file' ? (
     <a
-      href={`${base}garden/${item.slug}/`}
+      href={`${base}garden/${itemHashedSlug}/`}
       class:list={[
         'flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors',
         item.slug === currentSlug
@@ -54,5 +56,5 @@ function renderTitle(item: NoteFile): string {
         )}
       </div>
     </div>
-  )
-))}
+  );
+})}

@@ -2,6 +2,109 @@
 
 所有版本的更新记录。
 
+## 2026-07-08 URL掩码、媒体文件支持与样式增强
+
+### 新增测试笔记
+- 新增 `0004-mdx-components/0002-新功能测试.mdx` 测试笔记
+- 涵盖URL掩码、媒体文件、LaTeX对齐、表格样式等所有新功能
+- 测试页面URL：`/garden/edeff02b80f5320e/`
+
+### URL掩码系统
+- 新增16位MD5哈希URL掩码，完全隐藏真实目录结构
+- 自动生成，无需手动维护映射表
+- 相同路径始终生成相同URL，稳定可预测
+- 示例：`0002-coding/0001-python/0001-基础语法` → `/garden/a3f8b2c1d4e5f6a7/`
+- 所有页面链接、侧边栏、导航、搜索结果均使用哈希URL
+
+### 媒体文件支持
+- 新增每级目录独立的 `_media` 文件夹结构
+- 新增 `<Image>` 组件，支持调整大小和对齐
+- 图片自动居中显示，最大宽度100%，自动适应容器
+- 图片支持对齐：左对齐（`align="left"`）、居中（默认）、右对齐（`align="right"`）
+- 图片支持标题说明（`caption`），对齐方式跟随图片
+- 新增 `<Media>` 组件支持视频播放和文档下载
+- 文档类型（`.md`、`.mdx`、`.pdf`、`.docx`）支持点击下载
+- 构建时自动复制到 `public/media/` 目录
+- 新增 `remark-media` 插件自动处理路径转换
+
+### 表格样式
+- 新增 `<Table>` 组件创建样式化表格
+- 支持文字左对齐（`align="left"`）、居中（`align="center"`，默认）、右对齐（`align="right"`）
+- 支持表格标题（`caption`），可选，对齐方式跟随表格
+- 移动端自动横向滚动
+
+### 其他改进
+- 右侧目录导航（TOC）隐藏滚动条但保持可滚动功能
+- 图片默认居中显示，最大宽度100%
+- 图片和表格的标题对齐方式跟随父元素
+- 全局表格对齐样式已修复，使用 `!important` 确保优先级
+
+### LaTeX公式对齐
+- 新增 `<Latex>` 组件控制块级公式对齐
+- 支持左对齐（`align="left"`）、居中（`align="center"`）、右对齐（`align="right"`）
+- 默认居中对齐
+- 移动端自动添加横向滚动
+
+### 表格样式
+- 新增 `<Table>` 组件创建样式化表格
+- 支持文字左对齐（`align="left"`）、居中（`align="center"`，默认）、右对齐（`align="right"`）
+- 支持表格标题（`caption`）
+- 移动端自动横向滚动
+
+### 隐藏目录滚动条
+- 右侧目录导航（TOC）隐藏滚动条但保持可滚动功能
+
+### 组件使用示例
+
+```mdx
+<!-- URL掩码：自动生成，无需配置 -->
+
+<!-- 图片（推荐使用标准Markdown语法，自动居中） -->
+![照片](./_media/photo.png)
+
+<!-- 视频 -->
+<Media type="video" src="./_media/demo.mp4" width="640px" caption="演示视频" />
+
+<!-- 文档下载 -->
+<Media type="document" src="./_media/guide.md" alt="使用指南" />
+
+<!-- LaTeX公式（默认居中） -->
+<Latex>
+$$
+E = mc^2
+$$
+</Latex>
+
+<!-- LaTeX公式（左对齐） -->
+<Latex align="left">
+$$
+\sum_{i=1}^{n} i = \frac{n(n+1)}{2}
+$$
+</Latex>
+
+<!-- 表格（默认居中） -->
+<Table caption="示例表格">
+  <thead>
+    <tr><th>列1</th><th>列2</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>数据1</td><td>数据2</td></tr>
+  </tbody>
+</Table>
+
+<!-- 表格（左对齐） -->
+<Table align="left">
+  <thead>
+    <tr><th>列1</th><th>列2</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>数据1</td><td>数据2</td></tr>
+  </tbody>
+</Table>
+```
+
+---
+
 ## 2025-07-04 全面性能优化
 
 ### 缓存策略优化

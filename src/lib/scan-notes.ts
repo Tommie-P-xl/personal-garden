@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import matter from 'gray-matter';
+import { registerSlug } from './slug-hash';
 
 export interface NoteMeta {
   title: string;
@@ -138,6 +139,7 @@ export function getAllFlatNotes(): FlatNote[] {
 /**
  * Build a backlinks index in a single pass over all note files.
  * Returns a Map from note title → list of slugs that reference it via [[title]].
+ * Slugs are hashed using registerSlug for URL masking.
  */
 export function buildBacklinksIndex(): Map<string, Array<{ title: string; slug: string; summary?: string }>> {
   const allNotes = getAllFlatNotes();
@@ -165,8 +167,9 @@ export function buildBacklinksIndex(): Map<string, Array<{ title: string; slug: 
           index.set(linkedTitle, []);
         }
         const backlinks = index.get(linkedTitle)!;
-        if (!backlinks.some((b) => b.slug === note.slug)) {
-          backlinks.push({ title: note.title, slug: note.slug, summary: note.summary });
+        const hashedSlug = registerSlug(note.slug);
+        if (!backlinks.some((b) => b.slug === hashedSlug)) {
+          backlinks.push({ title: note.title, slug: hashedSlug, summary: note.summary });
         }
       }
     } catch {

@@ -1,0 +1,127 @@
+/* src/styles/latex.css */
+
+/* LaTeX对齐类 - 使用更高优先级覆盖KaTeX默认样式 */
+.latex-left,
+.latex-left .katex-display,
+.latex-left .katex-html {
+  text-align: left !important;
+  justify-content: flex-start !important;
+}
+
+.latex-center,
+.latex-center .katex-display,
+.latex-center .katex-html {
+  text-align: center !important;
+  justify-content: center !important;
+}
+
+.latex-right,
+.latex-right .katex-display,
+.latex-right .katex-html {
+  text-align: right !important;
+  justify-content: flex-end !important;
+}
+
+/* 块级公式容器 */
+.latex-block {
+  display: block;
+  width: 100%;
+  margin: 1.5rem 0;
+}
+
+/* 行内公式容器 */
+.latex-inline {
+  display: inline;
+}
+
+/* 重置KaTeX默认样式 */
+.latex-wrapper .katex-display {
+  margin: 0 !important;
+}
+
+.latex-wrapper .katex {
+  font-size: 1.1em;
+}
+
+/* 响应式调整 */
+@media (max-width: 640px) {
+  .katex-display {
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-bottom: 0.5rem;
+  }
+
+  .katex-display::-webkit-scrollbar {
+    height: 4px;
+  }
+
+  .katex-display::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .katex-display::-webkit-scrollbar-thumb {
+    background-color: rgba(156, 163, 175, 0.5);
+    border-radius: 2px;
+  }
+}
+
+/* 暗色模式适配 */
+:root.dark .katex {
+  color: #e5e7eb;
+}
+
+/* 表格对齐样式 */
+.table-align-left,
+.table-align-left th,
+.table-align-left td {
+  text-align: left !important;
+}
+
+.table-align-center,
+.table-align-center th,
+.table-align-center td {
+  text-align: center !important;
+}
+
+.table-align-right,
+.table-align-right th,
+.table-align-right td {
+  text-align: right !important;
+}
+
+.table-align-left .table-caption {
+  text-align: left !important;
+}
+
+.table-align-center .table-caption {
+  text-align: center !important;
+}
+
+.table-align-right .table-caption {
+  text-align: right !important;
+}
+
+/* 图片对齐样式 */
+.image-align-left {
+  text-align: left !important;
+}
+
+.image-align-center {
+  text-align: center !important;
+}
+
+.image-align-right {
+  text-align: right !important;
+}
+
+.image-align-left .image-caption {
+  text-align: left !important;
+}
+
+.image-align-center .image-caption {
+  text-align: center !important;
+}
+
+.image-align-right .image-caption {
+  text-align: right !important;
+}

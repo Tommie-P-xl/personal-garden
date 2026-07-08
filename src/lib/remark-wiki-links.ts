@@ -3,11 +3,12 @@ import type { Root, Text, Link } from 'mdast';
 import fs from 'node:fs';
 import path from 'node:path';
 import matter from 'gray-matter';
+import { registerSlug } from './slug-hash';
 
 const NOTES_DIR = path.resolve('src/content/notes');
 const BASE = process.env.DEPLOY_TARGET === 'cloudflare' ? '/' : '/personal-garden/';
 
-// 构建标题到 slug 的映射表
+// 构建标题到 slug 的映射表（使用哈希slug）
 function buildTitleSlugMap(): Map<string, string> {
   const map = new Map<string, string>();
 
@@ -32,7 +33,9 @@ function buildTitleSlugMap(): Map<string, string> {
           const content = fs.readFileSync(fullPath, 'utf-8');
           const { data } = matter(content);
           if (data.title) {
-            map.set(data.title, `${BASE}garden/${slug}/`);
+            // 使用哈希后的slug
+            const hashedSlug = registerSlug(slug);
+            map.set(data.title, `${BASE}garden/${hashedSlug}/`);
           }
         } catch {
           // skip files that fail to parse

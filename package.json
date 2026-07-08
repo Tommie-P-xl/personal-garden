@@ -5,9 +5,10 @@
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
-    "build": "astro build",
+    "build": "node scripts/copy-media.js && astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "copy-media": "node scripts/copy-media.js"
   },
   "dependencies": {
     "@astrojs/mdx": "^4.2.6",

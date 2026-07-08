@@ -1,0 +1,89 @@
+---
+// src/components/mdx/Table.astro
+interface Props {
+  /** 文本对齐方式 */
+  align?: 'left' | 'center' | 'right';
+  /** 表格标题 */
+  caption?: string;
+  /** 是否可滚动（移动端） */
+  scrollable?: boolean;
+}
+
+const {
+  align = 'center',
+  caption,
+  scrollable = true
+} = Astro.props;
+
+const alignClasses = {
+  left: 'table-align-left',
+  center: 'table-align-center',
+  right: 'table-align-right',
+};
+---
+
+<figure class:list={['table-wrapper', alignClasses[align]]}>
+  {scrollable ? (
+    <div class="table-scroll">
+      <table>
+        <slot />
+      </table>
+    </div>
+  ) : (
+    <table>
+      <slot />
+    </table>
+  )}
+  {caption && <figcaption class="table-caption">{caption}</figcaption>}
+</figure>
+
+<style>
+  /* 基础表格样式 */
+  .table-wrapper {
+    @apply my-6;
+  }
+
+  .table-scroll {
+    @apply overflow-x-auto rounded-lg;
+  }
+
+  .table-wrapper table {
+    @apply w-full border-collapse;
+  }
+
+  /* 表格样式 */
+  .table-wrapper th,
+  .table-wrapper td {
+    @apply px-4 py-3;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  html.dark .table-wrapper th,
+  html.dark .table-wrapper td {
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .table-wrapper th {
+    @apply bg-gray-100 dark:bg-gray-800 font-semibold;
+    border-bottom: 2px solid #d1d5db;
+  }
+  html.dark .table-wrapper th {
+    border-bottom-color: rgba(255, 255, 255, 0.2);
+  }
+
+  .table-wrapper tbody tr:hover {
+    @apply bg-gray-50 dark:bg-gray-800/50;
+  }
+
+  /* 表格标题 */
+  .table-caption {
+    @apply text-center text-sm text-gray-500 dark:text-gray-400 mt-3 italic;
+  }
+
+  /* 响应式字体大小 */
+  @media (max-width: 640px) {
+    .table-wrapper th,
+    .table-wrapper td {
+      @apply px-3 py-2 text-sm;
+    }
+  }
+</style>
