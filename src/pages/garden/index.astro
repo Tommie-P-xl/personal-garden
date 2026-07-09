@@ -11,6 +11,18 @@ const allFlatNotes = getAllFlatNotes();
 // 获取所有标签（搜索用）
 const allTags = [...new Set(allFlatNotes.flatMap(note => note.tags))];
 
+// 按频率排序标签，只显示前20个
+const tagFrequency: Record<string, number> = {};
+allFlatNotes.forEach(note => {
+  note.tags.forEach(tag => {
+    tagFrequency[tag] = (tagFrequency[tag] || 0) + 1;
+  });
+});
+const displayTags = Object.entries(tagFrequency)
+  .sort((a, b) => b[1] - a[1])
+  .slice(0, 20)
+  .map(([tag]) => tag);
+
 // 一级分类（只展示顶层目录）
 const topCategories = tree.filter(item => item.type === 'dir');
 ---
@@ -77,11 +89,11 @@ const topCategories = tree.filter(item => item.type === 'dir');
   </div>
 
   <!-- 标签云 -->
-  {allTags.length > 0 && (
+  {displayTags.length > 0 && (
     <div class="mb-6">
       <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">标签</h2>
       <div class="flex flex-wrap gap-2" id="tag-filter">
-        {allTags.map((tag) => (
+        {displayTags.map((tag) => (
           <button
             data-tag={tag}
             class="px-3 py-1 bg-gray-100/70 dark:bg-white/[0.06] backdrop-blur-sm text-gray-600 dark:text-gray-300 rounded-lg text-xs hover:bg-garden-50 dark:hover:bg-garden-900/20 hover:text-garden-700 dark:hover:text-garden-400 transition-colors whitespace-nowrap"

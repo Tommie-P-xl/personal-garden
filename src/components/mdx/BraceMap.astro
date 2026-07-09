@@ -29,7 +29,7 @@ interface Props {
 const { data, config = {} } = Astro.props;
 
 const defaultConfig = {
-  nodeWidth: 160,
+  nodeWidth: 200,
   nodeHeight: 32,
   levelGap: 60,
   siblingGap: 12,
@@ -240,7 +240,12 @@ const containerId = `brace-map-${Math.random().toString(36).slice(2, 9)}`;
       .attr('stroke', (d: any) => (d.depth === 0 ? rootBgColor : borderColor))
       .attr('stroke-width', 1.2);
 
-    // 文字
+    // 添加 title 元素以显示完整文本（鼠标悬停时）
+    nodeGroups
+      .append('title')
+      .text((d: any) => d.data.name);
+
+    // 文字（带溢出处理）
     nodeGroups
       .append('text')
       .attr('x', nodeWidth / 2)
@@ -250,7 +255,19 @@ const containerId = `brace-map-${Math.random().toString(36).slice(2, 9)}`;
       .attr('fill', (d: any) => (d.depth === 0 ? rootTextColor : textColor))
       .attr('font-size', fontSize)
       .attr('font-weight', (d: any) => (d.depth === 0 ? '600' : '400'))
-      .text((d: any) => d.data.name);
+      .text((d: any) => d.data.name)
+      .each(function(this: SVGTextElement, d: any) {
+        const text = d.data.name as string;
+        const maxWidth = nodeWidth - 16; // 左右各留 8px 边距
+        let currentText = text;
+        const textEl = d3.select(this);
+
+        // 检查文字是否超出最大宽度
+        while (textEl.node()!.getComputedTextLength() > maxWidth && currentText.length > 1) {
+          currentText = currentText.slice(0, -1);
+          textEl.text(currentText + '…');
+        }
+      });
 
     // 暗色模式适配
     const isDark = document.documentElement.classList.contains('dark');

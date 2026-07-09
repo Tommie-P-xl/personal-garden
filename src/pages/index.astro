@@ -41,8 +41,7 @@ const sortedTags = Object.entries(tagFrequency)
   .sort((a, b) => b[1] - a[1])
   .map(([tag]) => tag);
 
-const displayTags = sortedTags.slice(0, 12);
-const remainingTags = sortedTags.slice(12);
+const displayTags = sortedTags.slice(0, 20);
 ---
 
 <BaseLayout title="首页">
@@ -115,7 +114,7 @@ const remainingTags = sortedTags.slice(12);
     <div class="sm:col-span-2 bg-white/50 dark:bg-[#18181b]/60 backdrop-blur-sm rounded-xl border border-gray-200/60 dark:border-white/[0.06] p-6">
       <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
         <img src={`${base}icons/终端.svg`} alt="" class="w-5 h-5 icon-dark-adapt" />
-        技术栈
+        Keys
       </h2>
       <div class="flex flex-wrap gap-2" id="tech-tags-container">
         {displayTags.map((tag) => (
@@ -123,24 +122,7 @@ const remainingTags = sortedTags.slice(12);
             {tag}
           </span>
         ))}
-        {remainingTags.length > 0 && (
-          <button
-            id="show-more-tags"
-            class="inline-flex items-center px-3 py-1.5 bg-gray-100/70 dark:bg-white/[0.06] backdrop-blur-sm text-gray-500 dark:text-gray-400 rounded-lg text-sm font-medium hover:bg-garden-50 dark:hover:bg-garden-900/20 hover:text-garden-700 dark:hover:text-garden-400 transition-colors cursor-pointer"
-          >
-            +{remainingTags.length} 更多
-          </button>
-        )}
       </div>
-      {remainingTags.length > 0 && (
-        <div id="remaining-tags" class="hidden flex flex-wrap gap-2 mt-2">
-          {remainingTags.map((tag) => (
-            <span class="inline-flex items-center px-3 py-1.5 bg-gray-50/70 dark:bg-white/[0.04] backdrop-blur-sm text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium border border-gray-200/60 dark:border-white/[0.06] whitespace-nowrap">
-              {tag}
-            </span>
-          ))}
-        </div>
-      )}
     </div>
   </section>
 
@@ -221,21 +203,6 @@ const remainingTags = sortedTags.slice(12);
 
   <script>
     function initHomePage() {
-      // 展开更多标签
-      const showMoreBtn = document.getElementById('show-more-tags');
-      const remainingTags = document.getElementById('remaining-tags');
-      if (showMoreBtn && !showMoreBtn.dataset.bound) {
-        showMoreBtn.dataset.bound = 'true';
-        showMoreBtn.addEventListener('click', () => {
-          remainingTags?.classList.toggle('hidden');
-          if (remainingTags?.classList.contains('hidden')) {
-            showMoreBtn.textContent = `+${remainingTags?.children.length || 0} 更多`;
-          } else {
-            showMoreBtn.textContent = '收起';
-          }
-        });
-      }
-
       // 复制到剪贴板
       document.querySelectorAll('.copy-btn').forEach(btn => {
         if ((btn as HTMLElement).dataset.bound) return;
