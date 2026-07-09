@@ -2,6 +2,36 @@
 
 所有版本的更新记录。
 
+## 2026-07-09 功能优化与问题修复
+
+### Markdown 表格自动转换
+- 新增 `rehype-table-wrapper` 插件，Markdown 表格自动转换为带样式的 HTML 表格
+- 无需手动使用 `<Table>` 组件，直接写 Markdown 表格语法即可
+- 同时保留对 HTML `<Table>` 组件的支持（用于设置对齐、标题等高级属性）
+
+### 表格样式修复
+- 修复 HTML 表格标题（caption）显示异常的问题
+- 统一表格样式到全局 CSS，确保 rehype 插件和组件样式一致
+- 移除 `.prose table` 的冲突样式，由 `.table-wrapper` 统一管理
+- 添加 `writing-mode: horizontal-tb` 确保标题水平显示
+
+### 图片路径增强
+- `<Image>` 和 `<Media>` 组件现在同时支持相对路径和绝对路径
+- 相对路径：`./_media/photo.png`（相对于当前笔记目录）
+- 绝对路径：`/media/images/photo.png`（相对于站点根目录）
+- 外部URL：`https://example.com/photo.png`
+
+### MDX 组件文档合并
+- 将 `0001-BraceMap-测试.mdx` 和 `0002-新功能测试.mdx` 合并为 `0001-组件说明.mdx`
+- 包含所有组件的完整使用说明和示例
+
+### GitHub Actions 修复
+- 修复 deployment 清理脚本的权限问题，添加 `deployments: write` 权限
+- 改进清理逻辑：先将 deployment 状态设为 inactive 再删除
+- 更新 Node.js 版本从 20 升级到 22（20 已被弃用）
+
+---
+
 ## 2026-07-08 URL掩码、媒体文件支持与样式增强
 
 ### 新增测试笔记

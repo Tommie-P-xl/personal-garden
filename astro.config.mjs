@@ -9,6 +9,7 @@ import rehypeKatex from 'rehype-katex';
 import rehypeSlug from 'rehype-slug';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 import rehypeExternalLinks from 'rehype-external-links';
+import rehypeTableWrapper from './src/lib/rehype-table-wrapper';
 
 const isCloudflare = process.env.DEPLOY_TARGET === 'cloudflare';
 
@@ -32,6 +33,7 @@ export default defineConfig({
         content: { type: 'text', value: '#' },
       }],
       [rehypeExternalLinks, { target: '_blank', rel: ['noopener', 'noreferrer'] }],
+      rehypeTableWrapper,
     ],
     shikiConfig: {
       themes: {

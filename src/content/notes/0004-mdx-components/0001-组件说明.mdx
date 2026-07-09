@@ -1,0 +1,485 @@
+---
+title: MDX 组件说明
+summary: 所有自定义 MDX 组件的使用说明与示例
+tags: [组件, MDX, LaTeX, 表格, 媒体, BraceMap]
+---
+
+# MDX 组件说明
+
+本文档汇总所有自定义 MDX 组件的使用方法和示例。
+
+---
+
+## 1. 提示框 (Callout)
+
+用于高亮显示重要信息，支持多种类型。
+
+<Callout type="info">
+这是一个信息提示框，用于展示一般信息。
+</Callout>
+
+<Callout type="tip">
+这是一个技巧提示框，用于展示实用技巧。
+</Callout>
+
+<Callout type="warning">
+这是一个警告提示框，用于提醒注意事项。
+</Callout>
+
+**使用方式：**
+
+```mdx
+<Callout type="info">
+信息内容
+</Callout>
+```
+
+---
+
+## 2. 折叠面板 (Collapse)
+
+用于隐藏详细内容，点击展开。
+
+<Collapse title="点击展开详细内容">
+这是折叠面板的内容。可以用来隐藏详细的说明或代码示例。
+</Collapse>
+
+**使用方式：**
+
+```mdx
+<Collapse title="标题">
+折叠内容
+</Collapse>
+```
+
+---
+
+## 3. 标签页 (Tabs)
+
+用于在多个内容之间切换。
+
+<Tabs labels={['JavaScript', 'Python', 'TypeScript']}>
+<TabItem index={0} active>
+
+```javascript
+function hello(name) {
+  return `Hello, ${name}!`;
+}
+```
+
+</TabItem>
+<TabItem index={1}>
+
+```python
+def hello(name):
+    return f"Hello, {name}!"
+```
+
+</TabItem>
+<TabItem index={2}>
+
+```typescript
+function hello(name: string): string {
+  return `Hello, ${name}!`;
+}
+```
+
+</TabItem>
+</Tabs>
+
+**使用方式：**
+
+```mdx
+<Tabs labels={['标签1', '标签2']}>
+<TabItem index={0} active>
+内容1
+</TabItem>
+<TabItem index={1}>
+内容2
+</TabItem>
+</Tabs>
+```
+
+---
+
+## 4. 进度条 (Progress)
+
+用于展示进度或完成状态。
+
+<Progress value={100} label="URL掩码" />
+<Progress value={100} label="媒体文件" />
+<Progress value={100} label="LaTeX对齐" />
+<Progress value={100} label="表格样式" />
+
+**使用方式：**
+
+```mdx
+<Progress value={80} label="进度名称" />
+```
+
+---
+
+## 5. 图片 (Image)
+
+支持调整大小和对齐方式。
+
+**基本用法（Markdown 语法，自动居中）：**
+
+![测试图标](./_media/test-icon.svg)
+
+**使用组件调整大小：**
+
+<Image src="./_media/test-icon.svg" alt="小图标" width="100px" />
+
+**左对齐：**
+
+<Image src="./_media/test-icon.svg" alt="左对齐" width="80px" align="left" />
+
+**右对齐：**
+
+<Image src="./_media/test-icon.svg" alt="右对齐" width="80px" align="right" />
+
+**带标题说明：**
+
+<Image src="./_media/test-icon.svg" alt="带标题" width="120px" caption="图1：测试SVG图标" />
+
+**使用方式：**
+
+```mdx
+<!-- 推荐：Markdown 语法，自动居中 -->
+![描述](./_media/photo.png)
+
+<!-- 需要调整大小或对齐时使用组件 -->
+<Image src="./_media/photo.png" alt="描述" width="200px" align="left" caption="标题" />
+```
+
+<Callout type="info">
+**路径支持：**
+- 相对路径：`./_media/photo.png`（相对于当前笔记目录）
+- 绝对路径：`/media/images/photo.png`（相对于站点根目录）
+- 外部URL：`https://example.com/photo.png`
+</Callout>
+
+---
+
+## 6. 视频与文档 (Media)
+
+支持视频播放和文档下载。
+
+**使用方式：**
+
+```mdx
+<!-- 视频 -->
+<Media type="video" src="./_media/demo.mp4" width="640px" caption="演示视频" />
+
+<!-- 文档下载 -->
+<Media type="document" src="./_media/guide.md" alt="使用指南" />
+```
+
+支持的文档类型：`.md`、`.mdx`、`.pdf`、`.docx`、`.txt` 等
+
+---
+
+## 7. 表格 (Table)
+
+支持两种方式创建表格：Markdown 语法和 HTML 语法。
+
+### 7.1 Markdown 表格（推荐）
+
+直接使用 Markdown 表格语法，自动转换为带样式的表格：
+
+| 名称 | 类型 | 描述 |
+|------|------|------|
+| Astro | 框架 | 静态站点生成器 |
+| Tailwind | CSS | 原子化CSS框架 |
+| KaTeX | 库 | LaTeX数学公式渲染 |
+
+### 7.2 HTML 表格
+
+使用 HTML 语法可以设置更多属性（对齐、标题等）：
+
+<Table caption="示例表格" align="center">
+  <thead>
+    <tr>
+      <th>属性</th>
+      <th>类型</th>
+      <th>默认值</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>align</td>
+      <td>string</td>
+      <td>'center'</td>
+    </tr>
+    <tr>
+      <td>caption</td>
+      <td>string</td>
+      <td>undefined</td>
+    </tr>
+  </tbody>
+</Table>
+
+**左对齐表格：**
+
+<Table align="left">
+  <thead>
+    <tr>
+      <th>函数</th>
+      <th>用途</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>hashSlug</td>
+      <td>生成哈希</td>
+    </tr>
+    <tr>
+      <td>registerSlug</td>
+      <td>注册并缓存</td>
+    </tr>
+  </tbody>
+</Table>
+
+**使用方式：**
+
+```mdx
+<!-- Markdown 语法（推荐，自动转换） -->
+| 列1 | 列2 |
+|-----|-----|
+| 数据 | 数据 |
+
+<!-- HTML 语法（需要设置对齐或标题时） -->
+<Table align="left" caption="表格标题">
+  <thead>
+    <tr><th>列1</th><th>列2</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>数据</td><td>数据</td></tr>
+  </tbody>
+</Table>
+```
+
+<Callout type="tip">
+Markdown 表格自动转换为带样式的 HTML 表格。如果需要设置对齐方式或标题，请使用 HTML 语法的 `<Table>` 组件。
+</Callout>
+
+---
+
+## 8. LaTeX 公式 (Latex)
+
+支持块级公式的对齐控制。
+
+**居中对齐（默认）：**
+
+<Latex>
+$$
+E = mc^2
+$$
+</Latex>
+
+**左对齐：**
+
+<Latex align="left">
+$$
+\sum_{i=1}^{n} i = \frac{n(n+1)}{2}
+$$
+</Latex>
+
+**右对齐：**
+
+<Latex align="right">
+$$
+a^2 + b^2 = c^2
+$$
+</Latex>
+
+**行内公式：**
+
+行内公式示例：$a^2 + b^2 = c^2$，$\sum_{i=1}^{n} i = \frac{n(n+1)}{2}$
+
+**使用方式：**
+
+```mdx
+<!-- 默认居中 -->
+<Latex>
+$$
+E = mc^2
+$$
+</Latex>
+
+<!-- 左对齐 -->
+<Latex align="left">
+$$
+\sum_{i=1}^{n} i = \frac{n(n+1)}{2}
+$$
+</Latex>
+```
+
+---
+
+## 9. 大括号结构图 (BraceMap)
+
+使用 d3.js 渲染的大括号结构图，用于展示整体与部分关系。
+
+**基本用法：**
+
+<BraceMap
+  data={{
+    name: "HTML 页面",
+    children: [
+      {
+        name: "头部 (head)",
+        children: [
+          { name: "元信息 <meta>" },
+          { name: "标题 <title>" },
+          { name: "样式 <style>" },
+        ],
+      },
+      {
+        name: "主体 (body)",
+        children: [
+          { name: "标题 <h1>" },
+          { name: "段落 <p>" },
+          { name: "链接 <a>" },
+          { name: "图片 <img>" },
+        ],
+      },
+    ],
+  }}
+/>
+
+**自定义样式：**
+
+<BraceMap
+  data={{
+    name: "Web 技术栈",
+    children: [
+      {
+        name: "前端",
+        children: [
+          { name: "HTML/CSS" },
+          { name: "JavaScript" },
+          { name: "React/Vue" },
+        ],
+      },
+      {
+        name: "后端",
+        children: [
+          { name: "Node.js" },
+          { name: "Python" },
+          { name: "数据库" },
+        ],
+      },
+    ],
+  }}
+  config={{
+    braceColor: "#e74c3c",
+    bgColor: "#fff3e0",
+    borderColor: "#ff9800",
+    rootBgColor: "#e74c3c",
+    rootTextColor: "#fff",
+    fontSize: 13,
+    levelGap: 80,
+  }}
+/>
+
+**使用方式：**
+
+```mdx
+<BraceMap
+  data={{
+    name: "根节点",
+    children: [
+      { name: "子节点 1" },
+      { name: "子节点 2" },
+    ],
+  }}
+/>
+```
+
+**可配置参数：**
+
+| 参数 | 类型 | 默认值 | 说明 |
+|------|------|--------|------|
+| `nodeWidth` | number | 160 | 节点宽度 |
+| `nodeHeight` | number | 32 | 节点高度 |
+| `levelGap` | number | 60 | 层级间距 |
+| `braceWidth` | number | 14 | 大括号弯曲宽度 |
+| `braceColor` | string | #666 | 大括号颜色 |
+| `rootBgColor` | string | #4a7cff | 根节点背景色 |
+
+---
+
+## 10. 代码块 (CodeBlock)
+
+支持代码高亮和复制功能。
+
+```javascript
+function fibonacci(n) {
+  if (n <= 1) return n;
+  return fibonacci(n - 1) + fibonacci(n - 2);
+}
+```
+
+**使用方式：**
+
+````mdx
+```javascript
+// 代码内容
+```
+````
+
+---
+
+## 11. 画廊 (Gallery)
+
+用于展示多张图片的网格布局。
+
+**使用方式：**
+
+```mdx
+<Gallery columns={3}>
+  <img src="./_media/img1.png" alt="图片1" />
+  <img src="./_media/img2.png" alt="图片2" />
+  <img src="./_media/img3.png" alt="图片3" />
+</Gallery>
+```
+
+---
+
+## 12. Wiki 链接
+
+支持双向链接，自动关联相关笔记。
+
+**示例：**
+
+- [[基础语法]] - Python基础语法
+- [[虚拟内存]] - Linux虚拟内存机制
+- [[CFS 调度器]] - Linux进程调度
+
+**使用方式：**
+
+```mdx
+[[笔记标题]]
+```
+
+---
+
+## 总结
+
+所有可用组件：
+
+| 组件 | 用途 | 推荐场景 |
+|------|------|----------|
+| `<Callout>` | 提示框 | 高亮重要信息 |
+| `<Collapse>` | 折叠面板 | 隐藏详细内容 |
+| `<Tabs>` | 标签页 | 多语言代码对比 |
+| `<Progress>` | 进度条 | 展示完成状态 |
+| `<Image>` | 图片 | 需要调整大小/对齐时 |
+| `<Media>` | 媒体 | 视频播放/文档下载 |
+| `<Table>` | 表格 | 需要自定义样式时 |
+| `<Latex>` | LaTeX公式 | 块级公式对齐 |
+| `<BraceMap>` | 结构图 | 层次关系展示 |
+| `<CodeBlock>` | 代码块 | 代码高亮 |
+| `<Gallery>` | 画廊 | 图片网格展示 |

@@ -9,6 +9,7 @@ permissions:
   contents: read
   pages: write
   id-token: write
+  deployments: write
 
 concurrency:
   group: pages
@@ -24,7 +25,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
 
       - name: Install dependencies
@@ -68,17 +69,30 @@ jobs:
               new Date(b.created_at) - new Date(a.created_at)
             );
 
+            console.log(`Found ${deployments.data.length} deployments`);
+
             // 删除多余的 deployments
             for (let i = keepCount; i < deployments.data.length; i++) {
               const deployment = deployments.data[i];
               try {
+                // 先将 deployment 状态设为 inactive
+                await github.rest.repos.createDeploymentStatus({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  deployment_id: deployment.id,
+                  state: 'inactive'
+                });
+
+                // 然后删除 deployment
                 await github.rest.repos.deleteDeployment({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                   deployment_id: deployment.id
                 });
-                console.log(`Deleted deployment: ${deployment.id}`);
+                console.log(`✓ Deleted deployment: ${deployment.id}`);
               } catch (error) {
-                console.log(`Failed to delete deployment ${deployment.id}: ${error.message}`);
+                console.log(`✗ Failed to delete deployment ${deployment.id}: ${error.message}`);
               }
             }
+
+            console.log('Cleanup complete');

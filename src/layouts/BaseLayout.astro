@@ -346,21 +346,62 @@ function href(path: string) {
   .prose hr {
     @apply border-gray-200 dark:border-gray-700 my-8;
   }
-  .prose table {
-    @apply w-full border-collapse mb-4;
+  /* 表格统一样式 - 仅通过 .table-wrapper 控制 */
+  /* Table 组件和 rehype 插件统一样式 */
+  .table-wrapper {
+    margin: 1.5rem 0;
+    display: block;
+    width: 100%;
   }
-  .prose th {
-    @apply bg-gray-100 dark:bg-gray-800 px-4 py-2 font-semibold border border-gray-200 dark:border-gray-700;
+  .table-scroll {
+    overflow-x: auto;
+    border-radius: 0.5rem;
   }
-  .prose td {
-    @apply px-4 py-2 border border-gray-200 dark:border-gray-700;
+  .table-wrapper table {
+    width: 100%;
+    border-collapse: collapse;
   }
-
-  /* Table组件对齐样式 - 最高优先级 */
   .table-wrapper th,
   .table-wrapper td {
-    text-align: inherit;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #e5e7eb;
+    text-align: left;
   }
+  html.dark .table-wrapper th,
+  html.dark .table-wrapper td {
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+  }
+  .table-wrapper th {
+    background-color: #f3f4f6;
+    font-weight: 600;
+    border-bottom: 2px solid #d1d5db;
+  }
+  html.dark .table-wrapper th {
+    background-color: #1f2937;
+    border-bottom-color: rgba(255, 255, 255, 0.2);
+  }
+  .table-wrapper tbody tr:hover {
+    background-color: #f9fafb;
+  }
+  html.dark .table-wrapper tbody tr:hover {
+    background-color: rgba(31, 41, 55, 0.5);
+  }
+  .table-wrapper .table-caption {
+    display: block;
+    width: 100%;
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin-top: 0.75rem;
+    font-style: italic;
+    writing-mode: horizontal-tb;
+    white-space: normal;
+    text-align: center;
+  }
+  html.dark .table-wrapper .table-caption {
+    color: #9ca3af;
+  }
+
+  /* 表格对齐方式 */
   .table-wrapper.table-align-left {
     text-align: left;
   }
@@ -368,6 +409,10 @@ function href(path: string) {
   .table-wrapper.table-align-left td {
     text-align: left;
   }
+  .table-wrapper.table-align-left .table-caption {
+    text-align: left;
+  }
+
   .table-wrapper.table-align-center {
     text-align: center;
   }
@@ -375,6 +420,10 @@ function href(path: string) {
   .table-wrapper.table-align-center td {
     text-align: center;
   }
+  .table-wrapper.table-align-center .table-caption {
+    text-align: center;
+  }
+
   .table-wrapper.table-align-right {
     text-align: right;
   }
@@ -382,8 +431,29 @@ function href(path: string) {
   .table-wrapper.table-align-right td {
     text-align: right;
   }
-  .table-wrapper .table-caption {
-    text-align: inherit;
+  .table-wrapper.table-align-right .table-caption {
+    text-align: right;
+  }
+
+  /* 表格响应式 */
+  @media (max-width: 640px) {
+    .table-wrapper th,
+    .table-wrapper td {
+      padding: 0.5rem 0.75rem;
+      font-size: 0.875rem;
+    }
+  }
+
+  /* Table zebra stripes */
+  .table-wrapper table {
+    border-radius: 0.5rem;
+    overflow: hidden;
+  }
+  .table-wrapper tbody tr:nth-child(even) {
+    background-color: #f9fafb;
+  }
+  html.dark .table-wrapper tbody tr:nth-child(even) {
+    background-color: rgba(31, 41, 55, 0.3);
   }
 
   /* 媒体组件标题对齐 */
@@ -448,14 +518,6 @@ function href(path: string) {
   /* h2 heading divider */
   .prose h2 {
     @apply pb-2 border-b border-gray-200 dark:border-gray-700;
-  }
-
-  /* Table zebra stripes */
-  .prose table {
-    @apply rounded-lg overflow-hidden;
-  }
-  .prose tbody tr:nth-child(even) {
-    @apply bg-gray-50 dark:bg-gray-800/50;
   }
 
   /* Blockquote */

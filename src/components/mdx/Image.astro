@@ -33,9 +33,14 @@ const PUBLIC_MEDIA = path.resolve('public/media');
 
 // 解析图片路径 - 使用与remark-media相同的逻辑
 function resolveImagePath(srcPath: string): string {
-  // 如果已经是绝对路径或外部URL，直接返回
-  if (srcPath.startsWith('http://') || srcPath.startsWith('https://') || srcPath.startsWith('/')) {
+  // 如果已经是外部URL，直接返回
+  if (srcPath.startsWith('http://') || srcPath.startsWith('https://')) {
     return srcPath;
+  }
+
+  // 如果是绝对路径（以/开头），加上 base 前缀
+  if (srcPath.startsWith('/')) {
+    return `${base}${srcPath.slice(1)}`;
   }
 
   // 从当前页面URL提取笔记路径信息
