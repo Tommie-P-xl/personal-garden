@@ -1,0 +1,132 @@
+---
+title: GitHub Actions 基础概念与工作流结构
+tags: [github-actions, ci-cd, 工作流, 自动化]
+summary: GitHub Actions 的核心概念、目录结构和工作流配置
+---
+
+# GitHub Actions 基础概念与工作流结构
+
+GitHub Actions 是 GitHub 内置的自动化平台，允许你在代码仓库中直接定义并运行自动化流程，无需借助任何外部 CI/CD 工具。
+
+<Callout type="info">
+**常见用途**
+
+- 代码推送后自动运行测试
+- 合并 PR 后自动部署到服务器
+- 定时执行数据抓取脚本
+- 自动发布 npm 包、Docker 镜像等
+
+**免费额度**：公开仓库完全免费，私有仓库每月有 2,000 分钟的免费额度。
+</Callout>
+
+## 目录结构
+
+所有 Workflow 文件必须存放在仓库根目录的 `.github/workflows/` 文件夹下，文件名以 `.yml` 或 `.yaml` 结尾：
+
+```text
+your-repo/
+├── .github/
+│   └── workflows/
+│       ├── ci.yml          ← 持续集成流程（如运行测试）
+│       ├── deploy.yml      ← 部署流程
+│       └── scheduled.yml   ← 定时任务
+├── src/
+├── package.json
+└── README.md
+```
+
+## 核心概念
+
+| 概念 | 说明 | 类比 |
+|------|------|------|
+| Workflow（工作流） | 整个自动化流程，由一个 `.yml` 文件定义 | 一份完整的工作计划书 |
+| Event（事件） | 触发 Workflow 运行的条件，如代码推送、创建 PR | 计划书的启动条件 |
+| Job（作业） | Workflow 中的一个独立任务单元，每个 Job 运行在独立的虚拟机上 | 计划书中的一个章节 |
+| Step（步骤） | Job 内按顺序执行的最小操作单元 | 章节中的每一个具体步骤 |
+| Action（动作） | 可复用的封装好的操作，通过 `uses` 引用 | 现成的工具模板 |
+| Runner（运行器） | 执行 Job 的服务器 | 执行计划的工作人员 |
+
+### 层级关系
+
+```text
+仓库（Repository）
+└── Workflow（工作流）          ← 一个 .yml 文件 = 一个 Workflow
+    ├── Event（触发事件）        ← 什么情况下启动这个 Workflow
+    └── Job（作业）× N          ← 一个 Workflow 可以包含多个并行或串行的 Job
+        ├── Runner（运行器）     ← 执行 Job 的服务器
+        └── Step（步骤）× N     ← Job 内按顺序执行的一系列操作
+            ├── Action          ← 可复用的封装好的操作
+            └── Run             ← 直接执行 Shell 命令
+```
+
+## Workflow 示例
+
+```yaml
+# 【工作流名称】显示在仓库 "Actions" 标签页中的列表名称
+name: GitHub Actions Demo
+
+# 【运行显示名】每次触发时动态生成的标题，支持表达式语法
+# github.actor 会自动替换为触发本次运行的用户名
+run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
+
+# 【触发器定义】控制工作流何时自动执行
+# [push] 是简写形式，等价于 on: push: branches: ['**']
+# ⚠️ 注意：这表示任何分支的 push 都会触发
+on: [push]
+
+# 【作业定义】一个工作流可包含多个 job
+jobs:
+  build:                          # Job ID，同一 Workflow 中必须唯一
+    name: 构建项目                  # Job 的显示名称（可选）
+    runs-on: ubuntu-latest        # 【运行环境】指定虚拟机镜像
+
+    # 【Job 级环境变量】（可选）Job 内所有 Step 都可访问
+    env:
+      NODE_ENV: production        # Node.js 运行模式
+      APP_PORT: 8080              # 应用端口号
+
+    # 【超时控制】（可选）超时后 Job 自动取消
+    timeout-minutes: 30           # 默认值为 360 分钟（6小时）
+
+    # 【步骤列表】按从上到下的顺序依次执行
+    steps:
+      # Step 写法一：使用预置 Action（用 uses 引用）
+      - name: 拉取代码
+        uses: actions/checkout@v4 # 将仓库代码克隆到运行器工作目录
+
+      # Step 写法二：执行单行 Shell 命令（用 run 指定）
+      - name: 输出 Node 版本
+        run: node --version       # 直接执行单条命令
+
+      # Step 写法三：执行多行 Shell 命令（用 | 表示多行文本块）
+      - name: 安装依赖并构建
+        run: |                    # | 表示 YAML 多行字符串
+          npm install             # 安装项目依赖
+          npm run build           # 执行构建
+          echo "构建完成"          # 输出确认信息
+```
+
+## 托管运行器
+
+GitHub 提供以下免费的托管运行器：
+
+| 标签 | 操作系统 | 说明 |
+|------|----------|------|
+| `ubuntu-latest` | Ubuntu（最新 LTS） | 最常用，速度快，免费额度最多 |
+| `ubuntu-22.04` | Ubuntu 22.04 | 指定固定版本，避免升级不兼容 |
+| `windows-latest` | Windows Server（最新） | 用于需要 Windows 环境的构建 |
+| `macos-latest` | macOS（最新） | 用于 iOS/macOS 应用构建，消耗额度最快（约 Ubuntu 的 10 倍） |
+
+<Callout type="tip">
+**选择运行器的建议**
+
+- 优先使用 `ubuntu-latest`，免费额度最多
+- 只有在确实需要 Windows/macOS 环境时才使用对应的运行器
+- 对于关键的 CI 流程，建议指定固定版本（如 `ubuntu-22.04`），避免因 `latest` 升级导致构建失败
+</Callout>
+
+---
+
+**相关笔记**：
+- [[0002-触发事件与条件执行]] — 工作流的触发条件和条件执行
+- [[0003-环境变量与Secrets]] — 环境变量和敏感信息管理

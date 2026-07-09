@@ -1,0 +1,275 @@
+---
+title: 矩阵构建与权限管理
+tags: [github-actions, matrix, permissions, 矩阵构建, 权限]
+summary: GitHub Actions 的矩阵构建策略和权限声明
+---
+
+# 矩阵构建与权限管理
+
+## 矩阵构建（Matrix Strategy）
+
+矩阵构建是 GitHub Actions 中用于并行测试/构建多版本组合的核心机制。它允许你通过声明式配置，自动生成多个 Job 实例，每个实例使用不同的变量组合运行。
+
+### 基本用法
+
+```yaml
+jobs:
+  test:
+    # 矩阵变量在 runs-on 中必须使用 ${{ }} 语法引用
+    runs-on: ${{ matrix.os }}  # 动态指定运行器类型
+
+    strategy:
+      # 允许部分实例失败，不中断其余并行任务
+      # 设为 true 时，任一实例失败会取消其他实例
+      fail-fast: false
+
+      matrix:
+        os: [ubuntu-latest, windows-latest]       # 操作系统维度（2 个值）
+        node-version: [18, 20, 22]                # Node 版本维度（3 个值）
+        # 💡 自动生成 2 × 3 = 6 个基础组合
+
+        exclude:                                  # 排除无效组合
+          - os: windows-latest
+            node-version: 18                      # Windows 不再支持 Node 18
+
+        include:                                  # 追加额外组合（不参与笛卡尔积）
+          - os: ubuntu-latest
+            node-version: 23
+            experimental: true                    # 自定义标记，用于容错处理
+
+    # 【Job 级环境变量】
+    env:
+      BUILD_MODE: production
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # 使用矩阵变量设置 Node.js 版本
+      - name: 设置 Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: 显示环境变量与矩阵信息
+        env:
+          STEP_VAR: hello-${{ matrix.os }}
+        run: |
+          echo "应用名称：$APP_NAME"                    # Workflow 级
+          echo "构建模式：$BUILD_MODE"                   # Job 级
+          echo "步骤变量：$STEP_VAR"                     # Step 级（含矩阵变量拼接）
+          echo "Node 版本：${{ matrix.node-version }}"  # 矩阵变量
+          echo "实验性标记：${{ matrix.experimental }}"  # include 中定义的自定义变量
+
+      - name: 安装依赖并测试
+        # 配合 experimental 标记，使实验性版本失败不阻断工作流
+        continue-on-error: ${{ matrix.experimental == true }}
+        run: npm ci && npm test
+
+      - name: 上传测试产物
+        if: always()                              # 无论测试成功失败都上传
+        uses: actions/upload-artifact@v4
+        with:
+          # 多矩阵实例必须保证 name 唯一，否则会覆盖
+          name: test-report-${{ matrix.os }}-node${{ matrix.node-version }}
+          path: ./test-results/
+```
+
+### 矩阵组合计算
+
+```text
+基础组合数 = len(os) × len(node-version)
+           = 2 × 3
+           = 6 个组合
+
+排除的组合：windows-latest + node-version 18（1 个）
+额外的组合：ubuntu-latest + node-version 23 + experimental（1 个）
+
+最终组合数 = 6 - 1 + 1 = 6 个
+
+┌─────────────────────────────────────────────────────────────┐
+│  1. ubuntu-latest  + Node 18                                │
+│  2. ubuntu-latest  + Node 20                                │
+│  3. ubuntu-latest  + Node 22                                │
+│  4. windows-latest + Node 20                                │
+│  5. windows-latest + Node 22                                │
+│  6. ubuntu-latest  + Node 23 + experimental=true            │
+└─────────────────────────────────────────────────────────────┘
+```
+
+<Callout type="tip">
+**矩阵构建最佳实践**
+
+1. **使用 `fail-fast: false`**：避免一个版本失败导致其他版本取消
+2. **为产物命名加后缀**：使用 `${{ matrix.os }}-${{ matrix.node-version }}` 确保唯一
+3. **使用 `include` 添加特殊组合**：如实验性版本、特殊配置
+4. **使用 `exclude` 排除无效组合**：如不支持的系统+版本组合
+5. **使用 `continue-on-error` 容错**：配合 `experimental` 标记
+</Callout>
+
+## 权限管理（permissions）
+
+如果 Workflow 需要向仓库推送代码或操作 Issues，需要在配置文件中显式声明权限。每个 Job 运行时都会自动获得一个临时的 `GITHUB_TOKEN`，其权限范围由 `permissions` 关键字控制。
+
+<Callout type="warning">
+**最小权限原则**
+
+未显式声明的权限默认为 `none` 或 `read`。强烈建议始终显式声明所需权限，遵循最小权限原则。
+</Callout>
+
+### 声明方式
+
+```yaml
+# 推荐：Workflow 级设为最小默认，Job 级按需提升
+permissions:
+  contents: read          # 全局仅需读取代码
+
+jobs:
+  test:
+    permissions:
+      contents: read      # 继承或重申
+      checks: write       # 仅测试 Job 需要写入检查状态
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm test
+
+  deploy:
+    permissions:
+      contents: read
+      deployments: write  # 仅部署 Job 需要创建部署记录
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: ./deploy.sh
+```
+
+### 常用权限说明
+
+| 权限 | 读权限 | 写权限 | 说明 |
+|------|--------|--------|------|
+| `contents` | ✅ | ✅ | 仓库代码的读写 |
+| `packages` | ✅ | ✅ | GitHub Packages 的读写 |
+| `issues` | ✅ | ✅ | Issues 的读写 |
+| `pull-requests` | ✅ | ✅ | Pull Requests 的读写 |
+| `deployments` | ✅ | ✅ | 部署记录的读写 |
+| `checks` | ✅ | ✅ | 检查状态的读写 |
+| `actions` | ✅ | ✅ | 工作流的读写 |
+| `statuses` | ✅ | ✅ | 提交状态的读写 |
+
+### 权限配置示例
+
+```yaml
+# ==================== 场景一：只读权限 ====================
+# 适用于：只运行测试、构建，不修改仓库
+permissions:
+  contents: read
+
+# ==================== 场景二：推送代码 ====================
+# 适用于：自动格式化、文档生成后推送
+permissions:
+  contents: write
+
+# ==================== 场景三：操作 Issues ====================
+# 适用于：自动关闭 Issue、添加标签
+permissions:
+  issues: write
+
+# ==================== 场景四：发布包 ====================
+# 适用于：发布 npm 包、Docker 镜像
+permissions:
+  contents: read
+  packages: write
+
+# ==================== 场景五：完全禁用 ====================
+# 适用于：纯计算任务，不需要任何仓库访问
+permissions: {}
+```
+
+<Callout type="info">
+**GITHUB_TOKEN 的生命周期**
+
+- 每次 Workflow 运行时自动生成
+- 运行结束后自动失效
+- 权限范围由 `permissions` 关键字控制
+- 不需要手动创建或管理
+</Callout>
+
+## 完整示例：测试 → 构建 → 部署
+
+```yaml
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Workflow 级权限：最小权限
+permissions:
+  contents: read
+
+env:
+  APP_NAME: my-app
+  NODE_VERSION: '20'
+
+jobs:
+  # ==================== 测试 ====================
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        node-version: [18, 20, 22]
+    permissions:
+      contents: read
+      checks: write           # 写入测试报告
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: npm ci && npm test
+
+  # ==================== 构建 ====================
+  build:
+    runs-on: ubuntu-latest
+    needs: test               # 依赖测试通过
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - run: npm ci && npm run build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  # ==================== 部署 ====================
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build              # 依赖构建完成
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    permissions:
+      contents: read
+      deployments: write      # 创建部署记录
+    environment: production   # 绑定 GitHub Environment
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - run: |
+          echo "部署 ${{ env.APP_NAME }} 到生产环境"
+          # 实际部署命令...
+```
+
+---
+
+**相关笔记**：
+- [[0001-基础概念与工作流结构]] — Workflow 基础结构
+- [[0002-触发事件与条件执行]] — 触发事件和条件执行

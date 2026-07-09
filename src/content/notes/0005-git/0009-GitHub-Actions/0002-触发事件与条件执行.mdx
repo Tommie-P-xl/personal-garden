@@ -1,0 +1,221 @@
+---
+title: 触发事件与条件执行
+tags: [github-actions, on, if, 触发器, 条件]
+summary: GitHub Actions 的触发事件配置和条件执行控制
+---
+
+# 触发事件与条件执行
+
+## 触发事件（on）
+
+触发事件定义了工作流何时自动执行。完整的事件列表参考：[GitHub 官方文档](https://docs.github.com/zh/actions/reference/workflows-and-actions/events-that-trigger-workflows)
+
+### 指定分支或路径过滤
+
+```yaml
+on:
+  push:
+    branches:
+      - main            # 只在推送到 main 分支时触发
+      - develop         # 或者推送到 develop 分支时触发
+      - 'release/**'    # 或者推送到任何 release/ 开头的分支时触发
+    paths:
+      - 'src/**'        # 只有 src/ 目录下的文件发生变化时才触发
+      - 'package.json'  # 或者 package.json 文件发生变化时触发
+                        # branches 和 paths 是"且"的关系
+                        # paths 内部是"或"的关系
+```
+
+<Callout type="info">
+**branches 和 paths 的关系**
+
+- **同一层级的条件**：是"且"的关系（都满足才触发）
+- **同一条件内的多个值**：是"或"的关系（满足任意一个即触发）
+</Callout>
+
+### 打 Tag 时触发
+
+```yaml
+on:
+  create:
+    tags:
+      - 'v*'  # 仅匹配以 v 开头的标签，如 v1.0.0
+```
+
+### 定时触发（Cron）
+
+使用标准的 Cron 表达式定义执行时间，时区为 UTC（北京时间 = UTC+8，需换算）：
+
+```yaml
+on:
+  schedule:
+    # Cron 格式：分 时 日 月 星期
+    - cron: '0 2 * * *'       # 每天 UTC 02:00（即北京时间 10:00）
+    - cron: '0 9 * * 1'       # 每周一 UTC 09:00（即北京时间 17:00）
+    - cron: '*/30 * * * *'    # 每 30 分钟执行一次
+```
+
+#### Cron 表达式速查
+
+| Cron 表达式 | 含义 |
+|-------------|------|
+| `0 0 * * *` | 每天午夜（UTC 00:00） |
+| `0 * * * *` | 每小时整点 |
+| `0 0 * * 0` | 每周日午夜 |
+| `0 0 1 * *` | 每月 1 号午夜 |
+| `*/5 * * * *` | 每 5 分钟 |
+
+### 手动触发
+
+```yaml
+# ==================== 简单手动触发 ====================
+# 只需要一个 "Run workflow" 按钮，不需要传入任何变量
+on:
+  workflow_dispatch:
+
+# ==================== 带参数的手动触发 ====================
+on:
+  workflow_dispatch:             # 启用手动触发
+    inputs:                      # 定义输入参数列表
+      environment:               # 参数名：部署目标环境
+        description: '部署目标环境' # 参数描述
+        required: true           # 是否必填
+        default: 'staging'       # 默认值
+        type: choice             # 参数类型：下拉选择框
+        options:                 # 可选项列表
+          - staging              # 预发布环境
+          - production           # 生产环境
+      version:                   # 参数名：发布版本号
+        description: '发布版本号（留空则使用最新 tag）'
+        required: false          # 选填
+        type: string             # 参数类型：文本输入框
+      skip_tests:                # 参数名：是否跳过测试
+        description: '是否跳过自动化测试'
+        required: false
+        default: false           # 默认不跳过
+        type: boolean            # 参数类型：布尔勾选框
+```
+
+#### 在 Job 中引用输入参数
+
+通过 `inputs.<name>` 获取用户填写的值：
+
+```yaml
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 打印参数
+        run: |
+          echo "目标环境: ${{ inputs.environment }}"
+          echo "版本号: ${{ inputs.version }}"
+          echo "跳过测试: ${{ inputs.skip_tests }}"
+
+      # 条件执行：仅当 skip_tests 不为 true 时才执行
+      - name: 条件执行
+        if: ${{ inputs.skip_tests != true }}
+        run: npm test
+```
+
+## Job 之间的依赖（needs）
+
+通过 `needs` 控制 Job 的执行顺序，形成依赖链：
+
+```yaml
+jobs:
+  # 第一步：运行测试
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm ci                # 严格按 lock 文件安装依赖
+      - run: npm test              # 执行测试
+
+  # 第二步：构建项目（依赖 test）
+  build:
+    runs-on: ubuntu-latest
+    needs: test                    # 仅当 test 成功时才启动
+    steps:
+      - uses: actions/checkout@v4  # Job 间不共享文件，必须重新拉取
+      - run: npm ci && npm run build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist               # 产物名称
+          path: dist/              # 上传的目录
+
+  # 第三步：部署（依赖 build）
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build                   # 依赖 build（已隐式依赖 test）
+    environment: production
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist               # 与 upload 时的 name 一致
+          path: dist/
+      - run: |
+          echo "部署 dist/ 目录到生产环境"
+```
+
+<Callout type="tip">
+**needs 的作用**
+
+- 控制执行顺序：被依赖的 Job 必须先完成
+- 质量门禁：任一上游 Job 失败，所有依赖它的下游 Job 将被跳过
+- 并行执行：没有依赖关系的 Job 会并行运行
+</Callout>
+
+## 条件执行（if）
+
+通过 `if` 可以控制 Job 或 Step 是否执行：
+
+```yaml
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    # 【Job 级条件】整个 Job 仅在推送到 main 分支时触发
+    # 必须使用完整 ref 路径，而非简写 'main'
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+
+      # 执行部署脚本
+      - name: 部署到生产环境
+        run: ./deploy.sh
+
+      # 【成功回调】仅当所有前面的 Step 均为 success 时执行
+      # success() 是默认隐式条件，显式写出可增强可读性
+      - name: 发送成功通知
+        if: success()
+        run: echo "部署成功，发送通知"
+
+      # 【失败回调】当前面任意 Step 为 failure 或 cancelled 时执行
+      # failure() 不会因前置 Step 被跳过而触发，仅响应真实失败
+      - name: 发送失败通知
+        if: failure()
+        run: echo "部署失败，发送告警"
+
+      # 【无条件执行】无论前面 Step 成功、失败还是被跳过，都强制执行
+      # 典型用途：清理临时文件、释放资源、上传日志等收尾操作
+      - name: 总是执行的清理步骤
+        if: always()
+        run: rm -rf ./tmp
+```
+
+### if 条件常用表达式
+
+| 表达式 | 含义 |
+|--------|------|
+| `success()` | 前置步骤全部成功（默认条件） |
+| `failure()` | 前置步骤有失败 |
+| `always()` | 无论前置步骤状态，总是执行 |
+| `cancelled()` | 工作流被取消时 |
+| `github.ref == 'refs/heads/main'` | 当前分支是 main |
+| `github.event_name == 'push'` | 触发事件是 push |
+| `contains(github.event.head_commit.message, '[skip ci]')` | 提交信息包含 [skip ci] |
+
+---
+
+**相关笔记**：
+- [[0001-基础概念与工作流结构]] — Workflow 基础结构
+- [[0003-环境变量与Secrets]] — 环境变量和敏感信息

@@ -393,6 +393,70 @@ $$
 3. 在仓库设置中启用 GitHub Pages（Source: GitHub Actions）
 4. 使用 `.\deploy.ps1` 一键部署，或手动推送触发自动构建
 
+## Claude Code Skill：手稿笔记转 MDX
+
+项目提供了一个 Claude Code skill，帮助你将粗糙的学习手稿自动转换为结构化的 MDX 笔记文件。
+
+### 功能
+
+- **自动结构分析**：识别手稿中的核心主题、知识要点和逻辑关系
+- **智能章节规划**：根据内容特征安排合理的章节顺序
+- **组件自动编排**：根据内容类型选择最合适的 MDX 组件（Callout、Tabs、Collapse 等）
+- **内容优化**：改写、扩写、修整手稿内容，使其更清晰易读
+- **格式标准化**：自动生成正确的 frontmatter、文件命名和目录结构
+
+### 使用方法
+
+在 Claude Code 中直接描述你的需求即可：
+
+```
+我有一份学习笔记，帮我整理成网站能用的格式：
+[粘贴你的笔记内容]
+```
+
+支持的输入格式：纯文本、Markdown、DOC 内容、PDF 内容等任何文本形式。
+
+### Skill 文件位置
+
+```
+.claude/skills/note-to-mdx/
+├── SKILL.md              # 主技能文档（转换流程和规则）
+└── component-reference.md # MDX 组件详细参考
+```
+
+### 示例
+
+**输入（手稿）：**
+```
+虚拟内存是操作系统的重要概念。
+页表把虚拟地址映射到物理地址。
+TLB是页表的缓存。
+Linux用四级页表。
+```
+
+**输出（MDX）：**
+```mdx
+---
+title: 虚拟内存
+summary: Linux 虚拟内存机制和地址空间布局
+tags: [内核, 内存, 虚拟内存]
+---
+
+# 虚拟内存
+
+<Callout type="tip">
+虚拟内存是现代操作系统的基石...
+</Callout>
+
+## 地址转换
+
+<BraceMap data={{ name: "虚拟地址转换", children: [...] }} />
+
+<Collapse title="四级页表详解">
+Linux 采用四级页表结构...
+</Collapse>
+```
+
 ## 更新日志
 
 详细版本更新记录请查看 [CHANGELOG.md](./CHANGELOG.md)

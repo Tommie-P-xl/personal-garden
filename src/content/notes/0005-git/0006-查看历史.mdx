@@ -1,0 +1,173 @@
+---
+title: 查看历史
+tags: [git, log, blame, 历史]
+summary: Git 提交历史查看和代码溯源
+---
+
+# 查看历史
+
+## git log
+
+`git log` 显示从最新提交到最早提交的所有提交信息，包括提交的哈希值、作者、提交日期和提交消息等。
+
+```powershell
+# ==================== 基础用法 ====================
+# 查看完整提交历史
+git log
+
+# 查看最近的 n 条提交历史
+git log -n 5
+
+# ==================== 格式化输出 ====================
+# 以简洁的方式显示提交历史
+# 每个提交只显示一行，包含缩写的哈希值和提交消息
+git log --oneline
+
+# 以图形化的方式显示提交历史
+# 用 ASCII 图形展示分支和合并路径
+git log --graph
+
+# 组合使用：图形化 + 简洁
+git log --graph --oneline
+
+# ==================== 过滤输出 ====================
+# 查看某个文件的提交历史
+git log -- <file>
+
+# 查看某个作者的提交历史
+git log --author="your-name"
+
+# 查看某个时间范围内的提交
+git log --since="2024-01-01" --until="2024-12-31"
+
+# 查看包含特定关键词的提交
+git log --grep="fix"
+```
+
+### 常用格式选项
+
+```powershell
+# 自定义输出格式
+git log --format="%h - %an, %ar : %s"
+# 输出示例：a1b2c3d - John, 2 hours ago : fix login bug
+
+# 格式占位符说明：
+# %h  - 缩写的提交哈希
+# %H  - 完整的提交哈希
+# %an - 作者姓名
+# %ae - 作者邮箱
+# %ar - 相对时间（如 "2 hours ago"）
+# %ad - 提交日期
+# %s  - 提交消息标题
+# %b  - 提交消息正文
+```
+
+<Callout type="tip">
+**常用 git log 组合**
+
+```powershell
+# 查看简洁的图形化历史
+git log --graph --oneline --all
+
+# 查看带分支标签的历史
+git log --graph --oneline --decorate
+
+# 查看每次提交的文件变更统计
+git log --stat
+
+# 查看每次提交的具体代码差异
+git log -p
+```
+</Callout>
+
+## git blame
+
+`git blame` 命令用于逐行显示指定文件的每一行代码是由谁在什么时候引入或修改的。可以追踪文件中每一行的变更历史。
+
+```powershell
+# 查看指定文件的每一行代码的修改历史
+# 输出格式：提交哈希 (作者 日期) 代码内容
+git blame <file>
+
+# 指定行范围
+git blame -L 10,20 <file>    # 只查看第 10-20 行
+
+# 显示完整的提交哈希（默认缩写）
+git blame --show-stats <file>
+```
+
+### git blame 输出示例
+
+```text
+$ git blame README.md
+
+a1b2c3d4 (John  2024-01-15 10:30:00 +0800  1) # Project Title
+b2c3d4e5 (Alice 2024-01-16 14:20:00 +0800  2) 
+a1b2c3d4 (John  2024-01-15 10:30:00 +0800  3) This is a sample project.
+c3d4e5f6 (Bob   2024-01-17 09:15:00 +0800  4) 
+c3d4e5f6 (Bob   2024-01-17 09:15:00 +0800  5) ## Features
+a1b2c3d4 (John  2024-01-15 10:30:00 +0800  6) - Feature 1
+d4e5f6g7 (Alice 2024-01-18 16:45:00 +0800  7) - Feature 2 (updated)
+```
+
+<Callout type="info">
+**git blame 使用场景**
+
+- **代码溯源**：找出某行代码是谁写的、为什么这样写
+- **问题定位**：当发现 bug 时，找出引入 bug 的提交
+- **团队协作**：了解代码的修改历史和责任人
+</Callout>
+
+## git diff
+
+比较不同版本之间的差异。
+
+```powershell
+# ==================== 工作区 vs 暂存区 ====================
+# 查看未暂存的修改
+git diff
+
+# ==================== 暂存区 vs 最后一次提交 ====================
+# 查看即将提交的内容
+git diff --cached
+
+# ==================== 工作区 vs 最后一次提交 ====================
+# 查看所有未提交的修改
+git diff HEAD
+
+# ==================== 两个提交之间的差异 ====================
+# 比较两个提交之间的差异
+git diff <commit1> <commit2>
+
+# 比较两个分支之间的差异
+git diff main feature/new-feature
+
+# ==================== 文件级别的差异 ====================
+# 查看某个文件的修改
+git diff -- <file>
+
+# 查看某个文件在暂存区的修改
+git diff --cached -- <file>
+```
+
+<Callout type="tip">
+**git diff 输出格式**
+
+```text
+diff --git a/file.txt b/file.txt
+index 1234567..abcdefg 100644
+--- a/file.txt          # 修改前的文件（a 表示原始版本）
++++ b/file.txt          # 修改后的文件（b 表示新版本）
+@@ -1,5 +1,6 @@       # 行号变更信息
+ unchanged line         # 未修改的行
+-removed line           # 被删除的行（- 表示删除）
++added line             # 新增的行（+ 表示添加）
+ unchanged line         # 未修改的行
+```
+</Callout>
+
+---
+
+**相关笔记**：
+- [[0007-撤销与回退]] — 基于历史进行撤销操作
+- [[0008-标签管理]] — 为特定提交打标签
