@@ -166,6 +166,51 @@ git commit -m "合并后的提交"
 git push --force
 ```
 
+#### ⚠️ 场景二补充：为什么云端显示 2 次提交？
+
+如果你将 `<目标commit-hash>` 填写为**第一次提交的 hash 值**，操作完成后云端会显示 **2 次提交**。
+
+```text
+git reset --soft <第一次提交的hash>  →  HEAD 指向第一次提交，暂存区保留所有后续变更
+git commit -m "合并后的提交"          →  在第一次提交基础上新建一个 commit
+
+最终历史：  [第一次提交] ← [合并后的提交]  →  共 2 个 commit
+```
+
+`git reset --soft <hash>` 的机制是将当前分支指针移动到指定的 `<hash>` 上，同时保留该 commit 之后的所有更改在暂存区。因此**第一次提交本身被保留**，而你执行 `git commit` 时又**创建了一个全新的 commit**，所以最终是 2 个。
+
+#### ✅ 如何让云端只显示 1 次提交
+
+若目标是让仓库历史彻底压缩为单一 commit，你需要重置到第一次提交的**父级**（即一个不存在的空状态）：
+
+```powershell
+# 创建无历史的新分支（最稳妥的方式）
+git checkout --orphan temp-single-commit
+
+# 暂存所有文件并提交
+git add -A
+git commit -m "合并后的提交"
+
+# 替换原分支并强推
+git branch -M main
+git push --force-with-lease origin main
+```
+
+> **关键区别总结**
+
+| 操作 | 目标 Hash | 结果 Commit 数 | 说明 |
+| :--- | :--- | :--- | :--- |
+| `reset --soft <首次commit>` | 首次提交本身 | **2** | 保留了首次提交 + 新建的合并提交 |
+| `checkout --orphan` | 无历史起点 | **1** | 完全脱离旧历史，最干净 |
+
+操作完成后可通过以下命令确认实际 commit 数量：
+
+```powershell
+git log --oneline   # 本地验证
+```
+
+若你的初衷确实是保留第一次提交作为"项目起点"、后续所有迭代压缩为第二个 commit，那么原始操作（填首次 commit hash）就是正确的，无需修改。
+
 ## git revert
 
 撤销某次提交，但保留历史记录。与 `git reset` 不同，`revert` 会创建一个新的反向提交。
