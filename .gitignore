@@ -26,7 +26,7 @@ Thumbs.db
 
 # screenshots and temp files
 *.png
-!public/images/bg-*.png
+!public/images/bg-*.webp
 .playwright-mcp/
 
 # environment
