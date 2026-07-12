@@ -49,21 +49,23 @@ const displayTags = sortedTags.slice(0, 20);
   <section class="mb-12">
     <div class="bg-white/60 dark:bg-[#141827]/60 backdrop-blur-xl rounded-2xl border border-gray-200/50 dark:border-white/[0.06] p-8 shadow-sm dark:shadow-none">
       <div class="flex flex-col sm:flex-row items-start gap-6">
+        {/* ⭐ 头像放大 + 渐变 ring */}
         <img
           src={`${base}images/avatar.jpg`}
           alt="Tommie-P-xl"
-          class="w-20 h-20 rounded-full object-cover flex-shrink-0 ring-2 ring-gray-100 dark:ring-white/10 shadow-md"
+          class="w-24 h-24 rounded-full object-cover flex-shrink-0 ring-2 ring-garden-300/40 dark:ring-garden-500/30 shadow-lg"
         />
         <div class="flex-1">
           <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-1 tracking-tight">Tommie-P-xl</h1>
           <p class="text-base text-gray-500 dark:text-gray-400 mb-5">AI Agent & Embedded AI Development Enthusiast</p>
           <div class="flex flex-wrap gap-2">
+            {/* ⭐ 联系按钮主次区分：Mail 为主按钮 */}
             <button
               type="button"
-              class="copy-btn inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100/60 dark:bg-white/[0.05] backdrop-blur-sm rounded-lg text-sm text-gray-600 dark:text-gray-300 hover:bg-garden-50 dark:hover:bg-garden-900/20 hover:text-garden-700 dark:hover:text-garden-400 transition-colors cursor-pointer border border-gray-200/50 dark:border-white/[0.06]"
+              class="copy-btn inline-flex items-center gap-1.5 px-4 py-1.5 bg-garden-600 dark:bg-garden-700 text-white rounded-lg text-sm hover:bg-garden-700 dark:hover:bg-garden-600 transition-colors cursor-pointer shadow-sm"
               data-copy="wux4948@gmail.com"
             >
-              <img src={`${base}icons/email.svg`} alt="Email" class="w-4 h-4 dark:invert" />
+              <img src={`${base}icons/email.svg`} alt="Email" class="w-4 h-4 invert" />
               Mail
             </button>
             <a href="https://github.com/Tommie-P-xl" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100/60 dark:bg-white/[0.05] backdrop-blur-sm rounded-lg text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-200/50 dark:hover:bg-white/[0.08] transition-colors border border-gray-200/50 dark:border-white/[0.06]">
@@ -86,7 +88,7 @@ const displayTags = sortedTags.slice(0, 20);
 
   <!-- 教育背景 & 技术栈 -->
   <section class="grid sm:grid-cols-3 gap-6 mb-12">
-    <!-- 教育背景 - 占1列 -->
+    {/* 教育背景 - 占1列 */}
     <div class="bg-white/60 dark:bg-[#141827]/60 backdrop-blur-xl rounded-xl border border-gray-200/50 dark:border-white/[0.06] p-6 shadow-sm dark:shadow-none">
       <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
         <img src={`${base}icons/学术帽.svg`} alt="" class="w-5 h-5 icon-dark-adapt" />
@@ -110,7 +112,7 @@ const displayTags = sortedTags.slice(0, 20);
       </div>
     </div>
 
-    <!-- 技术栈 - 占2列 -->
+    {/* ⭐ 技术栈 - 标签加 hover 交互 */}
     <div class="sm:col-span-2 bg-white/60 dark:bg-[#141827]/60 backdrop-blur-xl rounded-xl border border-gray-200/50 dark:border-white/[0.06] p-6 shadow-sm dark:shadow-none">
       <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
         <img src={`${base}icons/终端.svg`} alt="" class="w-5 h-5 icon-dark-adapt" />
@@ -118,7 +120,7 @@ const displayTags = sortedTags.slice(0, 20);
       </h2>
       <div class="flex flex-wrap gap-2" id="tech-tags-container">
         {displayTags.map((tag) => (
-          <span class="inline-flex items-center px-3 py-1.5 bg-gray-50/60 dark:bg-white/[0.03] backdrop-blur-sm text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium border border-gray-200/50 dark:border-white/[0.06] whitespace-nowrap">
+          <span class="inline-flex items-center px-3 py-1.5 bg-gray-50/60 dark:bg-white/[0.03] backdrop-blur-sm text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium border border-gray-200/50 dark:border-white/[0.06] whitespace-nowrap hover:bg-garden-50 dark:hover:bg-garden-900/20 hover:text-garden-700 dark:hover:text-garden-400 hover:border-garden-300/50 dark:hover:border-garden-700/30 transition-all cursor-default">
             {tag}
           </span>
         ))}
@@ -141,9 +143,10 @@ const displayTags = sortedTags.slice(0, 20);
       {topCategories.map((cat) => {
         const hashedSlug = registerSlug(cat.slug);
         return (
+        {/* ⭐ 卡片 hover 上浮效果 */}
         <a
           href={`${base}garden/${hashedSlug}/`}
-          class="block bg-white/60 dark:bg-[#141827]/60 backdrop-blur-xl rounded-xl border border-gray-200/50 dark:border-white/[0.06] p-5 hover:shadow-md hover:border-garden-300/60 dark:hover:border-garden-700/30 transition-all duration-300 group"
+          class="block bg-white/60 dark:bg-[#141827]/60 backdrop-blur-xl rounded-xl border border-gray-200/50 dark:border-white/[0.06] p-5 hover:shadow-md hover:-translate-y-0.5 hover:border-garden-300/60 dark:hover:border-garden-700/30 transition-all duration-300 group"
         >
           <div class="flex items-center gap-3 mb-2">
             <img src={`${base}icons/文件夹.svg`} alt="" class="w-5 h-5 icon-colorful" />
@@ -174,9 +177,10 @@ const displayTags = sortedTags.slice(0, 20);
       </div>
       <div class="grid sm:grid-cols-2 gap-4">
         {featuredProjects.map((project) => (
+          {/* ⭐ 卡片 hover 上浮效果 */}
           <a
             href={`${base}projects/${project.id.replace(/\.md$/, '')}/`}
-            class="block bg-white/60 dark:bg-[#141827]/60 backdrop-blur-xl rounded-xl border border-gray-200/50 dark:border-white/[0.06] p-5 hover:shadow-md hover:border-garden-300/60 dark:hover:border-garden-700/30 transition-all duration-300 group"
+            class="block bg-white/60 dark:bg-[#141827]/60 backdrop-blur-xl rounded-xl border border-gray-200/50 dark:border-white/[0.06] p-5 hover:shadow-md hover:-translate-y-0.5 hover:border-garden-300/60 dark:hover:border-garden-700/30 transition-all duration-300 group"
           >
             <div class="flex items-center justify-between mb-2">
               <h3 class="font-semibold text-gray-900 dark:text-white group-hover:text-garden-600 dark:group-hover:text-garden-400 transition-colors">

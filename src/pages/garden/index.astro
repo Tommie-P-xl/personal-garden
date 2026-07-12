@@ -36,16 +36,16 @@ const topCategories = tree.filter(item => item.type === 'dir');
     <p class="text-gray-500 dark:text-gray-400">在这里记录学习的点滴，让知识像花园一样生长</p>
   </div>
 
-  <!-- 搜索栏 -->
+  {/* ⭐ 搜索栏 - 搜索图标 focus 变色 */}
   <div class="mb-6">
-    <div class="relative">
+    <div class="relative group">
       <input
         type="text"
         id="search-input"
         placeholder="搜索笔记标题、内容、标签..."
         class="w-full px-4 py-3 pl-10 bg-white/60 dark:bg-[#141827]/60 backdrop-blur-xl border border-gray-200/50 dark:border-white/[0.06] rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-garden-400 dark:focus:border-garden-500 focus:ring-2 focus:ring-garden-100/50 dark:focus:ring-garden-900/20 transition-all"
       />
-      <svg class="absolute left-3 top-3.5 w-4 h-4 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg class="absolute left-3 top-3.5 w-4 h-4 text-gray-400 dark:text-gray-500 group-focus-within:text-garden-500 dark:group-focus-within:text-garden-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
       </svg>
     </div>
@@ -173,7 +173,7 @@ const topCategories = tree.filter(item => item.type === 'dir');
                   }).join('') + '</div>';
               }
               return '<a href="' + esc(base) + 'garden/' + esc(n.slug) + '/"' +
-                ' class="block bg-white/60 dark:bg-[#141827]/60 backdrop-blur-xl rounded-xl border border-gray-200/50 dark:border-white/[0.06] p-4 hover:shadow-md hover:border-garden-300/60 dark:hover:border-garden-700/30 transition-all duration-300 group">' +
+                ' class="block bg-white/60 dark:bg-[#141827]/60 backdrop-blur-xl rounded-xl border border-gray-200/50 dark:border-white/[0.06] p-4 hover:shadow-md hover:-translate-y-0.5 hover:border-garden-300/60 dark:hover:border-garden-700/30 transition-all duration-300 group">' +
                 '<div class="flex items-center gap-2 mb-1">' +
                 '<span class="text-xs text-gray-400 dark:text-gray-500">' + esc(n.category) + '</span></div>' +
                 '<h3 class="font-medium text-gray-900 dark:text-white group-hover:text-garden-600 dark:group-hover:text-garden-400 transition-colors line-clamp-2 mb-1">' + esc(n.title) + '</h3>' +

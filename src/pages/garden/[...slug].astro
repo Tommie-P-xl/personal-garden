@@ -141,7 +141,7 @@ if (!isDir) {
               const childHashedSlug = registerSlug(child.slug);
               return child.type === 'dir' ? (
                 <a href={`${base}garden/${childHashedSlug}/`}
-                  class="flex items-center gap-3 p-4 bg-white/60 dark:bg-[#141827]/60 backdrop-blur-xl rounded-xl border border-gray-200/50 dark:border-white/[0.06] hover:shadow-md hover:border-garden-300/60 dark:hover:border-garden-700/30 transition-all duration-300 group">
+                  class="flex items-center gap-3 p-4 bg-white/60 dark:bg-[#141827]/60 backdrop-blur-xl rounded-xl border border-gray-200/50 dark:border-white/[0.06] hover:shadow-md hover:-translate-y-0.5 hover:border-garden-300/60 dark:hover:border-garden-700/30 transition-all duration-300 group">
                   <img src={`${base}icons/文件夹.svg`} alt="" class="w-5 h-5 icon-colorful" />
                   <div class="flex-1">
                     <h3 class="font-semibold text-gray-900 dark:text-white group-hover:text-garden-600 dark:group-hover:text-garden-400 transition-colors">
@@ -155,7 +155,7 @@ if (!isDir) {
                 </a>
               ) : (
                 <a href={`${base}garden/${childHashedSlug}/`}
-                  class="flex items-center gap-3 p-4 bg-white/60 dark:bg-[#141827]/60 backdrop-blur-xl rounded-xl border border-gray-200/50 dark:border-white/[0.06] hover:shadow-md hover:border-garden-300/60 dark:hover:border-garden-700/30 transition-all duration-300 group">
+                  class="flex items-center gap-3 p-4 bg-white/60 dark:bg-[#141827]/60 backdrop-blur-xl rounded-xl border border-gray-200/50 dark:border-white/[0.06] hover:shadow-md hover:-translate-y-0.5 hover:border-garden-300/60 dark:hover:border-garden-700/30 transition-all duration-300 group">
                   <img src={`${base}icons/文档.svg`} alt="" class="w-5 h-5 icon-colorful" />
                   <h3 class="font-medium text-gray-900 dark:text-white group-hover:text-garden-600 dark:group-hover:text-garden-400 transition-colors">
                     {child.title}

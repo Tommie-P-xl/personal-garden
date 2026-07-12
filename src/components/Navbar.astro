@@ -35,7 +35,7 @@ function href(path: string) {
               class:list={[
                 'nav-item relative px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5',
                 active
-                  ? 'text-garden-700 dark:text-garden-400'
+                  ? 'bg-garden-50 dark:bg-garden-900/10 text-garden-700 dark:text-garden-400'
                   : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100/60 dark:hover:bg-white/[0.06] hover:text-gray-900 dark:hover:text-white',
               ]}
               data-active={active ? 'true' : 'false'}
@@ -120,7 +120,7 @@ function href(path: string) {
           { label: '项目', path: '/projects/', icon: 'project', active: currentPath.includes('/projects'), idx: 2 },
           { label: '关于', path: '/about/', icon: 'about', active: currentPath.includes('/about'), idx: 3 },
         ].map((item) => (
-          <a href={href(item.path)} data-nav-idx={item.idx} class={`px-4 py-2.5 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors ${item.active ? 'bg-garden-50 dark:bg-garden-900/20 text-garden-700 dark:text-garden-400' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100/60 dark:hover:bg-white/[0.06]'}`}>
+          <a href={href(item.path)} data-nav-idx={item.idx} class={`px-4 py-2.5 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors ${item.active ? 'bg-garden-50 dark:bg-garden-900/10 text-garden-700 dark:text-garden-400' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100/60 dark:hover:bg-white/[0.06]'}`}>
             <img src={href(`/icons/${item.icon}.svg`)} alt="" class="w-4 h-4 dark:invert" /> {item.label}
           </a>
         ))}

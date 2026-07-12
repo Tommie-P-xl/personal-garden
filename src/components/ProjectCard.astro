@@ -21,7 +21,7 @@ const dateStr = date instanceof Date
 const detailHref = slug ? `${base}projects/${slug}/` : null;
 ---
 
-<div class="relative bg-white/60 dark:bg-[#141827]/60 backdrop-blur-xl rounded-xl border border-gray-200/50 dark:border-white/[0.06] overflow-hidden hover:shadow-md hover:border-garden-300/60 dark:hover:border-garden-700/30 transition-all duration-300 group">
+<div class="relative bg-white/60 dark:bg-[#141827]/60 backdrop-blur-xl rounded-xl border border-gray-200/50 dark:border-white/[0.06] overflow-hidden hover:shadow-md hover:-translate-y-0.5 hover:border-garden-300/60 dark:hover:border-garden-700/30 transition-all duration-300 group">
   {detailHref && (
     <a href={detailHref} class="absolute inset-0 z-10" aria-label={title}>
       <span class="sr-only">{title}</span>
