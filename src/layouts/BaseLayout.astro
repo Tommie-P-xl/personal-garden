@@ -272,6 +272,17 @@ function href(path: string) {
 </html>
 
 <style is:global>
+  /* 修复浏览器 autofill 在暗色模式下强制白色背景 */
+  html.dark input:-webkit-autofill,
+  html.dark input:-webkit-autofill:hover,
+  html.dark input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 1000px #141827 inset !important;
+    -webkit-text-fill-color: #e2e8f0 !important;
+    caret-color: #e2e8f0 !important;
+    border-color: rgba(255, 255, 255, 0.06) !important;
+    transition: background-color 5000s ease-in-out 0s;
+  }
+
   .prose {
     @apply text-gray-700 dark:text-gray-300 leading-relaxed;
   }
