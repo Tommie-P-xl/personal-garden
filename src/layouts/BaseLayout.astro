@@ -61,10 +61,10 @@ function href(path: string) {
         function applyTheme(theme) {
           var dark = isDark(theme);
           document.documentElement.classList.toggle('dark', dark);
-          document.documentElement.style.setProperty('--bg-primary', dark ? '#0f0f11' : '#fafaf9');
-          document.documentElement.style.setProperty('--bg-card', dark ? '#18181b' : '#ffffff');
-          document.documentElement.style.setProperty('--border-color', dark ? 'rgba(255,255,255,0.06)' : 'rgba(229,231,235,0.6)');
-          document.documentElement.style.backgroundColor = dark ? '#0f0f11' : '#fafaf9';
+          document.documentElement.style.setProperty('--bg-primary', dark ? '#08090e' : '#f8fafc');
+          document.documentElement.style.setProperty('--bg-card', dark ? '#141827' : '#ffffff');
+          document.documentElement.style.setProperty('--border-color', dark ? 'rgba(255,255,255,0.06)' : 'rgba(226,232,240,0.8)');
+          document.documentElement.style.backgroundColor = dark ? '#08090e' : '#f8fafc';
           localStorage.setItem('theme', theme);
           updateIcons(theme);
         }
@@ -258,7 +258,7 @@ function href(path: string) {
       })();
     </script>
   </head>
-  <body class="bg-transparent text-[#18181b] dark:text-[#e4e4e7] min-h-screen relative overflow-x-hidden">
+  <body class="bg-transparent text-slate-800 dark:text-slate-200 min-h-screen relative overflow-x-hidden">
     <Background />
     <Navbar base={base} currentPath={currentPath} />
 
@@ -273,7 +273,7 @@ function href(path: string) {
 
 <style is:global>
   .prose {
-    @apply text-gray-800 dark:text-gray-200 leading-relaxed;
+    @apply text-gray-700 dark:text-gray-300 leading-relaxed;
   }
   .prose h1 {
     @apply text-3xl font-bold mt-8 mb-4 text-gray-900 dark:text-white;
@@ -309,7 +309,7 @@ function href(path: string) {
   }
   /* 行内代码（非代码块） */
   .prose :not(pre) > code {
-    @apply bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded text-sm font-mono text-gray-800 dark:text-gray-200;
+    @apply bg-gray-100 dark:bg-white/[0.06] px-1.5 py-0.5 rounded text-sm font-mono text-gray-800 dark:text-gray-200;
   }
   .prose pre {
     @apply p-4 rounded-lg overflow-x-auto mb-4 border;
@@ -319,9 +319,9 @@ function href(path: string) {
   }
   html.dark .prose pre,
   html.dark .prose pre.astro-code {
-    background-color: var(--shiki-dark-bg, #24292e) !important;
+    background-color: var(--shiki-dark-bg, #1a1e2e) !important;
     color: var(--shiki-dark, #e1e4e8) !important;
-    border-color: rgba(255, 255, 255, 0.08) !important;
+    border-color: rgba(255, 255, 255, 0.06) !important;
   }
   html:not(.dark) .prose pre {
     background-color: var(--shiki-bg, #f6f8fa) !important;
@@ -344,7 +344,7 @@ function href(path: string) {
     margin-right: auto;
   }
   .prose hr {
-    @apply border-gray-200 dark:border-gray-700 my-8;
+    @apply border-gray-200 dark:border-gray-700/50 my-8;
   }
   /* 表格统一样式 - 仅通过 .table-wrapper 控制 */
   /* Table 组件和 rehype 插件统一样式 */
@@ -369,7 +369,7 @@ function href(path: string) {
   }
   html.dark .table-wrapper th,
   html.dark .table-wrapper td {
-    border-bottom-color: rgba(255, 255, 255, 0.1);
+    border-bottom-color: rgba(255, 255, 255, 0.08);
   }
   .table-wrapper th {
     background-color: #f3f4f6;
@@ -377,14 +377,14 @@ function href(path: string) {
     border-bottom: 2px solid #d1d5db;
   }
   html.dark .table-wrapper th {
-    background-color: #1f2937;
-    border-bottom-color: rgba(255, 255, 255, 0.2);
+    background-color: rgba(30, 41, 59, 0.5);
+    border-bottom-color: rgba(255, 255, 255, 0.15);
   }
   .table-wrapper tbody tr:hover {
     background-color: #f9fafb;
   }
   html.dark .table-wrapper tbody tr:hover {
-    background-color: rgba(31, 41, 55, 0.5);
+    background-color: rgba(30, 41, 59, 0.3);
   }
   .table-wrapper .table-caption {
     display: block;
@@ -453,7 +453,7 @@ function href(path: string) {
     background-color: #f9fafb;
   }
   html.dark .table-wrapper tbody tr:nth-child(even) {
-    background-color: rgba(31, 41, 55, 0.3);
+    background-color: rgba(30, 41, 59, 0.2);
   }
 
   /* 媒体组件标题对齐 */
@@ -474,7 +474,7 @@ function href(path: string) {
   }
 
   /* Shiki 暗色模式 */
-  html.dark .astro-code { background-color: #24292e !important; color: #e1e4e8 !important; }
+  html.dark .astro-code { background-color: #1a1e2e !important; color: #e1e4e8 !important; }
   html.dark .astro-code code { background-color: transparent !important; color: #e1e4e8 !important; }
   html.dark .astro-code span { color: var(--shiki-dark) !important; }
 
@@ -492,14 +492,15 @@ function href(path: string) {
     position: absolute;
     top: 8px;
     right: 8px;
-    padding: 4px 8px;
+    padding: 4px 10px;
     border-radius: 6px;
     font-size: 12px;
-    background: rgba(255, 255, 255, 0.1);
-    color: #9ca3af;
+    background: rgba(255, 255, 255, 0.08);
+    color: #94a3b8;
     cursor: pointer;
     opacity: 0;
-    transition: opacity 0.2s, background 0.2s;
+    transition: opacity 0.2s, background 0.2s, color 0.2s;
+    backdrop-filter: blur(4px);
   }
 
   pre:hover .code-copy-btn {
@@ -507,8 +508,8 @@ function href(path: string) {
   }
 
   .code-copy-btn:hover {
-    background: rgba(255, 255, 255, 0.2);
-    color: #fff;
+    background: rgba(99, 102, 241, 0.2);
+    color: #a5b4fc;
   }
 
   .code-copy-btn.copied {
@@ -517,12 +518,12 @@ function href(path: string) {
 
   /* h2 heading divider */
   .prose h2 {
-    @apply pb-2 border-b border-gray-200 dark:border-gray-700;
+    @apply pb-2 border-b border-gray-200 dark:border-gray-700/40;
   }
 
   /* Blockquote */
   .prose blockquote {
-    @apply border-l-4 border-garden-500 bg-garden-50 dark:bg-garden-900/20 rounded-r-lg;
+    @apply border-l-4 border-garden-400 dark:border-garden-500 bg-garden-50/50 dark:bg-garden-900/10 rounded-r-lg;
   }
 
   /* SVG icon dark mode adaptation */
@@ -578,13 +579,13 @@ function href(path: string) {
   /* View Transitions 页面切换动画（方向感知） */
   :root {
     --slide-dir: 0;
-    --bg-primary: #fafaf9;
+    --bg-primary: #f8fafc;
     --bg-card: #ffffff;
-    --border-color: rgba(229,231,235,0.6);
+    --border-color: rgba(226,232,240,0.8);
   }
   html.dark {
-    --bg-primary: #0f0f11;
-    --bg-card: #18181b;
+    --bg-primary: #08090e;
+    --bg-card: #141827;
     --border-color: rgba(255,255,255,0.06);
   }
   ::view-transition-old(root) {

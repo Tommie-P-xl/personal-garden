@@ -64,11 +64,11 @@ const sidebarContent = { tree, currentSlug, categoryTitle, base, activeSlugs };
 <div id="sidebar-overlay" class="lg:hidden fixed inset-0 bg-black/50 z-40 hidden"></div>
 
 {/* Mobile drawer */}
-<div id="sidebar-drawer" class="lg:hidden fixed top-0 left-0 bottom-0 w-72 bg-white/50 dark:bg-[#18181b]/60 backdrop-blur-sm z-50 transform -translate-x-full transition-transform overflow-y-auto">
+<div id="sidebar-drawer" class="lg:hidden fixed top-0 left-0 bottom-0 w-72 bg-white/80 dark:bg-[#0f1117]/80 backdrop-blur-xl z-50 transform -translate-x-full transition-transform overflow-y-auto border-r border-gray-200/50 dark:border-white/[0.06]">
   <div class="p-4">
     <div class="flex items-center justify-between mb-4">
       <h2 class="text-lg font-semibold text-gray-900 dark:text-white">目录</h2>
-      <button id="sidebar-close-btn" class="p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/[0.06]">
+      <button id="sidebar-close-btn" class="p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100/60 dark:hover:bg-white/[0.06]">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
         </svg>
@@ -186,20 +186,20 @@ const sidebarContent = { tree, currentSlug, categoryTitle, base, activeSlugs };
     top: 0;
     bottom: 0;
     width: 2px;
-    background-color: #9ca3af;
+    background-color: #94a3b8;
     border-radius: 1px;
   }
 
   html.dark .sidebar-children:not(.hidden)::before {
-    background-color: rgba(255, 255, 255, 0.25);
+    background-color: rgba(255, 255, 255, 0.2);
   }
 
   .sidebar-children:not(.hidden):has(.bg-garden-50)::before {
-    background-color: #d97706;
+    background-color: #6366f1;
   }
 
   html.dark .sidebar-children:not(.hidden):has(.dark\:bg-garden-900\/20)::before {
-    background-color: #fbbf24;
+    background-color: #818cf8;
   }
 
   /* 嵌套的子菜单 - 稍浅的竖线 */
@@ -208,19 +208,19 @@ const sidebarContent = { tree, currentSlug, categoryTitle, base, activeSlugs };
   }
 
   .sidebar-subgroup .sidebar-children:not(.hidden)::before {
-    background-color: #d1d5db;
+    background-color: #cbd5e1;
     width: 2px;
   }
 
   html.dark .sidebar-subgroup .sidebar-children:not(.hidden)::before {
-    background-color: rgba(255, 255, 255, 0.15);
+    background-color: rgba(255, 255, 255, 0.12);
   }
 
   .sidebar-subgroup .sidebar-children:not(.hidden):has(.bg-garden-50)::before {
-    background-color: #d97706;
+    background-color: #6366f1;
   }
 
   html.dark .sidebar-subgroup .sidebar-children:not(.hidden):has(.dark\:bg-garden-900\/20)::before {
-    background-color: #fbbf24;
+    background-color: #818cf8;
   }
 </style>

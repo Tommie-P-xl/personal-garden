@@ -47,12 +47,12 @@ const displayTags = sortedTags.slice(0, 20);
 <BaseLayout title="首页">
   <!-- 个人介绍 -->
   <section class="mb-12">
-    <div class="bg-white/50 dark:bg-[#18181b]/60 backdrop-blur-sm rounded-2xl border border-gray-200/60 dark:border-white/[0.06] p-8">
+    <div class="bg-white/60 dark:bg-[#141827]/60 backdrop-blur-xl rounded-2xl border border-gray-200/50 dark:border-white/[0.06] p-8 shadow-sm dark:shadow-none">
       <div class="flex flex-col sm:flex-row items-start gap-6">
         <img
           src={`${base}images/avatar.jpg`}
           alt="Tommie-P-xl"
-          class="w-20 h-20 rounded-full object-cover flex-shrink-0 ring-2 ring-gray-100 dark:ring-white/10"
+          class="w-20 h-20 rounded-full object-cover flex-shrink-0 ring-2 ring-gray-100 dark:ring-white/10 shadow-md"
         />
         <div class="flex-1">
           <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-1 tracking-tight">Tommie-P-xl</h1>
@@ -60,19 +60,19 @@ const displayTags = sortedTags.slice(0, 20);
           <div class="flex flex-wrap gap-2">
             <button
               type="button"
-              class="copy-btn inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100/70 dark:bg-white/[0.06] backdrop-blur-sm rounded-lg text-sm text-gray-600 dark:text-gray-300 hover:bg-garden-50 dark:hover:bg-garden-900/20 hover:text-garden-700 dark:hover:text-garden-400 transition-colors cursor-pointer"
+              class="copy-btn inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100/60 dark:bg-white/[0.05] backdrop-blur-sm rounded-lg text-sm text-gray-600 dark:text-gray-300 hover:bg-garden-50 dark:hover:bg-garden-900/20 hover:text-garden-700 dark:hover:text-garden-400 transition-colors cursor-pointer border border-gray-200/50 dark:border-white/[0.06]"
               data-copy="wux4948@gmail.com"
             >
               <img src={`${base}icons/email.svg`} alt="Email" class="w-4 h-4 dark:invert" />
               Mail
             </button>
-            <a href="https://github.com/Tommie-P-xl" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100/70 dark:bg-white/[0.06] backdrop-blur-sm rounded-lg text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-200/60 dark:hover:bg-white/[0.1] transition-colors">
+            <a href="https://github.com/Tommie-P-xl" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100/60 dark:bg-white/[0.05] backdrop-blur-sm rounded-lg text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-200/50 dark:hover:bg-white/[0.08] transition-colors border border-gray-200/50 dark:border-white/[0.06]">
               <img src={`${base}icons/github.svg`} alt="GitHub" class="w-4 h-4 dark:invert" />
               GitHub
             </a>
             <button
               type="button"
-              class="copy-btn inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100/70 dark:bg-white/[0.06] backdrop-blur-sm rounded-lg text-sm text-gray-600 dark:text-gray-300 hover:bg-garden-50 dark:hover:bg-garden-900/20 hover:text-garden-700 dark:hover:text-garden-400 transition-colors cursor-pointer"
+              class="copy-btn inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100/60 dark:bg-white/[0.05] backdrop-blur-sm rounded-lg text-sm text-gray-600 dark:text-gray-300 hover:bg-garden-50 dark:hover:bg-garden-900/20 hover:text-garden-700 dark:hover:text-garden-400 transition-colors cursor-pointer border border-gray-200/50 dark:border-white/[0.06]"
               data-copy="w9519539"
             >
               <img src={`${base}icons/wechat.svg`} alt="WeChat" class="w-4 h-4 dark:invert" />
@@ -87,7 +87,7 @@ const displayTags = sortedTags.slice(0, 20);
   <!-- 教育背景 & 技术栈 -->
   <section class="grid sm:grid-cols-3 gap-6 mb-12">
     <!-- 教育背景 - 占1列 -->
-    <div class="bg-white/50 dark:bg-[#18181b]/60 backdrop-blur-sm rounded-xl border border-gray-200/60 dark:border-white/[0.06] p-6">
+    <div class="bg-white/60 dark:bg-[#141827]/60 backdrop-blur-xl rounded-xl border border-gray-200/50 dark:border-white/[0.06] p-6 shadow-sm dark:shadow-none">
       <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
         <img src={`${base}icons/学术帽.svg`} alt="" class="w-5 h-5 icon-dark-adapt" />
         教育背景
@@ -111,14 +111,14 @@ const displayTags = sortedTags.slice(0, 20);
     </div>
 
     <!-- 技术栈 - 占2列 -->
-    <div class="sm:col-span-2 bg-white/50 dark:bg-[#18181b]/60 backdrop-blur-sm rounded-xl border border-gray-200/60 dark:border-white/[0.06] p-6">
+    <div class="sm:col-span-2 bg-white/60 dark:bg-[#141827]/60 backdrop-blur-xl rounded-xl border border-gray-200/50 dark:border-white/[0.06] p-6 shadow-sm dark:shadow-none">
       <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
         <img src={`${base}icons/终端.svg`} alt="" class="w-5 h-5 icon-dark-adapt" />
         Keys
       </h2>
       <div class="flex flex-wrap gap-2" id="tech-tags-container">
         {displayTags.map((tag) => (
-          <span class="inline-flex items-center px-3 py-1.5 bg-gray-50/70 dark:bg-white/[0.04] backdrop-blur-sm text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium border border-gray-200/60 dark:border-white/[0.06] whitespace-nowrap">
+          <span class="inline-flex items-center px-3 py-1.5 bg-gray-50/60 dark:bg-white/[0.03] backdrop-blur-sm text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium border border-gray-200/50 dark:border-white/[0.06] whitespace-nowrap">
             {tag}
           </span>
         ))}
@@ -133,7 +133,7 @@ const displayTags = sortedTags.slice(0, 20);
         <img src={`${base}icons/笔记.svg`} alt="" class="w-5 h-5 icon-dark-adapt" />
         笔记
       </h2>
-      <a href={`${base}garden/`} class="text-sm text-garden-600 dark:text-garden-400 hover:text-garden-500 dark:hover:text-garden-300 font-medium">
+      <a href={`${base}garden/`} class="text-sm text-garden-600 dark:text-garden-400 hover:text-garden-500 dark:hover:text-garden-300 font-medium transition-colors">
         查看全部 →
       </a>
     </div>
@@ -143,11 +143,11 @@ const displayTags = sortedTags.slice(0, 20);
         return (
         <a
           href={`${base}garden/${hashedSlug}/`}
-          class="block bg-white/50 dark:bg-[#18181b]/60 backdrop-blur-sm rounded-xl border border-gray-200/60 dark:border-white/[0.06] p-5 hover:shadow-sm hover:border-garden-300/60 dark:hover:border-garden-700/40 transition-all duration-200 group"
+          class="block bg-white/60 dark:bg-[#141827]/60 backdrop-blur-xl rounded-xl border border-gray-200/50 dark:border-white/[0.06] p-5 hover:shadow-md hover:border-garden-300/60 dark:hover:border-garden-700/30 transition-all duration-300 group"
         >
           <div class="flex items-center gap-3 mb-2">
             <img src={`${base}icons/文件夹.svg`} alt="" class="w-5 h-5 icon-colorful" />
-            <h3 class="font-semibold text-gray-900 dark:text-white group-hover:text-garden-700 dark:group-hover:text-garden-400 transition-colors">
+            <h3 class="font-semibold text-gray-900 dark:text-white group-hover:text-garden-600 dark:group-hover:text-garden-400 transition-colors">
               {cat.meta?.title || cat.title}
             </h3>
           </div>
@@ -168,7 +168,7 @@ const displayTags = sortedTags.slice(0, 20);
           <img src={`${base}icons/项目.svg`} alt="" class="w-5 h-5 icon-colorful" />
           精选项目
         </h2>
-        <a href={`${base}projects/`} class="text-sm text-garden-600 dark:text-garden-400 hover:text-garden-500 dark:hover:text-garden-300 font-medium">
+        <a href={`${base}projects/`} class="text-sm text-garden-600 dark:text-garden-400 hover:text-garden-500 dark:hover:text-garden-300 font-medium transition-colors">
           查看全部 →
         </a>
       </div>
@@ -176,10 +176,10 @@ const displayTags = sortedTags.slice(0, 20);
         {featuredProjects.map((project) => (
           <a
             href={`${base}projects/${project.id.replace(/\.md$/, '')}/`}
-            class="block bg-white/50 dark:bg-[#18181b]/60 backdrop-blur-sm rounded-xl border border-gray-200/60 dark:border-white/[0.06] p-5 hover:shadow-sm hover:border-garden-300/60 dark:hover:border-garden-700/40 transition-all duration-200 group"
+            class="block bg-white/60 dark:bg-[#141827]/60 backdrop-blur-xl rounded-xl border border-gray-200/50 dark:border-white/[0.06] p-5 hover:shadow-md hover:border-garden-300/60 dark:hover:border-garden-700/30 transition-all duration-300 group"
           >
             <div class="flex items-center justify-between mb-2">
-              <h3 class="font-semibold text-gray-900 dark:text-white group-hover:text-garden-700 dark:group-hover:text-garden-400 transition-colors">
+              <h3 class="font-semibold text-gray-900 dark:text-white group-hover:text-garden-600 dark:group-hover:text-garden-400 transition-colors">
                 {project.data.title}
               </h3>
               {project.stars > 0 && (
@@ -192,7 +192,7 @@ const displayTags = sortedTags.slice(0, 20);
             <p class="text-sm text-gray-500 dark:text-gray-400 mb-3 line-clamp-2">{project.data.description}</p>
             <div class="flex flex-wrap gap-1.5">
               {project.data.tech.map((t) => (
-                <span class="bg-gray-50 dark:bg-white/[0.04] text-gray-600 dark:text-gray-400 px-2 py-0.5 rounded-md text-xs border border-gray-200/60 dark:border-white/[0.06]">{t}</span>
+                <span class="bg-gray-50/80 dark:bg-white/[0.04] text-gray-600 dark:text-gray-400 px-2 py-0.5 rounded-md text-xs border border-gray-200/50 dark:border-white/[0.06]">{t}</span>
               ))}
             </div>
           </a>
