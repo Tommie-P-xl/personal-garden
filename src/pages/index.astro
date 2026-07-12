@@ -143,7 +143,6 @@ const displayTags = sortedTags.slice(0, 20);
       {topCategories.map((cat) => {
         const hashedSlug = registerSlug(cat.slug);
         return (
-        {/* ⭐ 卡片 hover 上浮效果 */}
         <a
           href={`${base}garden/${hashedSlug}/`}
           class="block bg-white/60 dark:bg-[#141827]/60 backdrop-blur-xl rounded-xl border border-gray-200/50 dark:border-white/[0.06] p-5 hover:shadow-md hover:-translate-y-0.5 hover:border-garden-300/60 dark:hover:border-garden-700/30 transition-all duration-300 group"
@@ -177,7 +176,6 @@ const displayTags = sortedTags.slice(0, 20);
       </div>
       <div class="grid sm:grid-cols-2 gap-4">
         {featuredProjects.map((project) => (
-          {/* ⭐ 卡片 hover 上浮效果 */}
           <a
             href={`${base}projects/${project.id.replace(/\.md$/, '')}/`}
             class="block bg-white/60 dark:bg-[#141827]/60 backdrop-blur-xl rounded-xl border border-gray-200/50 dark:border-white/[0.06] p-5 hover:shadow-md hover:-translate-y-0.5 hover:border-garden-300/60 dark:hover:border-garden-700/30 transition-all duration-300 group"
