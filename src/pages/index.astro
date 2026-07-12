@@ -49,35 +49,36 @@ const displayTags = sortedTags.slice(0, 20);
   <section class="mb-12">
     <div class="bg-white/60 dark:bg-[#141827]/60 backdrop-blur-xl rounded-2xl border border-gray-200/50 dark:border-white/[0.06] p-8 shadow-sm dark:shadow-none">
       <div class="flex flex-col sm:flex-row items-start gap-6">
-        {/* ⭐ 头像放大 + 渐变 ring */}
-        <img
-          src={`${base}images/avatar.jpg`}
-          alt="Tommie-P-xl"
-          class="w-24 h-24 rounded-full object-cover flex-shrink-0 ring-2 ring-garden-300/40 dark:ring-garden-500/30 shadow-lg"
-        />
+        {/* 头像 + 渐变光环 */}
+        <div class="flex-shrink-0 rounded-full p-[3px] bg-gradient-to-br from-garden-400 via-violet-400 to-blue-400 dark:from-garden-500 dark:via-violet-500 dark:to-blue-500 shadow-lg">
+          <img
+            src={`${base}images/avatar.jpg`}
+            alt="Tommie-P-xl"
+            class="w-24 h-24 rounded-full object-cover border-[3px] border-white dark:border-[#08090e]"
+          />
+        </div>
         <div class="flex-1">
           <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-1 tracking-tight">Tommie-P-xl</h1>
           <p class="text-base text-gray-500 dark:text-gray-400 mb-5">AI Agent & Embedded AI Development Enthusiast</p>
           <div class="flex flex-wrap gap-2">
-            {/* ⭐ 联系按钮主次区分：Mail 为主按钮 */}
             <button
               type="button"
-              class="copy-btn inline-flex items-center gap-1.5 px-4 py-1.5 bg-garden-600 dark:bg-garden-700 text-white rounded-lg text-sm hover:bg-garden-700 dark:hover:bg-garden-600 transition-colors cursor-pointer shadow-sm"
+              class="copy-btn inline-flex items-center gap-1.5 px-4 py-1.5 bg-[#4285F4] text-white rounded-lg text-sm hover:bg-[#3367D6] transition-colors cursor-pointer shadow-sm"
               data-copy="wux4948@gmail.com"
             >
               <img src={`${base}icons/email.svg`} alt="Email" class="w-4 h-4 invert" />
               Mail
             </button>
-            <a href="https://github.com/Tommie-P-xl" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100/60 dark:bg-white/[0.05] backdrop-blur-sm rounded-lg text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-200/50 dark:hover:bg-white/[0.08] transition-colors border border-gray-200/50 dark:border-white/[0.06]">
-              <img src={`${base}icons/github.svg`} alt="GitHub" class="w-4 h-4 dark:invert" />
+            <a href="https://github.com/Tommie-P-xl" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-4 py-1.5 bg-gray-800 dark:bg-gray-700 text-white rounded-lg text-sm hover:bg-gray-900 dark:hover:bg-gray-600 transition-colors shadow-sm">
+              <img src={`${base}icons/github.svg`} alt="GitHub" class="w-4 h-4 invert" />
               GitHub
             </a>
             <button
               type="button"
-              class="copy-btn inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100/60 dark:bg-white/[0.05] backdrop-blur-sm rounded-lg text-sm text-gray-600 dark:text-gray-300 hover:bg-garden-50 dark:hover:bg-garden-900/20 hover:text-garden-700 dark:hover:text-garden-400 transition-colors cursor-pointer border border-gray-200/50 dark:border-white/[0.06]"
+              class="copy-btn inline-flex items-center gap-1.5 px-4 py-1.5 bg-emerald-600 dark:bg-emerald-700 text-white rounded-lg text-sm hover:bg-emerald-700 dark:hover:bg-emerald-600 transition-colors cursor-pointer shadow-sm"
               data-copy="w9519539"
             >
-              <img src={`${base}icons/wechat.svg`} alt="WeChat" class="w-4 h-4 dark:invert" />
+              <img src={`${base}icons/wechat.svg`} alt="WeChat" class="w-4 h-4 invert" />
               WeChat
             </button>
           </div>
