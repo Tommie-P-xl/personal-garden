@@ -14,6 +14,13 @@
 - 修复点击搜索框瞬间白色 outline 闪现问题（`outline-none` 始终生效 + `transition-all` 改为精确属性过渡）
 - garden 页面分类卡片补上 `hover:-translate-y-0.5` 上浮效果
 
+### TOC 跳转偏移修复
+- 给 `h1`/`h2`/`h3` 标题添加 `scroll-mt-20`（80px），避免锚点跳转时标题被 sticky 导航栏遮挡
+
+### 笔记修复
+- 修正 GitHub Actions 笔记中 wiki-link 引用不匹配的问题
+- 简化「基础概念与工作流结构」笔记标题，去掉冗余前缀
+
 ### 构建产物清理
 - `public/media/` 从 git 追踪中移除（构建时自动生成，不应提交）
 - 背景图片从 PNG 转为 WebP（2.2MB → 32KB）
