@@ -4,62 +4,156 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 const base = import.meta.env.BASE_URL;
 ---
 
-<BaseLayout title="关于我">
-  <div class="max-w-3xl mx-auto">
-    <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-8 flex items-center gap-2">
-      <img src={`${base}icons/about.svg`} alt="" class="w-6 h-6 icon-dark-adapt" />
-      关于我
-    </h1>
+<BaseLayout
+  title="关于我"
+  description="关于 Tommie：学习方向、项目实践、个人数字花园与联系方式。"
+>
+  <div class="max-w-4xl mx-auto">
+    <header class="mb-8">
+      <p class="text-sm font-medium tracking-[0.16em] uppercase text-garden-700 dark:text-garden-300 mb-2">About</p>
+      <h1 class="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900 dark:text-white">关于我</h1>
+      <p class="mt-3 text-gray-600 dark:text-gray-300">学习机器学习与嵌入式 AI，也把日常遇到的问题做成工具、笔记和可复用的工作流。</p>
+    </header>
 
-    <!-- 个人介绍 -->
-    <section class="bg-white/60 dark:bg-[#141827]/60 backdrop-blur-xl rounded-xl border border-gray-200/50 dark:border-white/[0.06] p-8 mb-8 shadow-sm dark:shadow-none">
-      <div class="prose">
-        <h2>你好</h2>
-        <p>
-          这里是我的个人数字花园，一个记录学习、思考和创造的地方。
-        </p>
-        <p>
-          我相信知识不是写完就结束的文章，而是不断生长、修剪的植物。
-          在这个花园里，你可以看到我学习的轨迹——从刚种下的种子，到逐渐成长的发芽笔记，
-          再到成熟的常青内容。
-        </p>
-        <h2>这个网站是什么</h2>
-        <p>
-          这是一个 <strong>Digital Garden（数字花园）</strong>，不同于传统的按时间排列的博客，
-          数字花园更注重：
-        </p>
-        <ul>
-          <li><strong>链接思维</strong> —— 笔记之间通过双向链接相互关联，形成知识网络</li>
-          <li><strong>持续生长</strong> —— 内容不需要"写完"才能发布，随时可以补充和完善</li>
-          <li><strong>个人 Wiki</strong> —— 既是学习笔记，也是随时查阅的参考资料</li>
-        </ul>
-        <h2>我在学什么</h2>
-        <p>目前我的学习方向包括：</p>
-        <ul>
-          <li>Linux 内核 —— 进程管理、内存管理、文件系统等</li>
-          <li>编程技术 —— Python、JavaScript、数据结构与算法等</li>
-          <li>深度学习 —— 开集识别、射频信号分类、Vision Transformer</li>
-          <li>工具开发 —— 桌面应用、CLI 工具、自动化脚本</li>
-        </ul>
-        <h2>联系方式</h2>
-        <p>如果你想联系我，可以通过以下方式：</p>
-        <ul>
-          <li>邮箱：<a href="mailto:wux4948@gmail.com">wux4948@gmail.com</a></li>
-          <li>GitHub：<a href="https://github.com/Tommie-P-xl" target="_blank">@Tommie-P-xl</a></li>
-          <li>微信：w9519539</li>
-        </ul>
-        <h2>关于本站</h2>
-        <p>本站使用以下技术构建：</p>
-        <ul>
-          <li><a href="https://astro.build" target="_blank">Astro</a> —— 静态站点生成器</li>
-          <li><a href="https://tailwindcss.com" target="_blank">Tailwind CSS</a> —— CSS 框架</li>
-          <li><a href="https://pages.github.com" target="_blank">GitHub Pages</a> —— 托管服务</li>
-        </ul>
-        <p>
-          网站源码托管在 <a href="https://github.com/Tommie-P-xl/personal-garden" target="_blank">GitHub</a>，
-          采用 Digital Garden 的理念构建。
-        </p>
+    <section class="bg-white/60 dark:bg-[#141827]/60 backdrop-blur-xl rounded-2xl border border-gray-200/50 dark:border-white/[0.06] p-6 sm:p-8 shadow-sm dark:shadow-none mb-7" aria-labelledby="profile-title">
+      <div class="flex flex-col sm:flex-row gap-6 items-start">
+        <div class="paper-avatar-frame rounded-full p-[3px] shrink-0">
+          <img
+            src={`${base}images/avatar.jpg`}
+            alt="Tommie 的头像"
+            class="w-24 h-24 rounded-full object-cover border-[3px] border-white dark:border-[#242521]"
+          />
+        </div>
+        <div class="min-w-0">
+          <h2 id="profile-title" class="text-2xl font-bold text-gray-900 dark:text-white">Tommie</h2>
+          <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">AI Agent &amp; Embedded AI Development</p>
+          <p class="mt-4 leading-7 text-gray-700 dark:text-gray-300">
+            我是电子信息方向的研究生，持续关注无人机射频信号识别、开集识别与深度学习工程实践。平时也会把开发和学习中反复遇到的任务整理成小工具、Agent Skill 和结构化笔记。
+          </p>
+          <div class="mt-5 flex flex-wrap gap-2">
+            <a href="mailto:wux4948@gmail.com" class="paper-contact paper-contact-secondary inline-flex items-center gap-2 px-4 py-2 text-sm font-medium">
+              <img src={`${base}icons/email.svg`} alt="" class="w-4 h-4" />
+              邮件联系
+            </a>
+            <a href="https://github.com/Tommie-P-xl" target="_blank" rel="noopener noreferrer" class="paper-contact paper-contact-secondary inline-flex items-center gap-2 px-4 py-2 text-sm font-medium">
+              <img src={`${base}icons/github.svg`} alt="" class="w-4 h-4" />
+              GitHub
+            </a>
+            <button type="button" class="paper-contact paper-contact-secondary about-copy-btn inline-flex items-center gap-2 px-4 py-2 text-sm font-medium cursor-pointer" data-copy="w9519539" aria-label="复制微信号 w9519539">
+              <img src={`${base}icons/wechat.svg`} alt="" class="w-4 h-4" />
+              <span data-copy-label>微信号</span>
+            </button>
+          </div>
+        </div>
       </div>
     </section>
+
+    <section class="grid md:grid-cols-2 gap-5 mb-7" aria-label="学习与实践方向">
+      <article class="bg-white/60 dark:bg-[#141827]/60 backdrop-blur-xl rounded-xl border border-gray-200/50 dark:border-white/[0.06] p-6 shadow-sm dark:shadow-none">
+        <p class="text-sm font-semibold text-garden-700 dark:text-garden-300">研究与工程</p>
+        <h2 class="mt-2 text-xl font-semibold text-gray-900 dark:text-white">射频信号与开集识别</h2>
+        <p class="mt-3 leading-7 text-gray-600 dark:text-gray-300">
+          我在学习如何把深度学习方法用于无人机射频信号分类，并关注模型面对未知类别时的识别与拒识。相关实践包括 ViM、OpenMax，以及散射变换与 Vision Transformer 的组合探索。
+        </p>
+        <a href={`${base}projects/`} class="mt-4 inline-flex items-center gap-1 text-sm font-medium text-garden-700 dark:text-garden-300 hover:underline">
+          查看相关项目 <span aria-hidden="true">→</span>
+        </a>
+      </article>
+
+      <article class="bg-white/60 dark:bg-[#141827]/60 backdrop-blur-xl rounded-xl border border-gray-200/50 dark:border-white/[0.06] p-6 shadow-sm dark:shadow-none">
+        <p class="text-sm font-semibold text-garden-700 dark:text-garden-300">工具与工作流</p>
+        <h2 class="mt-2 text-xl font-semibold text-gray-900 dark:text-white">把重复工作整理成工具</h2>
+        <p class="mt-3 leading-7 text-gray-600 dark:text-gray-300">
+          我也开发面向实际工作流的小型工具：例如为 Claude Code 和 Codex 管理通知的 ClaudeBeep、整理 Codex 会话记录的 Codex Transfer，以及帮助 AI 助手遵循 PyTorch 科研代码规范的 Skill。
+        </p>
+        <a href={`${base}projects/`} class="mt-4 inline-flex items-center gap-1 text-sm font-medium text-garden-700 dark:text-garden-300 hover:underline">
+          浏览全部项目 <span aria-hidden="true">→</span>
+        </a>
+      </article>
+    </section>
+
+    <section class="bg-white/60 dark:bg-[#141827]/60 backdrop-blur-xl rounded-xl border border-gray-200/50 dark:border-white/[0.06] p-6 sm:p-8 shadow-sm dark:shadow-none mb-7" aria-labelledby="education-title">
+      <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 mb-5">
+        <div>
+          <p class="text-sm font-semibold text-garden-700 dark:text-garden-300">Education</p>
+          <h2 id="education-title" class="mt-1 text-xl font-semibold text-gray-900 dark:text-white">教育经历</h2>
+        </div>
+        <a href="https://www.uestc.edu.cn/" target="_blank" rel="noopener noreferrer" class="text-sm text-gray-500 dark:text-gray-400 hover:text-garden-700 dark:hover:text-garden-300">电子科技大学 ↗</a>
+      </div>
+      <div class="grid sm:grid-cols-2 gap-4">
+        <div class="rounded-lg bg-gray-50/50 dark:bg-white/[0.03] border border-gray-200/50 dark:border-white/[0.06] p-4">
+          <p class="text-sm text-gray-500 dark:text-gray-400">2026.09 — 2029.06</p>
+          <h3 class="mt-1 font-semibold text-gray-900 dark:text-white">电子科技大学</h3>
+          <p class="mt-1 text-sm text-gray-600 dark:text-gray-300">电子信息 · 专业硕士</p>
+        </div>
+        <div class="rounded-lg bg-gray-50/50 dark:bg-white/[0.03] border border-gray-200/50 dark:border-white/[0.06] p-4">
+          <p class="text-sm text-gray-500 dark:text-gray-400">2022.09 — 2026.06</p>
+          <h3 class="mt-1 font-semibold text-gray-900 dark:text-white">浙江工业大学</h3>
+          <p class="mt-1 text-sm text-gray-600 dark:text-gray-300">通信工程 · 本科</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid md:grid-cols-[1.2fr_0.8fr] gap-5 mb-7" aria-label="关于个人数字花园">
+      <article class="bg-white/60 dark:bg-[#141827]/60 backdrop-blur-xl rounded-xl border border-gray-200/50 dark:border-white/[0.06] p-6 shadow-sm dark:shadow-none">
+        <p class="text-sm font-semibold text-garden-700 dark:text-garden-300">The Garden</p>
+        <h2 class="mt-2 text-xl font-semibold text-gray-900 dark:text-white">一个持续整理的学习空间</h2>
+        <p class="mt-3 leading-7 text-gray-600 dark:text-gray-300">
+          这里记录课程与技术学习、研究代码阅读和项目实践。笔记可以逐步补充，并通过 Wiki 链接彼此连接；我会尽量把结论、示例和上下文放在一起，让它们以后仍然容易查找和复用。
+        </p>
+        <div class="mt-5 flex flex-wrap gap-3">
+          <a href={`${base}garden/`} class="paper-contact paper-contact-secondary inline-flex items-center gap-2 px-4 py-2 text-sm font-medium">阅读笔记 <span aria-hidden="true">→</span></a>
+          <a href={`${base}projects/`} class="paper-contact paper-contact-secondary inline-flex items-center gap-2 px-4 py-2 text-sm font-medium">查看项目 <span aria-hidden="true">→</span></a>
+        </div>
+      </article>
+
+      <article class="bg-white/60 dark:bg-[#141827]/60 backdrop-blur-xl rounded-xl border border-gray-200/50 dark:border-white/[0.06] p-6 shadow-sm dark:shadow-none">
+        <p class="text-sm font-semibold text-garden-700 dark:text-garden-300">Built With</p>
+        <h2 class="mt-2 text-xl font-semibold text-gray-900 dark:text-white">本站技术</h2>
+        <ul class="mt-4 space-y-3 text-sm text-gray-600 dark:text-gray-300">
+          <li><a href="https://astro.build/" target="_blank" rel="noopener noreferrer" class="font-medium text-gray-900 dark:text-white hover:text-garden-700 dark:hover:text-garden-300">Astro</a>：生成静态页面和内容路由</li>
+          <li><a href="https://tailwindcss.com/" target="_blank" rel="noopener noreferrer" class="font-medium text-gray-900 dark:text-white hover:text-garden-700 dark:hover:text-garden-300">Tailwind CSS</a>：响应式页面样式</li>
+          <li>Markdown / MDX：维护笔记、媒体和项目介绍</li>
+          <li>GitHub Actions：构建检查与 GitHub Pages 发布</li>
+        </ul>
+      </article>
+    </section>
+
+    <p class="text-center text-sm text-gray-500 dark:text-gray-400">
+      网站源码与项目资料见 <a href="https://github.com/Tommie-P-xl/personal-garden" target="_blank" rel="noopener noreferrer" class="font-medium text-garden-700 dark:text-garden-300 hover:underline">personal-garden 仓库</a>。
+    </p>
   </div>
 </BaseLayout>
+
+<script>
+  function initAboutContact() {
+    document.querySelectorAll<HTMLButtonElement>('.about-copy-btn').forEach((button) => {
+      if (button.dataset.bound === 'true') return;
+      button.dataset.bound = 'true';
+
+      button.addEventListener('click', async () => {
+        const value = button.dataset.copy;
+        if (!value) return;
+
+        try {
+          await navigator.clipboard.writeText(value);
+        } catch {
+          const input = document.createElement('textarea');
+          input.value = value;
+          document.body.appendChild(input);
+          input.select();
+          document.execCommand('copy');
+          input.remove();
+        }
+
+        const label = button.querySelector<HTMLElement>('[data-copy-label]');
+        if (!label) return;
+        label.textContent = '已复制';
+        window.setTimeout(() => { label.textContent = '微信号'; }, 1500);
+      });
+    });
+  }
+
+  initAboutContact();
+  document.addEventListener('astro:page-load', initAboutContact);
+</script>
