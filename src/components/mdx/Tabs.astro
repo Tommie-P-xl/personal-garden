@@ -7,7 +7,7 @@ interface Props {
 const { labels, id = `tabs-${Math.random().toString(36).slice(2, 8)}` } = Astro.props;
 ---
 
-<div class="my-6 rounded-lg border border-gray-200/60 dark:border-white/[0.06] overflow-hidden">
+<div class="paper-tabs my-6 rounded-lg border border-gray-200/60 dark:border-white/[0.06] overflow-hidden">
   <div class="flex border-b border-gray-200/60 dark:border-white/[0.06] bg-gray-50/50 dark:bg-white/[0.02]">
     {labels.map((label, i) => (
       <label

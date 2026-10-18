@@ -1,7 +1,7 @@
 ---
 title: Scattering-ViT
-description: 基于可学习散射网络和 Vision Transformer 的射频信号分类框架
-tech: [Python, PyTorch, ViT, Scattering Transform]
+description: 射频信号分类研究代码，探索可学习散射变换、多尺度特征与视觉 Transformer 的组合。
+tech: [Python, PyTorch, Kymatio, timm, Vision Transformer]
 github: https://github.com/Tommie-P-xl/MulScatteringViT
 featured: true
 date: 2026-04-03
@@ -9,17 +9,15 @@ date: 2026-04-03
 
 ## 项目简介
 
-实现了一个前沿深度学习框架，结合可学习散射网络和 Vision Transformer 进行射频信号分类。处理频谱图数据（射频信号的时频表示），实现多信号类型的高精度分类。
+Scattering-ViT 面向射频信号的时频谱图分类，包含可学习散射网络、常规视觉模型和散射网络与分类器组合的实验实现。仓库 README 提供训练、测试、数据格式及架构说明。
 
-## 核心功能
+## 当前内容
 
-- **多架构支持**：ResNet50、ViT、DeiT、PVT、Swin Transformer 及混合模型
-- **可学习散射网络**：可训练的小波散射变换，鲁棒特征提取
-- **多尺度处理**：S0、S1、S2 多阶散射系数，多分辨率分析
-- **生产就绪**：混合精度训练、梯度累积、学习率调度
+- 多尺度散射系数（S0、S1、S2）与可学习小波滤波器实现。
+- 支持 ResNet、ViT、DeiT、PVT、Swin 等模型及混合架构。
+- 包含训练、评估、STFT 处理与可视化脚本。
+- 使用单通道 512×512 `.npy` 时频谱图作为 README 中说明的输入示例。
 
-## 技术栈
+## 技术
 
-- Python / PyTorch 2.x / Kymatio
-- timm (Vision Transformers) / TensorBoard
-- scikit-learn / matplotlib / seaborn
+Python、PyTorch、Kymatio、timm，以及 TensorBoard、scikit-learn 和常用绘图库。

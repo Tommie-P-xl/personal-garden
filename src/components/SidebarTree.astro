@@ -21,6 +21,7 @@ function renderTitle(item: NoteFile): string {
   return item.type === 'file' ? (
     <a
       href={`${base}garden/${itemHashedSlug}/`}
+      aria-current={item.slug === currentSlug ? 'page' : undefined}
       class:list={[
         'flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors',
         item.slug === currentSlug

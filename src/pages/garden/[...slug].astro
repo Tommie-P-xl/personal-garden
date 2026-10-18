@@ -19,10 +19,12 @@ export async function getStaticPaths() {
 
   // 笔记文件路径 - 使用哈希slug
   for (const note of notes) {
-    const hashedSlug = registerSlug(note.id);
+    // 与 scanNotes / Wiki 链接统一使用小写 slug，避免大写文件名导致链接哈希不一致。
+    const normalizedSlug = note.id.toLowerCase();
+    const hashedSlug = registerSlug(normalizedSlug);
     paths.push({
       params: { slug: hashedSlug },
-      props: { isDir: false, note, realSlug: note.id },
+      props: { isDir: false, note, realSlug: normalizedSlug },
     });
   }
 
@@ -59,7 +61,7 @@ function findTopLevelAncestor(slug: string): NoteFile | undefined {
 }
 
 // 公共数据
-const currentSlug = isDir ? Astro.props.dirItem.slug : Astro.props.note.id;
+const currentSlug = isDir ? Astro.props.dirItem.slug : Astro.props.note.id.toLowerCase();
 const backlinksIndex = buildBacklinksIndex();
 const topLevelAncestor = findTopLevelAncestor(currentSlug);
 const sidebarIsRoot = !topLevelAncestor;
@@ -69,7 +71,7 @@ const finalSidebarTree = sidebarIsRoot ? tree : (topLevelAncestor.children || []
 let dirTitle = '';
 let dirDescription = '';
 let dirChildren: NoteFile[] = [];
-let dirFlatNotes: Array<{ title: string; slug: string; summary?: string }> = [];
+let dirFlatNotes: Array<{ title: string; rawSlug: string; summary?: string }> = [];
 
 if (isDir) {
   const dirItem: NoteFile = Astro.props.dirItem;
@@ -77,8 +79,8 @@ if (isDir) {
   dirDescription = dirItem.meta?.description || '';
   dirChildren = dirItem.children || [];
   dirFlatNotes = getAllFlatNotes()
-    .filter((n) => n.slug.startsWith(dirItem.slug))
-    .map((n) => ({ title: n.title, slug: registerSlug(n.slug), summary: n.summary }));
+    .filter((n) => n.slug === dirItem.slug || n.slug.startsWith(`${dirItem.slug}/`))
+    .map((n) => ({ title: n.title, rawSlug: n.slug, summary: n.summary }));
 }
 
 // ====== 笔记页面数据 ======
@@ -120,7 +122,7 @@ if (!isDir) {
     />
 
     {/* 中间内容区 */}
-    <article class="flex-1 min-w-0">
+    <article class="paper-reading flex-1 min-w-0">
       {/* 面包屑 */}
       <nav class="mb-6 text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
         <a href={`${base}garden/`} class="hover:text-garden-600 dark:hover:text-garden-400 transition-colors">笔记</a>
@@ -136,18 +138,23 @@ if (!isDir) {
           </h1>
           {dirDescription && <p class="text-gray-600 dark:text-gray-300 mb-8">{dirDescription}</p>}
 
-          <div class="space-y-3">
+          {dirChildren.length > 0 && (
+            <section class="mt-8" aria-labelledby="directory-content-title">
+              <h2 id="directory-content-title" class="text-lg font-semibold text-gray-900 dark:text-white mb-4">目录内容</h2>
+              <div class="grid sm:grid-cols-2 gap-3">
             {dirChildren.map((child) => {
               const childHashedSlug = registerSlug(child.slug);
+              const childNotes = dirFlatNotes.filter((note) => note.rawSlug === child.slug || note.rawSlug.startsWith(`${child.slug}/`));
+              const directNote = dirFlatNotes.find((note) => note.rawSlug === child.slug);
               return child.type === 'dir' ? (
                 <a href={`${base}garden/${childHashedSlug}/`}
-                  class="flex items-center gap-3 p-4 bg-white/60 dark:bg-[#141827]/60 backdrop-blur-xl rounded-xl border border-gray-200/50 dark:border-white/[0.06] hover:shadow-md hover:-translate-y-0.5 hover:border-garden-300/60 dark:hover:border-garden-700/30 transition-all duration-300 group">
+                  class="paper-directory-card flex items-center gap-3 p-4 bg-white/60 dark:bg-[#141827]/60 backdrop-blur-xl rounded-xl border border-gray-200/50 dark:border-white/[0.06] hover:shadow-md hover:-translate-y-0.5 hover:border-garden-300/60 dark:hover:border-garden-700/30 transition-all duration-300 group">
                   <img src={`${base}icons/文件夹.svg`} alt="" class="w-5 h-5 icon-colorful" />
                   <div class="flex-1">
                     <h3 class="font-semibold text-gray-900 dark:text-white group-hover:text-garden-600 dark:group-hover:text-garden-400 transition-colors">
                       {child.meta?.title || child.title}
                     </h3>
-                    {child.meta?.description && <p class="text-sm text-gray-500 dark:text-gray-400">{child.meta.description}</p>}
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{child.meta?.description || `${childNotes.length} 篇笔记`}</p>
                   </div>
                   <svg class="w-4 h-4 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
@@ -155,36 +162,27 @@ if (!isDir) {
                 </a>
               ) : (
                 <a href={`${base}garden/${childHashedSlug}/`}
-                  class="flex items-center gap-3 p-4 bg-white/60 dark:bg-[#141827]/60 backdrop-blur-xl rounded-xl border border-gray-200/50 dark:border-white/[0.06] hover:shadow-md hover:-translate-y-0.5 hover:border-garden-300/60 dark:hover:border-garden-700/30 transition-all duration-300 group">
+                  class="paper-directory-card flex items-center gap-3 p-4 bg-white/60 dark:bg-[#141827]/60 backdrop-blur-xl rounded-xl border border-gray-200/50 dark:border-white/[0.06] hover:shadow-md hover:-translate-y-0.5 hover:border-garden-300/60 dark:hover:border-garden-700/30 transition-all duration-300 group">
                   <img src={`${base}icons/文档.svg`} alt="" class="w-5 h-5 icon-colorful" />
-                  <h3 class="font-medium text-gray-900 dark:text-white group-hover:text-garden-600 dark:group-hover:text-garden-400 transition-colors">
-                    {child.title}
-                  </h3>
+                  <div class="min-w-0">
+                    <h3 class="font-medium text-gray-900 dark:text-white group-hover:text-garden-600 dark:group-hover:text-garden-400 transition-colors">
+                      {directNote?.title || child.title}
+                    </h3>
+                    {directNote?.summary && <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">{directNote.summary}</p>}
+                  </div>
                 </a>
               );
             })}
-          </div>
-
-          {dirFlatNotes.length > 0 && (
-            <div class="mt-8 pt-6 border-t border-gray-200/50 dark:border-white/[0.06]">
-              <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">所有笔记</h2>
-              <div class="grid sm:grid-cols-2 gap-3">
-                {dirFlatNotes.map((note) => (
-                  <a href={`${base}garden/${note.slug}/`}
-                    class="p-3 bg-gray-50/60 dark:bg-white/[0.03] backdrop-blur-sm rounded-lg hover:bg-garden-50/50 dark:hover:bg-garden-900/10 transition-colors border border-gray-200/50 dark:border-white/[0.06]">
-                    <h4 class="font-medium text-gray-900 dark:text-white text-sm">{note.title}</h4>
-                    {note.summary && <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">{note.summary}</p>}
-                  </a>
-                ))}
               </div>
-            </div>
+            </section>
           )}
         </>
       ) : (
         /* ====== 笔记详情页面 ====== */
         <>
-          <header class="mb-8">
+          <header class="paper-note-header mb-8 pb-6 border-b border-gray-200/50 dark:border-white/[0.06]">
             <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">{noteTitle}</h1>
+            {noteSummary && <p class="paper-note-summary max-w-2xl text-base sm:text-lg text-gray-600 dark:text-gray-300 leading-relaxed mb-5">{noteSummary}</p>}
             {tags.length > 0 && (
               <div class="flex flex-wrap gap-2">
                 {tags.map((tag) => (

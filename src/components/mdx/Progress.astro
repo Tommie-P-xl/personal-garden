@@ -24,7 +24,7 @@ const colorClass = {
       <span class="text-xs text-gray-500 dark:text-gray-400">{Math.round(percentage)}%</span>
     </div>
   )}
-  <div class="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+  <div class="progress-track h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden" role="progressbar" aria-valuenow={Math.round(percentage)} aria-valuemin="0" aria-valuemax="100" aria-label={label || '进度'}>
     <div
       class={`h-full rounded-full transition-all duration-500 ${colorClass}`}
       style={`width: ${percentage}%`}

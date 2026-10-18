@@ -1,25 +1,24 @@
 ---
-title: ViM-Pytorch
-description: 基于 Virtual-logit Matching 算法的无人机射频信号开集识别系统
-tech: [Python, PyTorch, ViM, Signal Processing]
+title: ViM UAV Open-Set Recognition
+description: 将 Virtual-logit Matching 用于无人机射频信号开集识别，使用 STFT 能量谱和可配置分类主干。
+tech: [Python, PyTorch, ViM, ResNet-50, Signal Processing]
 github: https://github.com/Tommie-P-xl/ViM-Pytorch
 featured: true
-date: 2026-04-17
+date: 2026-05-08
 ---
 
 ## 项目简介
 
-将 CVPR 2022 的 ViM（Virtual-logit Matching）算法应用于无人机射频信号的开集识别任务。输入 512×512 STFT 能量谱，无需修改网络结构、无需额外 OOD 数据，推理速度极快。
+该项目把 CVPR 2022 的 Virtual-logit Matching（ViM）应用于无人机射频信号开集识别。任务同时判断样本是否属于已知分布，并为已知样本输出类别。
 
-## 核心功能
+## 当前流程
 
-- **OOD 检测**：判断输入是已知类还是未知类
-- **已知类分类**：对 ID 样本给出具体类别标签
-- **特征缓存**：首次运行前向传播，后续直接加载缓存
-- **全面评估**：AUROC、AUPR、FPR@TPR95、Open-Set Acc 等指标
+- 输入为按类别目录组织的 512×512 STFT 能量谱 `.npy` 文件。
+- 通过配置选择 ResNet-50 等分类主干，完成已知类训练。
+- 从特征空间与 logits 计算 ViM 分数，使用阈值区分已知类和 OOD 样本。
+- 提供数据集结构验证、虚拟数据生成、训练和测试脚本。
+- 评估包含 AUROC、AUPR、FPR@TPR95 及开集分类指标。
 
-## 技术栈
+## 技术
 
-- Python / PyTorch 2.x / ResNet-50
-- YAML 配置管理 / TensorBoard 训练可视化
-- 混合精度训练 / tqdm 进度条
+Python、PyTorch、YAML 配置、TensorBoard 与 NumPy。完整的数据准备、训练和测试命令见仓库 README。

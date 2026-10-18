@@ -5,10 +5,11 @@
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
-    "build": "node scripts/copy-media.js && astro build",
+    "build": "npm run check:content && node scripts/copy-media.js && astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "copy-media": "node scripts/copy-media.js"
+    "copy-media": "node scripts/copy-media.js",
+    "check:content": "node scripts/check-content.js"
   },
   "dependencies": {
     "@astrojs/mdx": "^4.2.6",
