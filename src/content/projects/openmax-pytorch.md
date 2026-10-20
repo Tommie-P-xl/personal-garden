@@ -4,6 +4,7 @@ description: 基于 ResNet-50 的开集识别复现项目，覆盖闭集训练�
 tech: [Python, PyTorch, ResNet-50, OpenMax, Weibull, SciPy, scikit-learn]
 github: https://github.com/Tommie-P-xl/OpenMax-PyTorch
 featured: true
+featuredOrder: 3
 date: 2026-03-27
 ---
 

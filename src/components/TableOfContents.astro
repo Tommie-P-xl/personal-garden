@@ -16,7 +16,7 @@ const tocHeadings = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
 {tocHeadings.length > 0 && (
   <>
     <!-- 桌面端固定 TOC -->
-    <aside class="paper-toc hidden xl:block w-44 flex-shrink-0">
+    <aside class="paper-toc hidden min-[1600px]:block w-44 flex-shrink-0">
       <nav class="sticky top-20 overflow-y-auto max-h-[calc(100vh-6rem)] pb-8 scrollbar-hide">
         <h4 class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3">
           目录
@@ -43,28 +43,28 @@ const tocHeadings = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
 
     <!-- 移动端浮动按钮 -->
     <button
-      id="toc-mobile-btn"
-      class="xl:hidden fixed bottom-20 right-6 z-40 p-2.5 rounded-full shadow-lg
-        bg-white/80 dark:bg-[#141827]/80 backdrop-blur-xl border border-gray-200/50 dark:border-white/[0.06]
+      id="toc-mobile-btn" title="本页章节"
+      class="min-[1600px]:hidden fixed bottom-20 right-6 z-40 p-2.5 rounded-full shadow-lg
+        paper-surface   border border-gray-200/50 dark:border-white/[0.06]
         text-gray-600 dark:text-gray-300 hover:bg-gray-100/60 dark:hover:bg-white/[0.06] transition-colors"
-      aria-label="打开目录"
+      aria-label="打开文章目录"
       aria-controls="toc-mobile-drawer"
       aria-expanded="false"
     >
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" />
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" />
       </svg>
     </button>
 
     <!-- 移动端抽屉 -->
     <div
       id="toc-mobile-overlay"
-      class="xl:hidden fixed inset-0 bg-black/50 z-40 hidden"
+      class="min-[1600px]:hidden fixed inset-0 bg-black/50 z-40 hidden"
       aria-hidden="true"
     />
     <div
-      id="toc-mobile-drawer"
-      class="paper-toc-drawer xl:hidden fixed top-0 right-0 bottom-0 w-72 bg-white/90 dark:bg-[#0f1117]/90 backdrop-blur-xl z-50 transform translate-x-full transition-transform overflow-y-auto border-l border-gray-200/50 dark:border-white/[0.06]"
+      id="toc-mobile-drawer" inert aria-hidden="true"
+      class="paper-toc-drawer min-[1600px]:hidden fixed top-0 right-0 bottom-0 w-72 paper-surface   z-50 transform translate-x-full transition-transform overflow-y-auto border-l border-gray-200/50 dark:border-white/[0.06]"
       role="dialog"
       aria-modal="true"
       aria-label="文章目录"
@@ -107,116 +107,31 @@ const tocHeadings = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
 )}
 
 <script>
-  // 高亮指定 slug 的 TOC 项
-  function highlightTocItem(slug: string) {
-    document.querySelectorAll('[data-toc-link]').forEach((link) => {
-      const isActive = link.getAttribute('data-toc-link') === slug;
-      if (isActive) {
-        link.classList.add('text-garden-600', 'dark:text-garden-400', 'border-l-2', 'border-garden-500', 'dark:border-garden-400', '-ml-[2px]');
-        link.classList.remove('text-gray-500', 'dark:text-gray-400');
-      } else {
-        link.classList.remove('text-garden-600', 'dark:text-garden-400', 'border-l-2', 'border-garden-500', 'dark:border-garden-400', '-ml-[2px]');
-        link.classList.add('text-gray-500', 'dark:text-gray-400');
-      }
+  let observer: IntersectionObserver | undefined;
+  function highlight(slug: string) {
+    document.querySelectorAll<HTMLElement>('[data-toc-link]').forEach(link => {
+      if (link.dataset.tocLink === slug) link.setAttribute('aria-current', 'location');
+      else link.removeAttribute('aria-current');
     });
   }
-
-  // 滚动高亮
-  function initTocHighlight() {
-    const tocLinks = document.querySelectorAll('[data-toc-link]');
-    if (tocLinks.length === 0) return;
-
-    const headingElements: HTMLElement[] = [];
-    tocLinks.forEach((link) => {
-      const slug = link.getAttribute('data-toc-link');
-      const el = document.getElementById(slug || '');
-      if (el) headingElements.push(el);
+  function initToc() {
+    observer?.disconnect();
+    const headings = Array.from(document.querySelectorAll<HTMLElement>('.prose h2[id], .prose h3[id]'));
+    if (!headings.length) return;
+    const update = () => {
+      const above = headings.filter(h => h.getBoundingClientRect().top <= 140);
+      highlight((above.at(-1) || headings[0]).id);
+    };
+    observer = new IntersectionObserver(update, { rootMargin: '-80px 0px -65% 0px' });
+    headings.forEach(h => observer!.observe(h));
+    document.querySelectorAll<HTMLElement>('[data-toc-link]').forEach(link => {
+      link.addEventListener('click', () => highlight(link.dataset.tocLink || ''));
     });
-
-    if (headingElements.length === 0) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            highlightTocItem(entry.target.id);
-          }
-        });
-      },
-      {
-        rootMargin: '-80px 0px -80% 0px',
-        threshold: 0,
-      }
-    );
-
-    headingElements.forEach((el) => observer.observe(el));
-
-    // 点击 TOC 链接时立即高亮
-    tocLinks.forEach((link) => {
-      link.addEventListener('click', () => {
-        const slug = link.getAttribute('data-toc-link');
-        if (slug) highlightTocItem(slug);
-      });
-    });
+    update();
   }
-
-  // 移动端抽屉
-  function initTocMobile() {
-    const btn = document.getElementById('toc-mobile-btn');
-    const overlay = document.getElementById('toc-mobile-overlay');
-    const drawer = document.getElementById('toc-mobile-drawer');
-    const closeBtn = document.getElementById('toc-mobile-close');
-
-    if (!btn || !overlay || !drawer || btn.dataset.bound === 'true') return;
-    btn.dataset.bound = 'true';
-
-    function openDrawer() {
-      overlay.classList.remove('hidden');
-      drawer.classList.remove('translate-x-full');
-      btn.setAttribute('aria-expanded', 'true');
-      closeBtn?.focus();
-    }
-
-    function closeDrawer(restoreFocus = true) {
-      overlay.classList.add('hidden');
-      drawer.classList.add('translate-x-full');
-      btn.setAttribute('aria-expanded', 'false');
-      if (restoreFocus) btn.focus();
-    }
-
-    btn.addEventListener('click', openDrawer);
-    overlay.addEventListener('click', closeDrawer);
-    closeBtn?.addEventListener('click', closeDrawer);
-    drawer.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape') {
-        event.preventDefault();
-        closeDrawer();
-        return;
-      }
-      if (event.key !== 'Tab') return;
-      const focusable = Array.from(drawer.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])')).filter((el) => el.offsetParent !== null);
-      if (!focusable.length) { event.preventDefault(); drawer.focus(); return; }
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
-      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
-      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
-    });
-
-    // 点击链接后关闭抽屉
-    drawer.querySelectorAll('[data-toc-link]').forEach((link) => {
-      link.addEventListener('click', () => closeDrawer(false));
-    });
-  }
-
-  // 初始化
-  initTocHighlight();
-  initTocMobile();
-
-  // View Transitions 重新初始化
-  document.addEventListener('astro:page-load', () => {
-    initTocHighlight();
-    initTocMobile();
-  });
+  document.addEventListener('astro:before-swap', () => observer?.disconnect());
+  document.addEventListener('astro:page-load', initToc);
+  initToc();
 </script>
 
 <style>

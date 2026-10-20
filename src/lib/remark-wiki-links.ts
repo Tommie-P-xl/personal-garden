@@ -1,61 +1,11 @@
 import { visit } from 'unist-util-visit';
 import type { Root, Text, Link } from 'mdast';
-import fs from 'node:fs';
-import path from 'node:path';
-import matter from 'gray-matter';
+import { getAllFlatNotes } from './scan-notes';
 import { registerSlug } from './slug-hash';
-
-const NOTES_DIR = path.resolve('src/content/notes');
-const BASE = process.env.DEPLOY_TARGET === 'cloudflare' ? '/' : '/personal-garden/';
-
-// 构建标题到 slug 的映射表（使用哈希slug）
-function buildTitleSlugMap(): Map<string, string> {
-  const map = new Map<string, string>();
-
-  function scanDir(dir: string, parentSlug: string = '') {
-    if (!fs.existsSync(dir)) return;
-
-    const entries = fs.readdirSync(dir, { withFileTypes: true });
-    for (const entry of entries) {
-      if (entry.name.startsWith('_') || entry.name.startsWith('.')) continue;
-
-      if (entry.isDirectory()) {
-        const dirPath = path.join(dir, entry.name);
-        const slug = (parentSlug ? `${parentSlug}/${entry.name}` : entry.name).toLowerCase();
-        scanDir(dirPath, slug);
-      } else if (entry.name.endsWith('.md') || entry.name.endsWith('.mdx')) {
-        const slug = (parentSlug
-          ? `${parentSlug}/${entry.name.replace(/\.(md|mdx)$/, '')}`
-          : entry.name.replace(/\.(md|mdx)$/, '')).toLowerCase();
-
-        try {
-          const fullPath = path.join(dir, entry.name);
-          const content = fs.readFileSync(fullPath, 'utf-8');
-          const { data } = matter(content);
-          if (data.title) {
-            // 使用哈希后的slug
-            const hashedSlug = registerSlug(slug);
-            map.set(data.title, `${BASE}garden/${hashedSlug}/`);
-          }
-        } catch {
-          // skip files that fail to parse
-        }
-      }
-    }
-  }
-
-  scanDir(NOTES_DIR);
-  return map;
-}
-
-// 缓存映射表
-let titleSlugMap: Map<string, string> | null = null;
+import { deploymentBase as BASE } from './site-path';
 
 function getTitleSlugMap(): Map<string, string> {
-  if (!titleSlugMap) {
-    titleSlugMap = buildTitleSlugMap();
-  }
-  return titleSlugMap;
+  return new Map(getAllFlatNotes().map(note => [note.title, `${BASE}garden/${registerSlug(note.slug)}/`]));
 }
 
 export default function remarkWikiLinks() {

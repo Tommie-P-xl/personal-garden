@@ -1,0 +1,19 @@
+---
+interface Props { slug: string; }
+const { slug } = Astro.props;
+const flows: Record<string, { label: string; steps: string[] }> = {
+  'vim-pytorch': { label: 'RF / OPEN SET', steps: ['STFT', 'ResNet', 'ViM', '已知 / 未知'] },
+  mulscatteringvit: { label: 'RF / REPRESENTATION', steps: ['时频图', 'Scattering', 'ViT', '类别'] },
+  'openmax-pytorch': { label: 'OPEN SET / CALIBRATION', steps: ['激活', 'Weibull', '重校准', '未知判定'] },
+  claudebeep: { label: 'AGENT / NOTIFICATIONS', steps: ['Agent 事件', '通知路由', '桌面 / 手机'] },
+  'personal-garden': { label: 'KNOWLEDGE / GARDEN', steps: ['Markdown', 'Astro', '数字花园'] },
+  'codex-transfer': { label: 'SESSION / ARCHIVE', steps: ['会话记录', '导出', '归档'] },
+  'resource-deeplearning': { label: 'RESEARCH / LIBRARY', steps: ['文献资料', '主题分类', '学习索引'] },
+};
+const flow = flows[slug] || { label: 'AGENT / WORKFLOW', steps: ['任务约束', '可复用流程', '交付检查'] };
+---
+<div class="project-visual" aria-label={`${flow.label} 项目流程示意`} role="img">
+  <span class="project-visual-label">{flow.label}</span>
+  <div class="project-flow" aria-hidden="true">{flow.steps.map((step, i) => <><span>{step}</span>{i < flow.steps.length - 1 && <svg viewBox="0 0 20 20"><path d="M3 10h14m-5-5 5 5-5 5" /></svg>}</>)}</div>
+  <span class="project-visual-caption">流程示意</span>
+</div>

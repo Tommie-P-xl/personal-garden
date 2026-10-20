@@ -42,3 +42,9 @@ docs/
 
 # Superpowers plans
 .superpowers/plans/
+
+# local index and regression artifacts
+.codegraph/
+.review-builds/
+playwright-report/
+test-results/

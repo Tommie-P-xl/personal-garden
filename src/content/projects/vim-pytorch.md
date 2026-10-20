@@ -4,6 +4,7 @@ description: 用 PyTorch 训练无人机射频 STFT 分类器，并在特征空�
 tech: [Python, PyTorch, ViM, ResNet, Open-Set Recognition, RF]
 github: https://github.com/Tommie-P-xl/ViM-Pytorch
 featured: true
+featuredOrder: 1
 date: 2026-05-08
 ---
 

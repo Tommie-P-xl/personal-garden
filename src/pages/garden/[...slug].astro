@@ -1,4 +1,5 @@
 ---
+import Icon from '../../components/Icon.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Sidebar from '../../components/Sidebar.astro';
 import TableOfContents from '../../components/TableOfContents.astro';
@@ -10,6 +11,8 @@ import { scanNotes, getPrevNext, getAllFlatNotes, buildBacklinksIndex } from '..
 import type { NoteFile } from '../../lib/scan-notes';
 import { registerSlug } from '../../lib/slug-hash';
 
+import path from 'node:path';
+import { normalizeTags } from '../../lib/tags';
 const base = import.meta.env.BASE_URL;
 
 export async function getStaticPaths() {
@@ -95,13 +98,14 @@ let Content: any = null;
 
 if (!isDir) {
   const note = Astro.props.note;
+  Astro.locals.noteSourceFile = path.resolve(note.filePath);
   const rendered = await render(note);
   Content = rendered.Content;
   headings = rendered.headings;
 
   noteTitle = note.data.title;
   noteSummary = note.data.summary || '';
-  tags = note.data.tags || [];
+  tags = normalizeTags(note.data.tags || []);
 
   const nav = getPrevNext(currentSlug);
   prev = nav.prev;
@@ -113,7 +117,7 @@ if (!isDir) {
 ---
 
 <BaseLayout title={isDir ? dirTitle : noteTitle} description={isDir ? dirDescription : noteSummary} wide={!isDir}>
-  <div class="flex gap-3 xl:gap-4">
+  <div class:list={["flex gap-3 xl:gap-4", !isDir && "note-layout"]}>
     {/* 左侧边栏 */}
     <Sidebar
       tree={finalSidebarTree}
@@ -123,18 +127,21 @@ if (!isDir) {
 
     {/* 中间内容区 */}
     <article class="paper-reading flex-1 min-w-0">
-      {/* 面包屑 */}
+      {/* 面包屑与阅读模式 */}
+      <div class="note-toolbar">
       <nav class="mb-6 text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
         <a href={`${base}garden/`} class="hover:text-garden-600 dark:hover:text-garden-400 transition-colors">笔记</a>
         <span class="text-gray-300 dark:text-gray-600">/</span>
         <span class="text-gray-700 dark:text-gray-200 font-medium">{isDir ? dirTitle : noteTitle}</span>
       </nav>
+      {!isDir && <button class="reading-mode-toggle" type="button" data-reading-toggle aria-pressed="false" title="收起两侧目录并加宽正文"><Icon name="expand" class="w-4 h-4" /><span data-reading-label>专注阅读</span></button>}
+      </div>
 
       {isDir ? (
         /* ====== 目录页面 ====== */
         <>
           <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
-            <img src={`${base}icons/笔记总.svg`} alt="" class="w-6 h-6 icon-colorful" /> {dirTitle}
+            <Icon name="note" class="w-6 h-6" /> {dirTitle}
           </h1>
           {dirDescription && <p class="text-gray-600 dark:text-gray-300 mb-8">{dirDescription}</p>}
 
@@ -148,8 +155,8 @@ if (!isDir) {
               const directNote = dirFlatNotes.find((note) => note.rawSlug === child.slug);
               return child.type === 'dir' ? (
                 <a href={`${base}garden/${childHashedSlug}/`}
-                  class="paper-directory-card flex items-center gap-3 p-4 bg-white/60 dark:bg-[#141827]/60 backdrop-blur-xl rounded-xl border border-gray-200/50 dark:border-white/[0.06] hover:shadow-md hover:-translate-y-0.5 hover:border-garden-300/60 dark:hover:border-garden-700/30 transition-all duration-300 group">
-                  <img src={`${base}icons/文件夹.svg`} alt="" class="w-5 h-5 icon-colorful" />
+                  class="paper-directory-card flex items-center gap-3 p-4 paper-surface   rounded-xl border border-gray-200/50 dark:border-white/[0.06] hover:shadow-md hover:-translate-y-0.5 hover:border-garden-300/60 dark:hover:border-garden-700/30 transition-all duration-300 group">
+                  <Icon name="folder" class="w-5 h-5" />
                   <div class="flex-1">
                     <h3 class="font-semibold text-gray-900 dark:text-white group-hover:text-garden-600 dark:group-hover:text-garden-400 transition-colors">
                       {child.meta?.title || child.title}
@@ -162,8 +169,8 @@ if (!isDir) {
                 </a>
               ) : (
                 <a href={`${base}garden/${childHashedSlug}/`}
-                  class="paper-directory-card flex items-center gap-3 p-4 bg-white/60 dark:bg-[#141827]/60 backdrop-blur-xl rounded-xl border border-gray-200/50 dark:border-white/[0.06] hover:shadow-md hover:-translate-y-0.5 hover:border-garden-300/60 dark:hover:border-garden-700/30 transition-all duration-300 group">
-                  <img src={`${base}icons/文档.svg`} alt="" class="w-5 h-5 icon-colorful" />
+                  class="paper-directory-card flex items-center gap-3 p-4 paper-surface   rounded-xl border border-gray-200/50 dark:border-white/[0.06] hover:shadow-md hover:-translate-y-0.5 hover:border-garden-300/60 dark:hover:border-garden-700/30 transition-all duration-300 group">
+                  <Icon name="note" class="w-5 h-5" />
                   <div class="min-w-0">
                     <h3 class="font-medium text-gray-900 dark:text-white group-hover:text-garden-600 dark:group-hover:text-garden-400 transition-colors">
                       {directNote?.title || child.title}
@@ -186,7 +193,7 @@ if (!isDir) {
             {tags.length > 0 && (
               <div class="flex flex-wrap gap-2">
                 {tags.map((tag) => (
-                  <span class="bg-gray-50/60 dark:bg-white/[0.03] backdrop-blur-sm text-gray-600 dark:text-gray-400 px-3 py-1 rounded-lg text-xs border border-gray-200/50 dark:border-white/[0.06]">
+                  <span class="paper-muted-surface dark:bg-white/[0.03]  text-gray-600 dark:text-gray-400 px-3 py-1 rounded-lg text-xs border border-gray-200/50 dark:border-white/[0.06]">
                     #{tag}
                   </span>
                 ))}

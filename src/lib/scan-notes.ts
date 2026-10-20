@@ -2,10 +2,12 @@ import fs from 'node:fs';
 import path from 'node:path';
 import matter from 'gray-matter';
 import { registerSlug } from './slug-hash';
+import { normalizeTags } from './tags';
 
 export interface NoteMeta {
   title: string;
   description?: string;
+  kind?: 'documentation';
 }
 
 export interface NoteFile {
@@ -56,6 +58,7 @@ export function scanNotes(dir: string = NOTES_DIR, parentSlug: string = ''): Not
       const dirPath = path.join(dir, entry.name);
       const slug = (parentSlug ? `${parentSlug}/${entry.name}` : entry.name).toLowerCase();
       const children = scanNotes(dirPath, slug);
+      if (!children.length) continue;
       const meta = readMeta(dirPath);
 
       items.push({
@@ -68,14 +71,16 @@ export function scanNotes(dir: string = NOTES_DIR, parentSlug: string = ''): Not
         meta,
       });
     } else if (entry.name.endsWith('.md') || entry.name.endsWith('.mdx')) {
-      const ext = entry.name.endsWith('.mdx') ? '.mdx' : '.md';
+      const filePath = path.relative(NOTES_DIR, path.join(dir, entry.name));
+      const data = readFrontmatter(filePath);
+      if (data.draft === true) continue;
       const slug = (parentSlug
         ? `${parentSlug}/${entry.name.replace(/\.(md|mdx)$/, '')}`
         : entry.name.replace(/\.(md|mdx)$/, '')).toLowerCase();
 
       items.push({
-        title,
-        filePath: path.relative(NOTES_DIR, path.join(dir, entry.name)),
+        title: data.title || title,
+        filePath,
         slug,
         order,
         type: 'file',
@@ -109,8 +114,7 @@ export function readFrontmatter(filePath: string): Record<string, any> {
   }
 }
 
-export function getAllFlatNotes(): FlatNote[] {
-  const tree = scanNotes();
+export function getAllFlatNotes(tree: NoteFile[] = scanNotes()): FlatNote[] {
   const notes: FlatNote[] = [];
 
   function walk(items: NoteFile[], category: string) {
@@ -122,7 +126,7 @@ export function getAllFlatNotes(): FlatNote[] {
           slug: item.slug,
           filePath: item.filePath,
           category,
-          tags: Array.isArray(fm.tags) ? fm.tags : [],
+          tags: normalizeTags(Array.isArray(fm.tags) ? fm.tags : []),
           summary: fm.summary,
         });
       } else if (item.type === 'dir' && item.children) {
@@ -143,10 +147,7 @@ export function getAllFlatNotes(): FlatNote[] {
  */
 export function buildBacklinksIndex(): Map<string, Array<{ title: string; slug: string; summary?: string }>> {
   const allNotes = getAllFlatNotes();
-  const titleToNote = new Map<string, FlatNote>();
-  for (const note of allNotes) {
-    titleToNote.set(note.title, note);
-  }
+  const titleToNote = new Map(allNotes.map(note => [note.title.replace(/\s+/g, ''), note]));
 
   const index = new Map<string, Array<{ title: string; slug: string; summary?: string }>>();
 
@@ -155,12 +156,14 @@ export function buildBacklinksIndex(): Map<string, Array<{ title: string; slug: 
     if (!fs.existsSync(fullPath)) continue;
 
     try {
-      const body = fs.readFileSync(fullPath, 'utf-8');
+      const body = matter(fs.readFileSync(fullPath, 'utf-8')).content.replace(/^([ \t]*)(`{3,}|~{3,})[^\n]*\n[\s\S]*?^\1\2[^\n]*$/gm, '').replace(/`[^`\n]+`/g, '');
       // Match all [[...]] wiki links
       const linkRegex = /\[\[([^\]]+)\]\]/g;
       let match: RegExpExecArray | null;
       while ((match = linkRegex.exec(body)) !== null) {
-        const linkedTitle = match[1].trim();
+        const rawTitle = match[1].trim();
+        const linkedTitle = titleToNote.get(rawTitle.replace(/\s+/g, ''))?.title;
+        if (!linkedTitle) continue;
         if (linkedTitle === note.title) continue;
 
         if (!index.has(linkedTitle)) {

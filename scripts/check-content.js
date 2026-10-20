@@ -101,6 +101,7 @@ function checkWikiLinks() {
   }
 
   for (const note of notes) {
+    if (note.draft) continue;
     const content = stripCodeExamples(note.body);
     const seen = new Set();
     for (const match of content.matchAll(/\[\[([^\]]+)\]\]/g)) {
@@ -127,6 +128,7 @@ function checkMediaReferences() {
   const markdownLinkPattern = /!?\[[^\]]*\]\(([^\s)]+)(?:\s+["'][^)]*)?\)/g;
 
   for (const note of notes) {
+    if (note.draft) continue;
     const content = stripCodeExamples(note.body);
     const references = new Set();
 

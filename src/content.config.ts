@@ -8,6 +8,7 @@ const notes = defineCollection({
     tags: z.array(z.string()).default([]),
     summary: z.string().optional(),
     draft: z.boolean().default(false),
+    updated: z.coerce.date().optional(),
   }),
 });
 
@@ -21,6 +22,7 @@ const projects = defineCollection({
     github: z.string().optional(),
     image: z.string().optional(),
     featured: z.boolean().default(false),
+    featuredOrder: z.number().default(100),
     date: z.date(),
   }),
 });

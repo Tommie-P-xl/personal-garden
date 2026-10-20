@@ -4,6 +4,7 @@ description: 面向射频时频谱图分类的研究代码，包含可学习散�
 tech: [Python, PyTorch, Kymatio, timm, Vision Transformer, RF]
 github: https://github.com/Tommie-P-xl/MulScatteringViT
 featured: true
+featuredOrder: 2
 date: 2026-04-03
 ---
 

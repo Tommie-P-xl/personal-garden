@@ -1,4 +1,5 @@
 ---
+import Icon from './Icon.astro';
 interface Props {
   base: string;
   currentPath: string;
@@ -12,7 +13,7 @@ function href(path: string) {
 ---
 
 {/* 导航栏 */}
-<nav class="site-nav bg-white/60 dark:bg-[#0f1117]/60 backdrop-blur-xl border-b border-gray-200/50 dark:border-white/[0.06] sticky top-0 z-50">
+<nav class="site-nav paper-surface   border-b border-gray-200/50 dark:border-white/[0.06] sticky top-0 z-50">
   <div class="max-w-6xl mx-auto px-4 sm:px-6">
     <div class="flex items-center justify-between h-16">
       {/* Logo */}
@@ -41,7 +42,7 @@ function href(path: string) {
               data-active={active ? 'true' : 'false'}
               data-nav-idx={item.idx}
             >
-              <img src={href(`/icons/${item.icon}.svg`)} alt="" class="w-4 h-4 dark:invert" />
+              <Icon name={item.icon} class="w-4 h-4" />
               {item.label}
               <span class:list={['nav-indicator absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-garden-500 to-violet-500 dark:from-garden-400 dark:to-violet-400 rounded-full transition-opacity duration-200', { 'opacity-0': !active }]}></span>
             </a>
@@ -51,7 +52,7 @@ function href(path: string) {
         {/* 主题切换按钮 */}
         <div class="relative ml-3">
           <button
-            id="theme-toggle"
+            id="theme-toggle" aria-expanded="false" aria-controls="theme-dropdown"
             class="p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100/60 dark:hover:bg-white/[0.06] transition-colors"
             aria-label="切换主题"
           >
@@ -65,7 +66,7 @@ function href(path: string) {
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
             </svg>
           </button>
-          <div id="theme-dropdown" class="hidden absolute right-0 mt-2 w-36 bg-white/90 dark:bg-[#141827]/90 backdrop-blur-xl border border-gray-200/60 dark:border-white/[0.08] rounded-xl shadow-xl overflow-hidden z-50">
+          <div id="theme-dropdown" class="hidden absolute right-0 mt-2 w-36 paper-surface dark:bg-[#141827]/90  border border-gray-200/60 dark:border-white/[0.08] rounded-xl shadow-xl overflow-hidden z-50">
             <button data-theme="light" class="w-full px-4 py-2.5 text-left text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-white/[0.06] flex items-center gap-2 transition-colors">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
               亮色
@@ -100,7 +101,7 @@ function href(path: string) {
           </svg>
         </button>
         <button
-          id="mobile-menu-btn"
+          id="mobile-menu-btn" aria-expanded="false" aria-controls="mobile-menu"
           class="p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100/60 dark:hover:bg-white/[0.06]"
           aria-label="打开菜单"
         >
@@ -121,7 +122,7 @@ function href(path: string) {
           { label: '关于', path: '/about/', icon: 'about', active: currentPath.includes('/about'), idx: 3 },
         ].map((item) => (
           <a href={href(item.path)} data-nav-idx={item.idx} class={`px-4 py-2.5 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors ${item.active ? 'bg-garden-50 dark:bg-garden-900/10 text-garden-700 dark:text-garden-400' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100/60 dark:hover:bg-white/[0.06]'}`}>
-            <img src={href(`/icons/${item.icon}.svg`)} alt="" class="w-4 h-4 dark:invert" /> {item.label}
+            <Icon name={item.icon} class="w-4 h-4" /> {item.label}
           </a>
         ))}
       </div>

@@ -1,4 +1,6 @@
 ---
+import Icon from '../../components/Icon.astro';
+import { normalizeTags } from '../../lib/tags';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ProjectCard from '../../components/ProjectCard.astro';
 import { getCollection } from 'astro:content';
@@ -19,7 +21,7 @@ projectsWithStars.sort((a, b) => {
 <BaseLayout title="项目展示">
   <div class="mb-8">
     <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
-      <img src={`${base}icons/项目.svg`} alt="" class="w-6 h-6 icon-dark-adapt" />
+      <Icon name="project" class="w-6 h-6" />
       项目展示
     </h1>
     <p class="text-gray-500 dark:text-gray-400">我做过的项目，展示我的技术能力和实践经验</p>
@@ -31,8 +33,8 @@ projectsWithStars.sort((a, b) => {
       <input
         type="text"
         id="search-input"
-        placeholder="搜索项目名称、技术栈..."
-        class="w-full px-4 py-3 pl-10 bg-white/60 dark:bg-[#141827]/60 backdrop-blur-xl border border-gray-200/50 dark:border-white/[0.06] rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 outline-none focus:border-garden-400 dark:focus:border-garden-500 focus:ring-2 focus:ring-garden-100/50 dark:focus:ring-garden-900/20 transition-[border-color,box-shadow]"
+        aria-label="搜索项目" placeholder="搜索项目名称、技术栈…"
+        class="w-full px-4 py-3 pl-10 paper-surface   border border-gray-200/50 dark:border-white/[0.06] rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 outline-none focus:border-garden-400 dark:focus:border-garden-500 focus:ring-2 focus:ring-garden-100/50 dark:focus:ring-garden-900/20 transition-[border-color,box-shadow]"
       />
       <svg class="absolute left-3 top-3.5 w-4 h-4 text-gray-400 dark:text-gray-500 group-focus-within:text-garden-500 dark:group-focus-within:text-garden-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
@@ -43,7 +45,7 @@ projectsWithStars.sort((a, b) => {
   {projectsWithStars.length > 0 ? (
     <div class="grid sm:grid-cols-2 gap-5" id="projects-grid">
       {projectsWithStars.map((project) => (
-        <div class="project-card" data-title={project.data.title.toLowerCase()} data-tech={project.data.tech.join(' ').toLowerCase()} data-desc={project.data.description.toLowerCase()}>
+        <div class="project-card" data-title={project.data.title.toLowerCase()} data-tech={normalizeTags(project.data.tech).join(' ').toLowerCase()} data-desc={project.data.description.toLowerCase()}>
           <ProjectCard
             title={project.data.title}
             description={project.data.description}

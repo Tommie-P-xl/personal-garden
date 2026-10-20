@@ -1,4 +1,5 @@
 ---
+import Icon from '../../components/Icon.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { scanNotes, getAllFlatNotes } from '../../lib/scan-notes';
 import { registerSlug } from '../../lib/slug-hash';
@@ -24,13 +25,14 @@ const displayTags = Object.entries(tagFrequency)
   .map(([tag]) => tag);
 
 // 一级分类（只展示顶层目录）
-const topCategories = tree.filter(item => item.type === 'dir');
+const topCategories = tree.filter(item => item.type === 'dir' && item.meta?.kind !== 'documentation');
+const documentation = tree.filter(item => item.type === 'dir' && item.meta?.kind === 'documentation');
 ---
 
 <BaseLayout title="笔记">
   <div class="mb-8">
     <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
-      <img src={`${base}icons/笔记.svg`} alt="" class="w-6 h-6 icon-dark-adapt" />
+      <Icon name="note" class="w-6 h-6" />
       笔记
     </h1>
     <p class="text-gray-500 dark:text-gray-400">在这里记录学习的点滴，让知识像花园一样生长</p>
@@ -42,8 +44,8 @@ const topCategories = tree.filter(item => item.type === 'dir');
       <input
         type="text"
         id="search-input"
-        placeholder="搜索笔记标题、内容、标签..."
-        class="w-full px-4 py-3 pl-10 bg-white/60 dark:bg-[#141827]/60 backdrop-blur-xl border border-gray-200/50 dark:border-white/[0.06] rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 outline-none focus:border-garden-400 dark:focus:border-garden-500 focus:ring-2 focus:ring-garden-100/50 dark:focus:ring-garden-900/20 transition-[border-color,box-shadow]"
+        aria-label="搜索笔记标题、摘要或标签" placeholder="搜索标题、摘要、标签…"
+        class="w-full px-4 py-3 pl-10 paper-surface   border border-gray-200/50 dark:border-white/[0.06] rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 outline-none focus:border-garden-400 dark:focus:border-garden-500 focus:ring-2 focus:ring-garden-100/50 dark:focus:ring-garden-900/20 transition-[border-color,box-shadow]"
       />
       <svg class="absolute left-3 top-3.5 w-4 h-4 text-gray-400 dark:text-gray-500 group-focus-within:text-garden-500 dark:group-focus-within:text-garden-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
@@ -58,11 +60,11 @@ const topCategories = tree.filter(item => item.type === 'dir');
       return (
       <a
         href={`${base}garden/${hashedSlug}/`}
-        class="category-item block bg-white/60 dark:bg-[#141827]/60 backdrop-blur-xl rounded-xl border border-gray-200/50 dark:border-white/[0.06] p-6 hover:shadow-md hover:-translate-y-0.5 hover:border-garden-300/60 dark:hover:border-garden-700/30 transition-all duration-300 group"
+        class="category-item block paper-surface   rounded-xl border border-gray-200/50 dark:border-white/[0.06] p-6 hover:shadow-md hover:-translate-y-0.5 hover:border-garden-300/60 dark:hover:border-garden-700/30 transition-all duration-300 group"
         data-name={cat.meta?.title || cat.title}
       >
         <div class="flex items-center gap-3 mb-2">
-          <img src={`${base}icons/文件夹.svg`} alt="" class="w-5 h-5 icon-colorful" />
+          <Icon name="folder" class="w-5 h-5" />
           <h3 class="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-garden-600 dark:group-hover:text-garden-400 transition-colors">
             {cat.meta?.title || cat.title}
           </h3>
@@ -88,6 +90,7 @@ const topCategories = tree.filter(item => item.type === 'dir');
     })}
   </div>
 
+  {documentation.length > 0 && <div class="documentation-links mb-8"><span>组件文档</span>{documentation.map(cat => <a href={`${base}garden/${registerSlug(cat.slug)}/`}>{cat.meta?.title || cat.title} →</a>)}</div>}
   <!-- 标签云 -->
   {displayTags.length > 0 && (
     <div class="mb-6">
@@ -95,8 +98,8 @@ const topCategories = tree.filter(item => item.type === 'dir');
       <div class="flex flex-wrap gap-2" id="tag-filter">
         {displayTags.map((tag) => (
           <button
-            data-tag={tag}
-            class="px-3 py-1 bg-gray-100/60 dark:bg-white/[0.05] backdrop-blur-sm text-gray-600 dark:text-gray-300 rounded-lg text-xs hover:bg-garden-50 dark:hover:bg-garden-900/20 hover:text-garden-700 dark:hover:text-garden-400 transition-colors whitespace-nowrap border border-gray-200/40 dark:border-white/[0.04]"
+            data-tag={tag} aria-pressed="false"
+            class="px-3 py-1 paper-muted-surface dark:bg-white/[0.05]  text-gray-600 dark:text-gray-300 rounded-lg text-xs hover:bg-garden-50 dark:hover:bg-garden-900/20 hover:text-garden-700 dark:hover:text-garden-400 transition-colors whitespace-nowrap border border-gray-200/40 dark:border-white/[0.04]"
           >
             #{tag}
           </button>
@@ -108,13 +111,13 @@ const topCategories = tree.filter(item => item.type === 'dir');
   <!-- 搜索结果（隐藏，搜索时显示） -->
   <div id="search-results" class="hidden">
     <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">搜索结果</h2>
-    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4" id="search-results-grid"></div>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4" id="search-results-grid" aria-live="polite" aria-atomic="true"></div>
     <div id="search-empty" class="hidden text-center py-8">
       <p class="text-gray-500 dark:text-gray-400">没有找到匹配的笔记</p>
     </div>
   </div>
 
-  <script is:inline define:vars={{ notesJson: JSON.stringify(allFlatNotes.map(n => ({ title: n.title, slug: registerSlug(n.slug), tags: n.tags, summary: n.summary || '', category: n.category }))) }}>
+  <script is:inline define:vars={{ base, notesJson: JSON.stringify(allFlatNotes.map(n => ({ title: n.title, slug: registerSlug(n.slug), tags: n.tags, summary: n.summary || '', category: n.category }))) }}>
     (function() {
       var notesData = JSON.parse(notesJson);
       var activeTag = null;
@@ -125,13 +128,8 @@ const topCategories = tree.filter(item => item.type === 'dir');
         return div.innerHTML;
       }
 
-      function getBase() {
-        var baseEl = document.querySelector('base');
-        return baseEl ? baseEl.href : '/';
-      }
-
       function doSearch(term) {
-        term = (term || '').toLowerCase();
+        term = (term || '').trim().toLowerCase();
         var hasSearch = term.length > 0 || activeTag;
 
         var categoriesGrid = document.getElementById('categories-grid');
@@ -157,7 +155,7 @@ const topCategories = tree.filter(item => item.type === 'dir');
           return matchesTag && matchesSearch;
         });
 
-        var base = getBase();
+
         if (searchResultsGrid) {
           if (results.length === 0) {
             searchResultsGrid.innerHTML = '';
@@ -169,11 +167,11 @@ const topCategories = tree.filter(item => item.type === 'dir');
               if (n.tags.length > 0) {
                 tagsHtml = '<div class="flex gap-1 mt-2 flex-wrap">' +
                   n.tags.slice(0,3).map(function(t) {
-                    return '<span class="bg-gray-50/80 dark:bg-white/[0.04] px-2 py-0.5 rounded-md text-xs text-gray-500 dark:text-gray-400 border border-gray-200/50 dark:border-white/[0.06]">#' + esc(t) + '</span>';
+                    return '<span class="paper-muted-surface dark:bg-white/[0.04] px-2 py-0.5 rounded-md text-xs text-gray-500 dark:text-gray-400 border border-gray-200/50 dark:border-white/[0.06]">#' + esc(t) + '</span>';
                   }).join('') + '</div>';
               }
               return '<a href="' + esc(base) + 'garden/' + esc(n.slug) + '/"' +
-                ' class="block bg-white/60 dark:bg-[#141827]/60 backdrop-blur-xl rounded-xl border border-gray-200/50 dark:border-white/[0.06] p-4 hover:shadow-md hover:-translate-y-0.5 hover:border-garden-300/60 dark:hover:border-garden-700/30 transition-all duration-300 group">' +
+                ' class="block paper-surface   rounded-xl border border-gray-200/50 dark:border-white/[0.06] p-4 hover:shadow-md hover:-translate-y-0.5 hover:border-garden-300/60 dark:hover:border-garden-700/30 transition-all duration-300 group">' +
                 '<div class="flex items-center gap-2 mb-1">' +
                 '<span class="text-xs text-gray-400 dark:text-gray-500">' + esc(n.category) + '</span></div>' +
                 '<h3 class="font-medium text-gray-900 dark:text-white group-hover:text-garden-600 dark:group-hover:text-garden-400 transition-colors line-clamp-2 mb-1">' + esc(n.title) + '</h3>' +
@@ -185,7 +183,12 @@ const topCategories = tree.filter(item => item.type === 'dir');
       }
 
       // 暴露为全局函数，供 BaseLayout 事件委托调用
-      window.__gardenSearch = doSearch;
+      window.__gardenSearch = function(term) {
+        doSearch(term);
+        var url = new URL(location.href);
+        if (term.trim()) url.searchParams.set('search', term.trim()); else url.searchParams.delete('search');
+        history.replaceState(history.state, '', url);
+      };
 
       window.__gardenTagFilter = function(btn) {
         var tag = btn.dataset.tag || '';
@@ -194,14 +197,38 @@ const topCategories = tree.filter(item => item.type === 'dir');
         var tagButtons = document.querySelectorAll('#tag-filter button');
         tagButtons.forEach(function(b) {
           var isActive = b.dataset.tag === activeTag;
+          b.setAttribute('aria-pressed', String(isActive));
           b.className = isActive
             ? 'px-3 py-1 bg-garden-600 dark:bg-garden-700 text-white rounded-lg text-xs transition-colors whitespace-nowrap'
-            : 'px-3 py-1 bg-gray-100/60 dark:bg-white/[0.05] text-gray-600 dark:text-gray-300 rounded-lg text-xs hover:bg-garden-50 dark:hover:bg-garden-900/20 hover:text-garden-700 dark:hover:text-garden-400 transition-colors whitespace-nowrap border border-gray-200/40 dark:border-white/[0.04]';
+            : 'px-3 py-1 paper-muted-surface dark:bg-white/[0.05] text-gray-600 dark:text-gray-300 rounded-lg text-xs hover:bg-garden-50 dark:hover:bg-garden-900/20 hover:text-garden-700 dark:hover:text-garden-400 transition-colors whitespace-nowrap border border-gray-200/40 dark:border-white/[0.04]';
         });
 
         var searchInput = document.getElementById('search-input');
         doSearch(searchInput ? searchInput.value : '');
+        var url = new URL(location.href);
+        if (activeTag) url.searchParams.set('tag', activeTag); else url.searchParams.delete('tag');
+        history.replaceState(history.state, '', url);
       };
+      function syncQuery() {
+        if (!document.getElementById('categories-grid')) return;
+        var params = new URLSearchParams(location.search);
+        var input = document.getElementById('search-input');
+        if (input) input.value = params.get('search') || '';
+        var requestedTag = params.get('tag');
+        activeTag = notesData.some(function(n) { return n.tags.includes(requestedTag); }) ? requestedTag : null;
+        document.querySelectorAll('#tag-filter [data-tag]').forEach(function(btn) {
+          btn.setAttribute('aria-pressed', String(btn.dataset.tag === activeTag));
+        });
+        doSearch(input ? input.value : '');
+      }
+      // One persistent listener reads the current page's synchronization function.
+      window.__syncGardenQuery = syncQuery;
+      if (!window.__gardenQueryBound) {
+        window.__gardenQueryBound = true;
+        document.addEventListener('astro:page-load', function() { window.__syncGardenQuery?.(); });
+        window.addEventListener('popstate', function() { window.__syncGardenQuery?.(); });
+      }
+      syncQuery();
     })();
   </script>
 </BaseLayout>

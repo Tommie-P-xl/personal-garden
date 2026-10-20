@@ -4,6 +4,7 @@ description: 面向 Claude Code 与 Codex 的 Windows 托盘通知管理器；�
 tech: [Python, Windows, Flask, WinRT, GitHub Actions]
 github: https://github.com/Tommie-P-xl/ClaudeBeep
 featured: true
+featuredOrder: 4
 date: 2026-09-09
 ---
 

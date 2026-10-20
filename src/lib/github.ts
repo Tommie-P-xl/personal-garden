@@ -59,6 +59,7 @@ export async function fetchStars(repo: string): Promise<number> {
   try {
     const res = await fetch(`https://api.github.com/repos/${repo}`, {
       headers: { Accept: 'application/vnd.github.v3+json' },
+      signal: AbortSignal.timeout(5000),
     });
     if (res.ok) {
       const data = await res.json();
