@@ -34,11 +34,11 @@ personal-garden 项目中所有可用 MDX 组件的完整参数和用法。
 
 ## 2. Collapse 折叠面板
 
-隐藏详细内容，点击展开查看。
+默认显示详细内容，点击标题可收起或展开。
 
 **属性：**
 - `title`: 面板标题（必填）
-- `defaultOpen`: 是否默认展开（可选，默认 false）
+- `defaultOpen`: 是否默认展开（可选，默认 true）
 
 ```mdx
 <Collapse title="点击查看详细实现">
@@ -239,7 +239,7 @@ $$
 ```mdx
 <KnowledgeMap data={{
   name: "Git 五大区域",
-  description: "先读摘要；有子项的卡片可点击或按 Enter 展开。",
+  description: "先读摘要；有子项的卡片默认展开，可点击或按 Enter 收起/展开。",
   children: [
     { name: "工作区 · Working Directory", description: "编辑文件的地方", command: "git status · git diff" },
     { name: "暂存区 · Index / Stage", description: "选择下一次提交的内容", children: [
@@ -352,3 +352,9 @@ flowchart LR
 ### 子主题2
 详细内容...
 ```
+
+## 代码阅读与展开约定
+
+- 笔记中的 Collapse 和知识卡片所有层级默认展开，读者可手动收起；Mermaid 图直接显示，源码面板默认收起，可按需展开。不要自动重置读者的选择。
+- 代码块、行内代码和卡片命令统一使用站点的 JetBrains Mono / Noto Sans SC 字体，桌面 15px、手机 14px；不在 MDX 中单独缩小字号或覆盖字体。
+- 技能路径为 `skills/note-to-mdx/`；YAML 描述含冒号时使用多行字符串，提交前运行 `npm test` 校验技能元数据。

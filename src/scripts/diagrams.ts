@@ -107,7 +107,6 @@ function schedule(figure: HTMLElement) {
       if (current !== revision || !figure.isConnected) return;
       figure.dataset.rendered = 'error';
       figure.querySelector<HTMLElement>('.diagram-status')!.textContent = '图表暂时无法显示，可查看下方 Mermaid 源码。';
-      figure.querySelector('details')?.setAttribute('open', '');
       // 网络加载失败允许下次导航重试，语法错误只影响当前图表。
       library = undefined;
     }

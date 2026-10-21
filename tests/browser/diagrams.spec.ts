@@ -96,12 +96,17 @@ for (const base of ['/personal-garden/', '/']) {
       const invalid = page.locator('[data-mermaid]').last();
       await invalid.scrollIntoViewIfNeeded();
       await expect(invalid).toHaveAttribute('data-rendered', 'error');
+      await expect(invalid.locator('details')).not.toHaveAttribute('open');
+      await invalid.locator('summary').click();
       await expect(invalid.locator('details')).toHaveAttribute('open');
       await expect(invalid.locator('code')).toContainText('this is not valid mermaid');
       await page.goto(`${base}garden/${hashSlug('9998-regression/0001-a')}/`);
       const map = page.locator('.knowledge-map');
       await expect(map).toContainText('Full long label without truncation');
+      await expect(map.locator('details')).toHaveAttribute('open');
       await map.locator('summary').focus();
+      await page.keyboard.press('Enter');
+      await expect(map.locator('details')).not.toHaveAttribute('open');
       await page.keyboard.press('Enter');
       await expect(map).toContainText('Nested detail');
       await expect(map.locator('details')).toHaveAttribute('open');
@@ -113,6 +118,7 @@ for (const base of ['/personal-garden/', '/']) {
       for (const path of [base, `${base}about/`]) {
         await page.goto(path);
         await expect(page.locator('a[href="https://x.com/wux4948"]')).toBeVisible();
+        await expect(page.locator('a[href="https://x.com/wux4948"]')).toHaveText('@wux4948');
         await expect(page.locator('[data-copy="w9519539"], img[src*="wechat"]')).toHaveCount(0);
       }
       await expect(page.locator('[aria-labelledby="education-title"]')).not.toContainText(/电子科技|浙江工业|硕士|本科|教育经历/);
@@ -124,15 +130,48 @@ for (const base of ['/personal-garden/', '/']) {
         const page = await context.newPage();
         await page.goto(`http://127.0.0.1:4333${base}garden/${hashSlug('9998-regression/0001-a')}/`);
         const map = page.locator('.knowledge-map');
-        await map.locator('summary').click();
         await expect(map.locator('details')).toHaveAttribute('open');
         await expect(map).toContainText('Nested detail');
         await page.goto(`http://127.0.0.1:4333${base}garden/${hashSlug('9998-regression/0004-diagrams')}/`);
+        await expect(page.locator('.diagram-source').first()).not.toHaveAttribute('open');
         await page.locator('.diagram-source summary').first().click();
         await expect(page.locator('.diagram-source').first()).toHaveAttribute('open');
         await expect(page.locator('.diagram-source code').first()).toContainText('flowchart LR');
         expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
       } finally { await context.close(); }
+    });
+    test('code fonts load locally, remain readable on mobile, and preserve copied text', async ({ page, context }) => {
+      await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+      const note = getAllFlatNotes().find(note => note.title === 'Git 核心概念')!;
+      await page.setViewportSize({ width: 1440, height: 1000 });
+      await page.goto(`${base}garden/${hashSlug(note.slug)}/`);
+      const fonts = await page.evaluate(async () => {
+        await document.fonts.load('16px "JetBrains Mono Variable"', 'git stash');
+        await document.fonts.load('16px "Noto Sans SC Variable"', '储藏当前更改');
+        return [...document.fonts].filter(font => font.status === 'loaded').map(font => font.family);
+      });
+      expect(fonts).toContain('JetBrains Mono Variable');
+      expect(fonts).toContain('Noto Sans SC Variable');
+      const code = page.locator('.astro-code code').filter({ hasText: 'git stash pop' }).first();
+      for (const [width, size] of [[1440, '15px'], [390, '14px']] as const) {
+        await page.setViewportSize({ width, height: 1000 });
+        for (const item of [code, page.locator('.knowledge-map code').first(), page.locator('.diagram-source code').first(), page.locator('.prose p > code').first()]) {
+          await expect(item).toHaveCSS('font-size', size);
+          await expect(item).toHaveCSS('font-family', /JetBrains Mono Variable.*Noto Sans SC Variable/);
+        }
+        expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+      }
+      const original = await code.textContent();
+      await code.locator('..').getByRole('button', { name: '复制代码' }).click();
+      await expect(code.locator('..').getByRole('button', { name: '复制代码' })).toHaveText('已复制');
+      // Windows 剪贴板可能把换行标准化为 CRLF，比较内容时统一换行形式。
+      expect((await page.evaluate(() => navigator.clipboard.readText())).replace(/\r\n/g, '\n')).toBe(original?.replace(/\r\n/g, '\n'));
+      await page.goto(`${base}garden/${hashSlug('9998-regression/0001-a')}/`);
+      await expect(page.locator('.paper-collapse')).toHaveAttribute('open');
+      await page.locator('.paper-collapse summary').click();
+      await expect(page.locator('.paper-collapse')).not.toHaveAttribute('open');
+      await page.evaluate(() => document.documentElement.classList.add('dark'));
+      await expect(page.locator('.paper-collapse')).not.toHaveAttribute('open');
     });
   });
 }

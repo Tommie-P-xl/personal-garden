@@ -17,7 +17,7 @@
 .knowledge-details[open] > summary .knowledge-chevron { transform: rotate(45deg); }
 .knowledge-body { padding: 0 14px 14px; }
 .prose .knowledge-body > p { margin: 0 0 10px; }
-.prose .knowledge-map code { display: block; white-space: pre-wrap; overflow-wrap: anywhere; font-size: .78rem; margin-top: 5px; }
+.prose .knowledge-map code { display: block; white-space: pre-wrap; overflow-wrap: anywhere; font-size: var(--paper-code-size); line-height: 1.8; margin-top: 5px; }
 .knowledge-item-nested { border-width: 0 0 0 2px; border-radius: 0; margin-top: 10px; }
 .knowledge-item-nested .knowledge-number { display: none; }
 .knowledge-item-nested .knowledge-leaf, .knowledge-item-nested summary { padding: 6px 10px; }

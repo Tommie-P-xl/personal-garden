@@ -1,6 +1,8 @@
 ---
 name: note-to-mdx
-description: Use when converting rough notes, drafts, or handwritten learning content into structured MDX files for the personal-garden digital garden project. Triggers: user has raw notes in any format (MD, TXT, DOC, PDF), notes need chapter reorganization, content should use MDX components for better presentation.
+description: >-
+  Use when converting rough notes, drafts, or handwritten learning content into structured MDX files for the personal-garden digital garden project.
+  Triggers: user has raw notes in any format (MD, TXT, DOC, PDF), notes need chapter reorganization, content should use MDX components for better presentation.
 ---
 
 # 手稿笔记转 MDX
@@ -236,7 +238,7 @@ $$
 ```mdx
 <KnowledgeMap data={{
   name: "Git 五大区域",
-  description: "先读摘要；有子项的卡片可点击或按 Enter 展开。",
+  description: "先读摘要；有子项的卡片默认展开，可点击或按 Enter 收起/展开。",
   children: [
     { name: "工作区 · Working Directory", description: "编辑文件的地方", command: "git status · git diff" },
     { name: "暂存区 · Index / Stage", description: "选择下一次提交的内容", children: [
@@ -369,10 +371,10 @@ src/content/notes/0005-git/
 
 ## 使用方式
 
-在 Claude Code 中直接描述你的需求：
+在支持技能导入的助手中加载 `skills/note-to-mdx/SKILL.md`，或在提示词中指定这个路径：
 
 ```
-/note-to-mdx
+请读取并遵循 skills/note-to-mdx/SKILL.md。
 
 我有一份关于 TCP/IP 协议的学习笔记，内容如下：
 [粘贴你的笔记内容]
@@ -387,3 +389,9 @@ src/content/notes/0005-git/
 2. 对新增/修改图逐一浏览器验证渲染、节点全文、连线、明暗主题与 390px 布局，不能只检查 Mermaid 语法。
 3. 图表系统修改需运行 `npm test` 与 `npm run test:integration`，覆盖双部署路径、放大关闭、导航和失败降级。
 4. 更新组件指南、README 与 CHANGELOG；只有用户授权发布时才推送部署。
+
+## 代码阅读与展开约定
+
+- 笔记中的 Collapse 和知识卡片所有层级默认展开，读者可手动收起；Mermaid 图直接显示，源码面板默认收起，可按需展开。不要自动重置读者的选择。
+- 代码块、行内代码和卡片命令统一使用站点的 JetBrains Mono / Noto Sans SC 字体，桌面 15px、手机 14px；不在 MDX 中单独缩小字号或覆盖字体。
+- 技能路径为 `skills/note-to-mdx/`；YAML 描述含冒号时使用多行字符串，提交前运行 `npm test` 校验技能元数据。

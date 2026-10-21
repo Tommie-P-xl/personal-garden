@@ -6,7 +6,7 @@ const expandable = Boolean(node.detail || node.children?.length);
 ---
 <div class:list={['knowledge-item', { 'knowledge-item-nested': nested }]}>
   {expandable ? (
-    <details class="knowledge-details">
+    <details class="knowledge-details" open>
       <summary>
         <span class="knowledge-number" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
         <span class="knowledge-copy"><strong>{node.name}</strong>{node.description && <span>{node.description}</span>}</span>

@@ -2,6 +2,15 @@
 
 所有版本的更新记录。
 
+## 2026-10-21 代码排版、展开默认值与技能路径修复
+
+- 修复 note-to-mdx 技能描述中未转义冒号导致的 YAML 解析错误，改用多行字符串，并加入技能元数据解析检查。
+- 将技能移至 `skills/note-to-mdx/`，删除 `.claude` 目录，更新文档链接与校验路径。
+- 全局统一代码块、行内代码、知识卡片命令与图表源码的字体：本地托管 JetBrains Mono / Noto Sans SC；桌面 15px、手机 14px，代码块行高 1.8。
+- Collapse 与知识卡片默认展开，Mermaid 源码面板默认收起；保留键盘与鼠标手动切换，主题切换不重置读者选择。
+- 关于页 X 联系入口去掉重复字母，显示图标与 `@wux4948`。
+- 更新 README、组件指南与技能参考，并扩展双部署字体加载、字号、展开默认值和代码复制回归。
+
 ## 2026-10-21 笔记可视化与个人资料更新
 
 - 用自适应知识卡片替换固定画布思维导图，支持完整长标题、摘要、命令及多级原生折叠；保留旧 `BraceMap` 数据接口的兼容入口。
@@ -147,8 +156,8 @@
 - 提供组件选择速查表和完整使用示例
 
 ### Skill 文件
-- `.claude/skills/note-to-mdx/SKILL.md` — 主技能文档（转换流程、组件选择规则、完整示例）
-- `.claude/skills/note-to-mdx/component-reference.md` — 所有 MDX 组件的详细参数参考
+- `skills/note-to-mdx/SKILL.md` — 主技能文档（转换流程、组件选择规则、完整示例）
+- `skills/note-to-mdx/component-reference.md` — 所有 MDX 组件的详细参数参考
 
 ### 文档更新
 - README.md 新增 Skill 使用说明章节

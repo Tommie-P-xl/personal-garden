@@ -8,6 +8,17 @@ import { normalizeTags } from '../src/lib/tags';
 import { scanNotes, getAllFlatNotes } from '../src/lib/scan-notes';
 import { resolveMediaPath } from '../src/lib/media-path';
 import headings from '../src/lib/remark-note-headings';
+import matter from 'gray-matter';
+
+test('repository skills have valid YAML metadata', () => {
+  const root = path.resolve('skills');
+  for (const file of fs.readdirSync(root, { recursive: true }).filter(file => path.basename(String(file)) === 'SKILL.md')) {
+    const { data } = matter(fs.readFileSync(path.join(root, String(file)), 'utf8'));
+    assert.equal(typeof data.name, 'string', String(file));
+    assert.equal(typeof data.description, 'string', String(file));
+    assert.ok(data.description.length > 0);
+  }
+});
 
 test('deployment paths preserve external URLs and do not duplicate the base', () => {
   for (const base of ['/', '/personal-garden/']) {

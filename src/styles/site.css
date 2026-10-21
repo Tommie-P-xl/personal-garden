@@ -1,4 +1,9 @@
+@import '@fontsource-variable/jetbrains-mono/wght.css';
+@import '@fontsource-variable/noto-sans-sc/wght.css';
+
 :root {
+  --paper-code-font: "JetBrains Mono Variable", "Noto Sans SC Variable", "PingFang SC", "Microsoft YaHei", ui-monospace, monospace;
+  --paper-code-size: 15px;
   color-scheme: light;
   --paper-bg: #f3efe6;
   --paper-surface: #fffdf8;
@@ -676,8 +681,14 @@ html[data-reading-mode="focus"] .note-layout > :is(.paper-sidebar, .paper-toc, #
   text-decoration: underline;
   text-underline-offset: .2em;
 }
+.prose :is(pre,code,kbd,samp) {
+  font-family: var(--paper-code-font);
+  font-weight: 400;
+  font-variant-ligatures: none;
+  -webkit-font-smoothing: antialiased;
+}
 .prose :not(pre)>code {
-  font-size: .85em;
+  font-size: var(--paper-code-size);
   background: var(--paper-surface-muted);
   border: 1px solid var(--paper-line);
   padding: .1em .3em;
@@ -686,10 +697,9 @@ html[data-reading-mode="focus"] .note-layout > :is(.paper-sidebar, .paper-toc, #
 }
 .prose pre {
   position: relative;
-  font-family: ui-monospace,Consolas,monospace;
-  font-size: .8rem;
-  line-height: 1.7;
-  padding: 18px;
+  font-size: var(--paper-code-size);
+  line-height: 1.8;
+  padding: 22px;
   margin: 1.25rem 0;
   overflow-x: auto;
   max-width: 100%;
@@ -698,6 +708,8 @@ html[data-reading-mode="focus"] .note-layout > :is(.paper-sidebar, .paper-toc, #
   background: var(--paper-code) !important;
 }
 .prose pre code {
+  font-size: inherit;
+  line-height: inherit;
   background: transparent;
   padding: 0;
   border: 0;
@@ -1005,8 +1017,10 @@ html[data-reading-mode="focus"] .note-layout > :is(.paper-sidebar, .paper-toc, #
     line-height: 1.9;
   }
   .prose pre {
-    font-size: .75rem;
     padding: 14px;
+  }
+  :root {
+    --paper-code-size: 14px;
   }
   .prose h2 {
     font-size: 1.3rem;

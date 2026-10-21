@@ -95,7 +95,7 @@ draft: false
 ```
 
 - `name` 必填；`description` 始终显示；`detail` 展开后显示；`command` 放短命令；`children` 递归。字段为纯文本，不解析 Markdown。
-- 多列自适应、长文字换行，使用原生 `<details>` 折叠，关闭 JavaScript 仍可阅读。
+- 多列自适应、长文字换行，使用原生 `<details>` 折叠，关闭 JavaScript 仍可阅读。笔记中的 Collapse 和知识卡片所有层级默认展开，可手动收起。Mermaid 图直接显示，源码面板默认收起，可按需展开。
 - 旧 `BraceMap` 保留为相同卡片的兼容入口，原固定节点宽度/配色参数不再生效。新笔记统一使用 `KnowledgeMap`。
 
 Markdown 和 MDX 均可直接写，无需 import：
@@ -112,7 +112,7 @@ flowchart LR
 - 默认居中；长流程建议 `flowchart TB`，宽图在图内滚动。图表可放大、缩放与适应窗口；Escape 关闭并恢复按钮焦点，专注模式保持。
 - 图进入视口附近才加载本地打包的 Mermaid；无需第三方 CDN。主题切换后重新绘制，支持 Astro 页面导航。
 - 保留可展开、可复制的源码。禁用 JavaScript、网络加载失败或语法错误时显示源码降级。SVG 使用 strict 安全模式；笔记不使用 HTML 标签、脚本或 click 回调。
-- 完整示例见站内“MDX 组件说明”；维护规则及字段模板位于 `.claude/skills/note-to-mdx/SKILL.md` 与 `component-reference.md`。
+- 完整示例见站内“MDX 组件说明”；维护规则及字段模板位于 `skills/note-to-mdx/SKILL.md` 与 `component-reference.md`。
 - 实现位于 `src/lib/remark-diagrams.ts`、`src/scripts/diagrams.ts`、`src/components/mdx/KnowledgeMap.astro` 和 `src/styles/diagrams.css`。
 
 ## 个人资料维护
@@ -203,3 +203,11 @@ GitHub Pages 默认使用 `/personal-garden/`；Cloudflare Pages 构建需设置
 - Markdown 图表语法错误降级、旧结构图兼容、X 联系方式与英文教育信息。
 
 测试使用 Chromium，覆盖桌面与手机尺寸；这不等同于所有浏览器的兼容性认证。发布工作流使用完整 Git 历史计算最近笔记日期，测试通过后再上传正式 `dist/` 并发布。
+
+## 代码字体与技能目录
+
+- 代码块、行内代码、知识卡片命令和 Mermaid 源码统一使用本地托管的 [JetBrains Mono](https://fontsource.org/fonts/jetbrains-mono) 与 [Noto Sans SC](https://fontsource.org/fonts/noto-sans-sc)，中英文字号一致；桌面 15px、手机 14px，代码块行高 1.8，禁用代码连字以保持符号清晰。
+- 字体通过 Fontsource 包构建到站点，不依赖外部字体服务；WOFF2 按字符范围加载，`font-display: swap` 在字体未就绪时先使用系统字体。字体许可随站点附于 `public/fonts/JetBrains-Mono-OFL.txt` 与 `public/fonts/Noto-Sans-SC-OFL.txt`。
+- 字体配置与字号在 `src/styles/site.css` 的 `--paper-code-font`、`--paper-code-size`；卡片复用同一规则，手机不再额外缩小代码字号。
+- 项目技能现在位于 `skills/note-to-mdx/`，原 `.claude` 目录已删除。技能 YAML 使用多行描述，`npm test` 检查所有技能元数据能否解析。
+- 关于页的 X 联系入口显示图标和 `@wux4948`，不再重复显示字母 X。

@@ -64,6 +64,7 @@ try {
     '', '```mermaid title="Invalid syntax"', 'this is not valid mermaid', '```',
   ].join('\n'));
   fs.appendFileSync(path.join(fixture,'0001-a.mdx'), '\n\n<BraceMap data={{name:"Legacy compatibility",children:[{name:"Full long label without truncation",description:"Always visible",children:[{name:"Nested detail"}]}]}} />');
+  fs.appendFileSync(path.join(fixture,'0001-a.mdx'), '\n\n<Collapse title="默认展开验证">中英文内容 Default expanded</Collapse>');
   for(const target of ['github','cloudflare']) {
     const dest=path.join(output,target);
     remove(dest);
