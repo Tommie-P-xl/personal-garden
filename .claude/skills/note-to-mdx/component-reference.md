@@ -232,54 +232,48 @@ $$
 
 ---
 
-## 9. BraceMap 大括号结构图
+## 9. 知识卡片与 Mermaid
 
-使用 d3.js 渲染的层次结构图。
-
-**属性：**
-- `data`: object — 树形数据（必填）
-  - `name`: string — 节点名称
-  - `children`: array — 子节点数组（可选，递归结构）
-- `config`: object — 样式配置（可选）
-  - `nodeWidth`: number — 节点宽度（默认 160）
-  - `nodeHeight`: number — 节点高度（默认 32）
-  - `levelGap`: number — 层级间距（默认 60）
-  - `braceWidth`: number — 大括号宽度（默认 14）
-  - `braceColor`: string — 大括号颜色（默认 "#666"）
-  - `rootBgColor`: string — 根节点背景色（默认 "#4a7cff"）
-  - `rootTextColor`: string — 根节点文字颜色（默认 "#fff"）
-  - `fontSize`: number — 字体大小
+### KnowledgeMap 知识卡片（替代固定画布思维导图）
 
 ```mdx
-<BraceMap
-  data={{
-    name: "操作系统",
-    children: [
-      {
-        name: "进程管理",
-        children: [
-          { name: "调度" },
-          { name: "同步" },
-        ],
-      },
-      {
-        name: "内存管理",
-        children: [
-          { name: "虚拟内存" },
-          { name: "分页" },
-        ],
-      },
-    ],
-  }}
-  config={{
-    braceColor: "#e74c3c",
-    rootBgColor: "#e74c3c",
-  }}
-/>
+<KnowledgeMap data={{
+  name: "Git 五大区域",
+  description: "先读摘要；有子项的卡片可点击或按 Enter 展开。",
+  children: [
+    { name: "工作区 · Working Directory", description: "编辑文件的地方", command: "git status · git diff" },
+    { name: "暂存区 · Index / Stage", description: "选择下一次提交的内容", children: [
+      { name: "添加修改", command: "git add <file>" },
+      { name: "检查暂存", command: "git diff --cached" }
+    ] }
+  ]
+}} />
 ```
 
-**适用场景：** 知识体系总览、目录结构、分类关系。
-**不适用：** 流程图（用文字描述）、简单列表。
+`name` 必填；`description` 是始终可见的摘要；`detail` 是展开后的补充文字；`command` 放短命令；`children` 可递归。文字自动换行，手机自动单列，原生折叠无需脚本。字段内容为纯文本，不解析 Markdown。核心信息放摘要，不能只藏在折叠中。
+
+旧 `<BraceMap data={...} />` 保留为兼容入口，渲染相同卡片；新笔记只使用 `<KnowledgeMap>`。不要再使用 `nodeWidth`、`nodeHeight`、`braceColor` 等固定画布配置。
+
+### Mermaid 可视化（Markdown / MDX 均无需 import）
+
+````md
+```mermaid title="Git 文件状态流转"
+flowchart LR
+  accTitle: Git 文件状态流转
+  U["未跟踪"] -->|git add| S["已暂存"]
+  S -->|git commit| C["已提交"]
+  C -->|编辑文件| M["已修改"]
+  M -->|git add| S
+```
+````
+
+- 流程用 `flowchart`；状态机可用 `stateDiagram-v2`；交互时序可用 `sequenceDiagram`；仅展示分支历史时可用 `gitGraph`。
+- 默认居中；宽图在图内横向滚动，提供放大/缩小、适应窗口、Escape 关闭和源码查看。明暗主题随网站切换，不在笔记里写死颜色。
+- 纵向流程优先 `TB`，短流程可用 `LR`；超过 6–8 个复杂节点时拆图。节点用稳定英文 ID，中文标签用双引号。
+- 给图写 `title="..."` 和 `accTitle:`。避免 init 指令、HTML 标签、click 回调、外部图片和自定义脚本。
+- 展示命令执行结果的代码块保持原样。**不得用空格、箭头、ASCII 边框拼流程图/概念树**；目录概览用 KnowledgeMap，矩阵结果用表格；实际终端输出与源代码保留。
+- 按原文核对方向、条件、HEAD/分支/标签指针、前后状态，不能仅把旧图的布局机械照搬。图下保留关键解释。
+- 图表在浏览器按需渲染；禁用 JavaScript、加载失败或语法错误时，保留可阅读/复制的源码。知识卡片始终可用。
 
 ---
 
@@ -350,7 +344,7 @@ $$
 ```mdx
 ## 知识总览
 
-<BraceMap data={{ name: "主题", children: [...] }} />
+<KnowledgeMap data={{ name: "主题", children: [{ name: "子主题", description: "始终显示的摘要" }] }} />
 
 ### 子主题1
 详细内容...

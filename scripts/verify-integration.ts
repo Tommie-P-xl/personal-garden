@@ -58,6 +58,12 @@ try {
     fs.writeFileSync(path.join(fixture,name+'.mdx'),`---\ntitle: Regression ${dir}\nsummary: Public fixture ${dir}\n---\n# Duplicate title\n\n## Section\n\n<Image src="./${dir}/_media/same.svg" alt="${dir}" />\n\n<Media type="image" src={"./${dir}/_media/same.svg"} alt="${dir}" />`);
   }
   fs.writeFileSync(path.join(fixture,'0003-draft.mdx'),'---\ntitle: REGRESSION_PRIVATE\nsummary: REGRESSION_PRIVATE_SUMMARY\ntags: [REGRESSION_PRIVATE_TAG]\ndraft: true\n---\n# Draft\n\nUnpublished.');
+  fs.writeFileSync(path.join(fixture,'0004-diagrams.md'), [
+    '---', 'title: Diagram regression', '---',
+    '```mermaid title="Markdown flow"', 'flowchart LR', '  A["Start"] --> B["Finish"]', '```',
+    '', '```mermaid title="Invalid syntax"', 'this is not valid mermaid', '```',
+  ].join('\n'));
+  fs.appendFileSync(path.join(fixture,'0001-a.mdx'), '\n\n<BraceMap data={{name:"Legacy compatibility",children:[{name:"Full long label without truncation",description:"Always visible",children:[{name:"Nested detail"}]}]}} />');
   for(const target of ['github','cloudflare']) {
     const dest=path.join(output,target);
     remove(dest);

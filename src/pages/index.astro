@@ -22,12 +22,12 @@ const interests = ['无人机射频', '开集识别', 'PyTorch', '嵌入式 AI',
       <p class="eyebrow">学习 · 研究 · 构建</p>
       <h1>Tommie 的数字花园</h1>
       <p class="hero-intro">研究射频信号与开集识别，<br class="hidden sm:block" />也把反复遇到的问题，做成可复用的工具。</p>
-      <p class="text-muted hero-caption">电子信息研究生 / AI Agent &amp; Embedded AI</p>
+      <p class="text-muted hero-caption">Master's student in Electronic Information / AI Agent &amp; Embedded AI</p>
       <div class="hero-actions"><a class="button-primary" href={`${base}garden/`}>阅读笔记 <Icon name="arrow" class="w-4 h-4" /></a><a class="button-secondary" href={`${base}projects/`}>查看项目</a></div>
       <div class="hero-contacts">
         <a href="mailto:wux4948@gmail.com"><Icon name="mail" class="w-4 h-4" />邮件</a>
         <a href="https://github.com/Tommie-P-xl" target="_blank" rel="noopener noreferrer"><Icon name="github" class="w-4 h-4" />GitHub</a>
-        <button class="copy-btn" type="button" data-copy="w9519539" aria-label="复制微信号"><Icon name="message" class="w-4 h-4" /><span>微信号</span></button>
+        <a href="https://x.com/wux4948" target="_blank" rel="noopener noreferrer" aria-label="X：@wux4948"><Icon name="x" class="w-4 h-4" />@wux4948</a>
       </div>
     </div>
     <img class="hero-avatar" src={`${base}images/avatar.jpg`} width="128" height="128" alt="Tommie 的头像" />
@@ -38,26 +38,5 @@ const interests = ['无人机射频', '开集识别', 'PyTorch', '嵌入式 AI',
     <div class="recent-grid">{recent.map(note => <a class="recent-note paper-surface" href={`${base}garden/${registerSlug(note.slug)}/`}><div class="recent-meta"><span>{note.category}</span>{note.updated && <time datetime={note.updated}>{note.updated.slice(0,10)}</time>}</div><h3>{note.title}</h3><p>{note.summary}</p><span class="read-more">阅读笔记 ↗</span></a>)}</div>
   </section>
   <section class="home-section" aria-labelledby="projects-heading"><div class="section-heading"><div><p class="eyebrow">研究与工具</p><h2 id="projects-heading">精选项目</h2></div><a href={`${base}projects/`}>全部项目 <Icon name="arrow" class="w-4 h-4" /></a></div><div class="grid sm:grid-cols-2 gap-5">{featured.map(p => <ProjectCard {...p.data} slug={p.id} stars={p.stars} />)}</div></section>
-  <section class="home-section" aria-labelledby="topics-heading"><div class="section-heading"><div><p class="eyebrow">按主题探索</p><h2 id="topics-heading">笔记花园</h2></div></div><div class="topic-grid">{categories.map(cat => <a class="topic-card paper-surface" href={`${base}garden/${registerSlug(cat.slug)}/`}><Icon name="folder" /><div><h3>{cat.meta?.title || cat.title}</h3><p>{cat.meta?.description}</p></div><Icon name="arrow" class="w-4 h-4" /></a>)}</div><div class="home-about"><span>电子科技大学 · 电子信息硕士在读</span><a href={`${base}about/`}>教育经历与关于我 →</a></div></section>
+  <section class="home-section" aria-labelledby="topics-heading"><div class="section-heading"><div><p class="eyebrow">按主题探索</p><h2 id="topics-heading">笔记花园</h2></div></div><div class="topic-grid">{categories.map(cat => <a class="topic-card paper-surface" href={`${base}garden/${registerSlug(cat.slug)}/`}><Icon name="folder" /><div><h3>{cat.meta?.title || cat.title}</h3><p>{cat.meta?.description}</p></div><Icon name="arrow" class="w-4 h-4" /></a>)}</div><div class="home-about"><span>UESTC · Master's student in Electronic Information</span><a href={`${base}about/`}>Education & About →</a></div></section>
 </BaseLayout>
-<script>
-  function bindCopy() {
-    document.querySelectorAll<HTMLButtonElement>('.copy-btn').forEach(button => {
-      if (button.dataset.bound) return;
-      button.dataset.bound = 'true';
-      button.addEventListener('click', async () => {
-        const label = button.querySelector('span');
-        const original = label?.textContent || '';
-        try {
-          await navigator.clipboard.writeText(button.dataset.copy || '');
-          if (label) label.textContent = '已复制';
-        } catch {
-          if (label) label.textContent = button.dataset.copy || '复制失败';
-        }
-        window.setTimeout(() => { if(label) label.textContent = original; }, 1800);
-      });
-    });
-  }
-  document.addEventListener('astro:page-load', bindCopy);
-  bindCopy();
-</script>

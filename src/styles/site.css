@@ -829,16 +829,6 @@ html[data-reading-mode="focus"] .note-layout > :is(.paper-sidebar, .paper-toc, #
 .paper-collapse summary,.paper-code-header {
   background: var(--paper-surface-muted);
 }
-.brace-map-shell {
-  overflow-x: auto;
-  border: 1px solid var(--paper-line);
-  border-radius: 8px;
-  padding: 12px;
-  background: var(--paper-surface);
-}
-.brace-map-shell svg {
-  max-width: none;
-}
 .progress-track {
   background: var(--paper-surface-muted);
 }

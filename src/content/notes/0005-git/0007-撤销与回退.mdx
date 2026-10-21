@@ -24,12 +24,21 @@ git checkout abc123 -- file.txt
 
 `git checkout <commit>` 的意思是：将你的工作目录切换到指定的某一次提交的状态。当你 checkout 一个具体的 commit hash（而不是分支名）时，HEAD 不再指向任何分支，而是直接指向那个提交节点。
 
-```text
-正常状态:    A --- B --- C (main) ← HEAD 指向 main 分支
-
-执行后:      A --- B --- C (main)
-                    ↑
-               HEAD → B        ← Detached HEAD！HEAD 悬空了
+```mermaid title="附着分支与 Detached HEAD"
+flowchart TB
+  accTitle: 附着分支与 Detached HEAD
+  subgraph before["切换前：HEAD 附着在 main"]
+    direction LR
+    A1["A"] --- B1["B"] --- C1["C"]
+    H1["HEAD"] --> M1["main"] --> C1
+  end
+  subgraph after["git checkout B 后：HEAD 直接指向 B"]
+    direction LR
+    A2["A"] --- B2["B"] --- C2["C"]
+    M2["main"] --> C2
+    H2["HEAD · detached"] --> B2
+  end
+  before --> after
 ```
 
 #### 三种典型用法
@@ -101,16 +110,23 @@ git reset --hard <commit>
 
 ### 重置示意图
 
-```text
-重置前:  A --- B --- C --- D (main, HEAD)
-
-执行: git reset --soft B
-
-重置后:  A --- B (main, HEAD)
-              \
-               C --- D  ← 这两个提交还在 .git/objects 里，
-                          但没有指针指向它们了！
+```mermaid title="git reset --soft B：移动分支指针"
+flowchart TB
+  accTitle: git reset --soft B：移动分支指针
+  subgraph before["重置前"]
+    direction LR
+    A1["A"] --- B1["B"] --- C1["C"] --- D1["D"]
+    H1["HEAD → main"] --> D1
+  end
+  subgraph after["重置后：工作区与暂存区内容保留"]
+    direction LR
+    A2["A"] --- B2["B"] -.-> C2["C：不再由 main 引用"] --- D2["D：不再由 main 引用"]
+    H2["HEAD → main"] --> B2
+  end
+  before -->|git reset --soft B| after
 ```
+
+C、D 不再从 main 可达，但通常仍能通过 reflog 找回；它们不会立即从对象数据库消失。
 
 <Callout type="error">
 **⚠️ git reset --hard 危险警告**
@@ -170,11 +186,12 @@ git push --force
 
 如果你将 `<目标commit-hash>` 填写为**第一次提交的 hash 值**，操作完成后云端会显示 **2 次提交**。
 
-```text
-git reset --soft <第一次提交的hash>  →  HEAD 指向第一次提交，暂存区保留所有后续变更
-git commit -m "合并后的提交"          →  在第一次提交基础上新建一个 commit
-
-最终历史：  [第一次提交] ← [合并后的提交]  →  共 2 个 commit
+```mermaid title="保留首次提交后重新合并提交"
+flowchart TB
+  accTitle: 保留首次提交后重新合并提交
+  A["git reset --soft：目标为首次提交"] --> B["首次提交保留；后续差异留在暂存区"]
+  B --> C["git commit：创建合并后的新提交"]
+  C --> D["最终历史：首次提交 + 新提交，共 2 次提交"]
 ```
 
 `git reset --soft <hash>` 的机制是将当前分支指针移动到指定的 `<hash>` 上，同时保留该 commit 之后的所有更改在暂存区。因此**第一次提交本身被保留**，而你执行 `git commit` 时又**创建了一个全新的 commit**，所以最终是 2 个。
@@ -233,15 +250,11 @@ git revert <commit>
 
 ### revert 示意图
 
-```text
-执行前:  A --- B --- C (删除了重要文件) --- D (main)
-
-执行: git revert C
-
-执行后:  A --- B --- C --- D --- C' (main)
-                              ↑
-                         新提交 C' 的内容 = C 的完全反向操作
-                         （把删除的文件加回来）
+```mermaid title="git revert：新增反向提交，保留原有历史"
+flowchart LR
+  accTitle: git revert：新增反向提交，保留原有历史
+  A["A"] --- B["B"] --- C["C：删除重要文件"] --- D["D"] --- R["C′：反转 C 的变更，恢复文件"]
+  H["HEAD → main"] --> R
 ```
 
 <Callout type="tip">
@@ -289,31 +302,20 @@ e5f6g7h HEAD@{4}: commit: 初始提交
 
 ## 操作选择指南
 
-```text
-┌─────────────────────────────────────────────────────────────┐
-│                    Git 撤销操作选择指南                        │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│   场景一：撤销未暂存的修改                                     │
-│   → git checkout -- <file>                                  │
-│                                                             │
-│   场景二：撤销已暂存的修改                                     │
-│   → git reset HEAD <file>                                   │
-│                                                             │
-│   场景三：撤销最近一次 commit（保留修改）                       │
-│   → git reset --soft HEAD~1                                 │
-│                                                             │
-│   场景四：撤销最近一次 commit（丢弃修改）                       │
-│   → git reset --hard HEAD~1                                 │
-│                                                             │
-│   场景五：撤销已推送的 commit                                  │
-│   → git revert <commit>                                     │
-│                                                             │
-│   场景六：找回丢失的提交                                       │
-│   → git reflog → git reset --hard HEAD@{n}                  │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
+```mermaid title="撤销操作选择指南"
+flowchart TB
+  accTitle: 撤销操作选择指南
+  Q{"要撤销什么？"}
+  Q -->|未暂存的修改| W["git restore：丢弃工作区修改"]
+  Q -->|已暂存的修改| I["git restore --staged：取消暂存，保留文件修改"]
+  Q -->|本地最近一次提交| K{"是否保留修改？"}
+  K -->|保留| S["git reset --soft HEAD~1"]
+  K -->|丢弃，先确认备份| H["git reset --hard HEAD~1"]
+  Q -->|已推送的提交| R["git revert：生成反向提交"]
+  Q -->|丢失的提交| F["git reflog：定位提交，再建恢复分支"]
 ```
+
+上述 `git restore` 用法分别对应前文的 `git checkout -- <file>` 和 `git reset HEAD <file>`。恢复丢失提交时可先执行 `git branch recovered <hash>`，确认内容后再决定是否重置当前分支。
 
 ---
 

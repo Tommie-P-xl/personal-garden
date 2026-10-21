@@ -3,6 +3,7 @@ import mdx from '@astrojs/mdx';
 import tailwind from '@astrojs/tailwind';
 import sitemap from '@astrojs/sitemap';
 import remarkMath from 'remark-math';
+import remarkDiagrams from './src/lib/remark-diagrams';
 import remarkNoteHeadings from './src/lib/remark-note-headings';
 import remarkWikiLinks from './src/lib/remark-wiki-links';
 import remarkMedia from './src/lib/remark-media';
@@ -25,7 +26,7 @@ export default defineConfig({
     sitemap(),
   ],
   markdown: {
-    remarkPlugins: [remarkMath, remarkNoteHeadings, remarkWikiLinks, remarkMedia],
+    remarkPlugins: [remarkMath, remarkDiagrams, remarkNoteHeadings, remarkWikiLinks, remarkMedia],
     rehypePlugins: [
       rehypeKatex,
       rehypeSlug,

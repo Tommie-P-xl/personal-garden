@@ -1,0 +1,12 @@
+---
+import KnowledgeBranch from './KnowledgeBranch.astro';
+import type { KnowledgeNode } from '../../lib/knowledge-map';
+interface Props { data: KnowledgeNode; }
+const { data } = Astro.props;
+---
+<section class="knowledge-map" aria-label={data.name}>
+  <header class="knowledge-header"><p>{data.name}</p>{data.description && <span>{data.description}</span>}</header>
+  <div class="knowledge-grid">
+    {(data.children?.length ? data.children : [data]).map((node, index) => <KnowledgeBranch node={node} index={index} />)}
+  </div>
+</section>

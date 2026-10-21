@@ -23,17 +23,19 @@ GitHub Actions 是 GitHub 内置的自动化平台，允许你在代码仓库中
 
 所有 Workflow 文件必须存放在仓库根目录的 `.github/workflows/` 文件夹下，文件名以 `.yml` 或 `.yaml` 结尾：
 
-```text
-your-repo/
-├── .github/
-│   └── workflows/
-│       ├── ci.yml          ← 持续集成流程（如运行测试）
-│       ├── deploy.yml      ← 部署流程
-│       └── scheduled.yml   ← 定时任务
-├── src/
-├── package.json
-└── README.md
-```
+<KnowledgeMap data={{
+  name: "仓库目录结构",
+  children: [
+    { name: ".github/workflows/", description: "工作流定义文件", children: [
+      { name: "ci.yml", description: "持续集成，例如运行测试" },
+      { name: "deploy.yml", description: "部署流程" },
+      { name: "scheduled.yml", description: "定时任务" }
+    ] },
+    { name: "src/", description: "项目源码" },
+    { name: "package.json", description: "依赖与脚本" },
+    { name: "README.md", description: "项目说明" }
+  ]
+}} />
 
 ## 核心概念
 
@@ -48,16 +50,22 @@ your-repo/
 
 ### 层级关系
 
-```text
-仓库（Repository）
-└── Workflow（工作流）          ← 一个 .yml 文件 = 一个 Workflow
-    ├── Event（触发事件）        ← 什么情况下启动这个 Workflow
-    └── Job（作业）× N          ← 一个 Workflow 可以包含多个并行或串行的 Job
-        ├── Runner（运行器）     ← 执行 Job 的服务器
-        └── Step（步骤）× N     ← Job 内按顺序执行的一系列操作
-            ├── Action          ← 可复用的封装好的操作
-            └── Run             ← 直接执行 Shell 命令
-```
+<KnowledgeMap data={{
+  name: "GitHub Actions 概念层级",
+  description: "仓库中可有多个 Workflow，每个 Workflow 由事件触发并组织作业。",
+  children: [
+    { name: "Workflow", description: "一个 .yml 文件定义一个工作流", children: [
+      { name: "Event", description: "决定工作流何时运行" },
+      { name: "Job × N", description: "多个作业可并行，也可通过 needs 声明依赖", children: [
+        { name: "Runner", description: "运行作业的服务器" },
+        { name: "Step × N", description: "作业内按顺序执行的步骤", children: [
+          { name: "Action", description: "通过 uses 调用可复用操作" },
+          { name: "Run", description: "直接执行 Shell 命令" }
+        ] }
+      ] }
+    ] }
+  ]
+}} />
 
 ## Workflow 示例
 

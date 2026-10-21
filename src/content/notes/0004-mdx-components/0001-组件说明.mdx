@@ -1,7 +1,7 @@
 ---
 title: MDX 组件说明
 summary: 所有自定义 MDX 组件的使用说明与示例
-tags: [组件, MDX, LaTeX, 表格, 媒体, BraceMap]
+tags: [组件, MDX, LaTeX, 表格, 媒体, 可视化]
 ---
 
 # MDX 组件说明
@@ -318,96 +318,72 @@ $$
 
 ---
 
-## 9. 大括号结构图 (BraceMap)
+## 9. 知识卡片与可视化流程图
 
-使用 d3.js 渲染的大括号结构图，用于展示整体与部分关系。
+概念分类使用知识卡片：长文字自动换行，摘要始终显示，深层内容按需展开，不再受固定画布宽度限制。
 
-**基本用法：**
+<KnowledgeMap data={{
+  name: "Git 五大区域",
+  description: "一眼查看概念与常用命令；点击暂存区可展开细节。",
+  children: [
+    { name: "工作区 · Working Directory", description: "编辑项目文件的地方", command: "git status · git diff" },
+    { name: "暂存区 · Index / Stage", description: "准备下一次提交的内容", children: [
+      { name: "添加修改", command: "git add <file>" },
+      { name: "检查内容", command: "git diff --cached" }
+    ] },
+    { name: "本地版本库 · Local Repository", description: "记录提交历史", command: "git commit · git log" }
+  ]
+}} />
 
-<BraceMap
-  data={{
-    name: "HTML 页面",
-    children: [
-      {
-        name: "头部 (head)",
-        children: [
-          { name: "元信息 <meta>" },
-          { name: "标题 <title>" },
-          { name: "样式 <style>" },
-        ],
-      },
-      {
-        name: "主体 (body)",
-        children: [
-          { name: "标题 <h1>" },
-          { name: "段落 <p>" },
-          { name: "链接 <a>" },
-          { name: "图片 <img>" },
-        ],
-      },
-    ],
-  }}
-/>
-
-**自定义样式：**
-
-<BraceMap
-  data={{
-    name: "Web 技术栈",
-    children: [
-      {
-        name: "前端",
-        children: [
-          { name: "HTML/CSS" },
-          { name: "JavaScript" },
-          { name: "React/Vue" },
-        ],
-      },
-      {
-        name: "后端",
-        children: [
-          { name: "Node.js" },
-          { name: "Python" },
-          { name: "数据库" },
-        ],
-      },
-    ],
-  }}
-  config={{
-    braceColor: "#e74c3c",
-    bgColor: "#fff3e0",
-    borderColor: "#ff9800",
-    rootBgColor: "#e74c3c",
-    rootTextColor: "#fff",
-    fontSize: 13,
-    levelGap: 80,
-  }}
-/>
-
-**使用方式：**
+**复制这个格式即可添加知识卡片，无需 import：**
 
 ```mdx
-<BraceMap
-  data={{
-    name: "根节点",
-    children: [
-      { name: "子节点 1" },
-      { name: "子节点 2" },
-    ],
-  }}
-/>
+<KnowledgeMap data={{
+  name: "主题",
+  children: [
+    { name: "概念一", description: "始终显示的摘要", command: "常用命令" },
+    { name: "概念二", description: "先读这里", detail: "展开后的补充说明", children: [
+      { name: "子概念", description: "进一步解释" }
+    ] }
+  ]
+}} />
 ```
 
-**可配置参数：**
+| 字段 | 用途 |
+| --- | --- |
+| `name` | 标题，必填 |
+| `description` | 始终可见的简短摘要 |
+| `detail` | 展开后显示的纯文本补充 |
+| `command` | 短命令或速查内容 |
+| `children` | 可递归的子概念数组 |
 
-| 参数 | 类型 | 默认值 | 说明 |
-|------|------|--------|------|
-| `nodeWidth` | number | 160 | 节点宽度 |
-| `nodeHeight` | number | 32 | 节点高度 |
-| `levelGap` | number | 60 | 层级间距 |
-| `braceWidth` | number | 14 | 大括号弯曲宽度 |
-| `braceColor` | string | #666 | 大括号颜色 |
-| `rootBgColor` | string | #4a7cff | 根节点背景色 |
+字段均为纯文本；代码示例和长段落仍放正文。旧 `BraceMap` 入口保留兼容，固定节点宽度、颜色配置不再生效。
+
+### Mermaid 流程图
+
+Markdown 与 MDX 均可直接写 Mermaid 围栏。默认居中，宽图可横向滚动；支持主题切换、放大预览、缩放和源码查看，按 Escape 关闭预览。
+
+```mermaid title="Git 文件状态流转"
+flowchart LR
+  accTitle: Git 文件状态流转
+  U["未跟踪"] -->|git add| S["已暂存"]
+  S -->|git commit| C["已提交"]
+  C -->|编辑文件| M["已修改"]
+  M -->|git add| S
+```
+
+**复制下面的围栏即可：**
+
+````md
+```mermaid title="提交流程"
+flowchart LR
+  accTitle: 提交流程
+  A["修改文件"] -->|git add| B["暂存修改"]
+  B -->|git commit| C["记录版本"]
+```
+````
+
+较长的流程改用 `flowchart TB` 纵向排列，复杂内容拆成多张图。节点用英文 ID，中文标签加双引号，不写死主题颜色。没有 JavaScript 或渲染失败时仍可查看源码。不要再用空格、箭头和字符边框拼流程图。
 
 ---
 
@@ -480,6 +456,6 @@ function fibonacci(n) {
 | `<Media>` | 媒体 | 视频播放/文档下载 |
 | `<Table>` | 表格 | 需要自定义样式时 |
 | `<Latex>` | LaTeX公式 | 块级公式对齐 |
-| `<BraceMap>` | 结构图 | 层次关系展示 |
+| `<KnowledgeMap>` | 结构图 | 层次关系展示 |
 | `<CodeBlock>` | 代码块 | 代码高亮 |
 | `<Gallery>` | 画廊 | 图片网格展示 |

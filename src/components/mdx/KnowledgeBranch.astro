@@ -1,0 +1,27 @@
+---
+import type { KnowledgeNode } from '../../lib/knowledge-map';
+interface Props { node: KnowledgeNode; index: number; nested?: boolean; }
+const { node, index, nested = false } = Astro.props;
+const expandable = Boolean(node.detail || node.children?.length);
+---
+<div class:list={['knowledge-item', { 'knowledge-item-nested': nested }]}>
+  {expandable ? (
+    <details class="knowledge-details">
+      <summary>
+        <span class="knowledge-number" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
+        <span class="knowledge-copy"><strong>{node.name}</strong>{node.description && <span>{node.description}</span>}</span>
+        <span class="knowledge-chevron" aria-hidden="true">＋</span>
+      </summary>
+      <div class="knowledge-body">
+        {node.detail && <p>{node.detail}</p>}
+        {node.command && <code>{node.command}</code>}
+        {node.children?.map((child, i) => <Astro.self node={child} index={i} nested />)}
+      </div>
+    </details>
+  ) : (
+    <div class="knowledge-leaf">
+      <span class="knowledge-number" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
+      <div class="knowledge-copy"><strong>{node.name}</strong>{node.description && <span>{node.description}</span>}{node.command && <code>{node.command}</code>}</div>
+    </div>
+  )}
+</div>

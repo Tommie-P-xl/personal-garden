@@ -76,25 +76,16 @@ jobs:
 
 ### 矩阵组合计算
 
-```text
-基础组合数 = len(os) × len(node-version)
-           = 2 × 3
-           = 6 个组合
+基础矩阵为 `2 × 3 = 6` 个组合；排除 Windows + Node 18，再额外加入一个实验组合，最终仍为 **6 个作业**。
 
-排除的组合：windows-latest + node-version 18（1 个）
-额外的组合：ubuntu-latest + node-version 23 + experimental（1 个）
-
-最终组合数 = 6 - 1 + 1 = 6 个
-
-┌─────────────────────────────────────────────────────────────┐
-│  1. ubuntu-latest  + Node 18                                │
-│  2. ubuntu-latest  + Node 20                                │
-│  3. ubuntu-latest  + Node 22                                │
-│  4. windows-latest + Node 20                                │
-│  5. windows-latest + Node 22                                │
-│  6. ubuntu-latest  + Node 23 + experimental=true            │
-└─────────────────────────────────────────────────────────────┘
-```
+| 作业 | 操作系统 | Node.js | 实验性 |
+| --- | --- | --- | --- |
+| 1 | ubuntu-latest | 18 | 否 |
+| 2 | ubuntu-latest | 20 | 否 |
+| 3 | ubuntu-latest | 22 | 否 |
+| 4 | windows-latest | 20 | 否 |
+| 5 | windows-latest | 22 | 否 |
+| 6 | ubuntu-latest | 23 | 是 |
 
 <Callout type="tip">
 **矩阵构建最佳实践**

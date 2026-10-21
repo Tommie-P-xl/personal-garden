@@ -8,15 +8,15 @@ summary: 理解 Git 的五大区域和文件状态流转机制
 
 Git 的核心在于理解**五大区域**和**文件状态的流转**。掌握这些概念是高效使用 Git 的基础。
 
-<BraceMap
+<KnowledgeMap
   data={{
     name: "Git 五大区域",
     children: [
-      { name: "工作区（Working Directory）" },
-      { name: "暂存区（Index / Stage）" },
-      { name: "本地版本库（Local Repository）" },
-      { name: "远程版本库（Remote Repository）" },
-      { name: "储藏区（Stash）" },
+      { name: "工作区（Working Directory）", description: "编辑项目文件，修改首先发生在这里。", command: "git status · git diff" },
+      { name: "暂存区（Index / Stage）", description: "选择下一次提交要记录的内容。", command: "git add · git diff --cached" },
+      { name: "本地版本库（Local Repository）", description: "保存提交对象与本地版本历史。", command: "git commit · git log" },
+      { name: "远程版本库（Remote Repository）", description: "协作与共享提交历史。", command: "git fetch · git push" },
+      { name: "储藏区（Stash）", description: "临时收起未完成的修改，稍后恢复。", command: "git stash · git stash pop" },
     ],
   }}
 />
@@ -39,14 +39,13 @@ Git 的核心在于理解**五大区域**和**文件状态的流转**。掌握�
 
 ### 状态流转图
 
-```text
-                    git add                    git commit
-  [未跟踪] ─────────→ [已暂存] ─────────→ [已提交]
-     ↑                                        │
-     │          工作区修改                      │
-     └────────── [已修改] ←────────────────────┘
-                    │
-                    └──── git add ────→ [已暂存]
+```mermaid title="Git 文件状态流转"
+flowchart LR
+  accTitle: Git 文件状态流转
+  U["未跟踪"] -->|git add| S["已暂存"]
+  S -->|git commit| C["已提交"]
+  C -->|编辑文件| M["已修改"]
+  M -->|git add| S
 ```
 
 <Callout type="tip">
@@ -112,28 +111,19 @@ git stash pop
 
 ## 五大区域的关系
 
-```text
-┌─────────────────────────────────────────────────────────────┐
-│                        Git 五大区域                          │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│   ┌──────────┐    git add     ┌──────────┐   git commit    │
-│   │  工作区   │ ──────────→  │  暂存区   │ ──────────→     │
-│   │ (Working) │              │ (Stage)  │                  │
-│   └──────────┘              └──────────┘                  │
-│         │                                                  │
-│         │                         ┌──────────┐             │
-│         │      git stash          │  储藏区   │             │
-│         └─────────────────────→  │ (Stash)  │             │
-│                                  └──────────┘             │
-│                                                             │
-│   ┌──────────┐              ┌──────────┐                   │
-│   │ 本地版本库 │ ←── git pull │ 远程版本库 │                   │
-│   │ (Local)  │ ── git push → │ (Remote) │                   │
-│   └──────────┘              └──────────┘                   │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
+```mermaid title="Git 五大区域与常用操作"
+flowchart LR
+  accTitle: Git 五大区域与常用操作
+  W["工作区"] -->|git add| I["暂存区"]
+  I -->|git commit| L["本地版本库"]
+  L -->|git push| R["远程版本库"]
+  R -->|git fetch| L
+  L -->|git switch / restore| W
+  W -->|git stash| S["储藏区"]
+  S -->|git stash pop / apply| W
 ```
+
+`git pull` 会先 fetch，再把获取的提交通过 merge 或 rebase 整合到当前分支；它不只是复制远程仓库到本地。
 
 ---
 

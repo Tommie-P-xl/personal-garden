@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from '../components/Icon.astro';
 
 const base = import.meta.env.BASE_URL;
 ---
@@ -28,7 +29,7 @@ const base = import.meta.env.BASE_URL;
           <h2 id="profile-title" class="text-2xl font-bold text-gray-900 dark:text-white">Tommie</h2>
           <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">AI Agent &amp; Embedded AI Development</p>
           <p class="mt-4 leading-7 text-gray-700 dark:text-gray-300">
-            我是电子信息方向的研究生，持续关注无人机射频信号识别、开集识别与深度学习工程实践。平时也会把开发和学习中反复遇到的任务整理成小工具、Agent Skill 和结构化笔记。
+            I am a master's student in Electronic Information. My interests include UAV radio-frequency signal identification, open-set recognition, and deep learning engineering. I also turn recurring tasks into small tools, Agent Skills, and structured notes.
           </p>
           <div class="mt-5 flex flex-wrap gap-2">
             <a href="mailto:wux4948@gmail.com" class="paper-contact paper-contact-secondary inline-flex items-center gap-2 px-4 py-2 text-sm font-medium">
@@ -39,10 +40,10 @@ const base = import.meta.env.BASE_URL;
               <img src={`${base}icons/github.svg`} alt="" class="w-4 h-4" />
               GitHub
             </a>
-            <button type="button" class="paper-contact paper-contact-secondary about-copy-btn inline-flex items-center gap-2 px-4 py-2 text-sm font-medium cursor-pointer" data-copy="w9519539" aria-label="复制微信号 w9519539">
-              <img src={`${base}icons/wechat.svg`} alt="" class="w-4 h-4" />
-              <span data-copy-label>微信号</span>
-            </button>
+            <a href="https://x.com/wux4948" target="_blank" rel="noopener noreferrer" class="paper-contact paper-contact-secondary inline-flex items-center gap-2 px-4 py-2 text-sm font-medium" aria-label="X：@wux4948">
+              <Icon name="x" class="w-4 h-4" />
+              X · @wux4948
+            </a>
           </div>
         </div>
       </div>
@@ -72,24 +73,24 @@ const base = import.meta.env.BASE_URL;
       </article>
     </section>
 
-    <section class="paper-surface   rounded-xl border border-gray-200/50 dark:border-white/[0.06] p-6 sm:p-8 shadow-sm dark:shadow-none mb-7" aria-labelledby="education-title">
+    <section class="paper-surface   rounded-xl border border-gray-200/50 dark:border-white/[0.06] p-6 sm:p-8 shadow-sm dark:shadow-none mb-7" aria-labelledby="education-title" lang="en">
       <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 mb-5">
         <div>
-          <p class="text-sm font-semibold text-garden-700 dark:text-garden-300">Education</p>
-          <h2 id="education-title" class="mt-1 text-xl font-semibold text-gray-900 dark:text-white">教育经历</h2>
+          <p class="text-sm font-semibold text-garden-700 dark:text-garden-300">Academic Background</p>
+          <h2 id="education-title" class="mt-1 text-xl font-semibold text-gray-900 dark:text-white">Education</h2>
         </div>
-        <a href="https://www.uestc.edu.cn/" target="_blank" rel="noopener noreferrer" class="text-sm text-gray-500 dark:text-gray-400 hover:text-garden-700 dark:hover:text-garden-300">电子科技大学 ↗</a>
+        <a href="https://en.uestc.edu.cn/" target="_blank" rel="noopener noreferrer" class="text-sm text-gray-500 dark:text-gray-400 hover:text-garden-700 dark:hover:text-garden-300">UESTC ↗</a>
       </div>
       <div class="grid sm:grid-cols-2 gap-4">
         <div class="rounded-lg paper-muted-surface dark:bg-white/[0.03] border border-gray-200/50 dark:border-white/[0.06] p-4">
-          <p class="text-sm text-gray-500 dark:text-gray-400">2026.09 — 2029.06</p>
-          <h3 class="mt-1 font-semibold text-gray-900 dark:text-white">电子科技大学</h3>
-          <p class="mt-1 text-sm text-gray-600 dark:text-gray-300">电子信息 · 专业硕士</p>
+          <p class="text-sm text-gray-500 dark:text-gray-400">Sep 2026 — Jun 2029 (expected)</p>
+          <h3 class="mt-1 font-semibold text-gray-900 dark:text-white">University of Electronic Science and Technology of China</h3>
+          <p class="mt-1 text-sm text-gray-600 dark:text-gray-300">Professional Master's Degree in Electronic Information</p>
         </div>
         <div class="rounded-lg paper-muted-surface dark:bg-white/[0.03] border border-gray-200/50 dark:border-white/[0.06] p-4">
-          <p class="text-sm text-gray-500 dark:text-gray-400">2022.09 — 2026.06</p>
-          <h3 class="mt-1 font-semibold text-gray-900 dark:text-white">浙江工业大学</h3>
-          <p class="mt-1 text-sm text-gray-600 dark:text-gray-300">通信工程 · 本科</p>
+          <p class="text-sm text-gray-500 dark:text-gray-400">Sep 2022 — Jun 2026</p>
+          <h3 class="mt-1 font-semibold text-gray-900 dark:text-white">Zhejiang University of Technology</h3>
+          <p class="mt-1 text-sm text-gray-600 dark:text-gray-300">Bachelor's Degree in Communication Engineering</p>
         </div>
       </div>
     </section>
@@ -124,36 +125,3 @@ const base = import.meta.env.BASE_URL;
     </p>
   </div>
 </BaseLayout>
-
-<script>
-  function initAboutContact() {
-    document.querySelectorAll<HTMLButtonElement>('.about-copy-btn').forEach((button) => {
-      if (button.dataset.bound === 'true') return;
-      button.dataset.bound = 'true';
-
-      button.addEventListener('click', async () => {
-        const value = button.dataset.copy;
-        if (!value) return;
-
-        try {
-          await navigator.clipboard.writeText(value);
-        } catch {
-          const input = document.createElement('textarea');
-          input.value = value;
-          document.body.appendChild(input);
-          input.select();
-          document.execCommand('copy');
-          input.remove();
-        }
-
-        const label = button.querySelector<HTMLElement>('[data-copy-label]');
-        if (!label) return;
-        label.textContent = '已复制';
-        window.setTimeout(() => { label.textContent = '微信号'; }, 1500);
-      });
-    });
-  }
-
-  initAboutContact();
-  document.addEventListener('astro:page-load', initAboutContact);
-</script>

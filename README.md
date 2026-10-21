@@ -78,6 +78,47 @@ draft: false
 
 项目介绍放在 `src/content/projects/` 下，每个 Markdown 文件对应一张项目卡，字段定义见 `src/content.config.ts`。
 
+## 笔记可视化与维护模板
+
+概念分类使用 **KnowledgeMap 知识卡片**，流程与状态变化使用 **Mermaid**（[官方语法](https://mermaid.js.org/intro/)）。不再用空格与字符边框拼流程图。矩阵组合等纯数据使用表格。
+
+```mdx
+<KnowledgeMap data={{
+  name: "Git 五大区域",
+  children: [
+    { name: "工作区", description: "编辑文件的地方", command: "git status · git diff" },
+    { name: "暂存区", description: "准备提交的内容", children: [
+      { name: "添加修改", command: "git add <file>" }
+    ] }
+  ]
+}} />
+```
+
+- `name` 必填；`description` 始终显示；`detail` 展开后显示；`command` 放短命令；`children` 递归。字段为纯文本，不解析 Markdown。
+- 多列自适应、长文字换行，使用原生 `<details>` 折叠，关闭 JavaScript 仍可阅读。
+- 旧 `BraceMap` 保留为相同卡片的兼容入口，原固定节点宽度/配色参数不再生效。新笔记统一使用 `KnowledgeMap`。
+
+Markdown 和 MDX 均可直接写，无需 import：
+
+````md
+```mermaid title="提交流程"
+flowchart LR
+  accTitle: 提交流程
+  A["修改文件"] -->|git add| B["暂存修改"]
+  B -->|git commit| C["记录版本"]
+```
+````
+
+- 默认居中；长流程建议 `flowchart TB`，宽图在图内滚动。图表可放大、缩放与适应窗口；Escape 关闭并恢复按钮焦点，专注模式保持。
+- 图进入视口附近才加载本地打包的 Mermaid；无需第三方 CDN。主题切换后重新绘制，支持 Astro 页面导航。
+- 保留可展开、可复制的源码。禁用 JavaScript、网络加载失败或语法错误时显示源码降级。SVG 使用 strict 安全模式；笔记不使用 HTML 标签、脚本或 click 回调。
+- 完整示例见站内“MDX 组件说明”；维护规则及字段模板位于 `.claude/skills/note-to-mdx/SKILL.md` 与 `component-reference.md`。
+- 实现位于 `src/lib/remark-diagrams.ts`、`src/scripts/diagrams.ts`、`src/components/mdx/KnowledgeMap.astro` 和 `src/styles/diagrams.css`。
+
+## 个人资料维护
+
+首页和关于页的教育信息使用英文，日期保留原经历；在读项目标记预计毕业。联系方式使用邮箱、GitHub 和 [X · @wux4948](https://x.com/wux4948)。首页资料位于 `src/pages/index.astro`，完整教育经历位于 `src/pages/about.astro`。项目介绍中的第三方渠道说明仍按项目实际功能撰写。
+
 ## 构建与部署
 
 GitHub Actions 在推送到 `main`、针对 `main` 创建或更新 Pull Request，以及手动触发时运行生产构建。Pull Request 执行单元测试、双部署构建、静态链接与浏览器回归；合并到 `main` 后，检查通过才部署 GitHub Pages。
@@ -157,6 +198,8 @@ GitHub Pages 默认使用 `/personal-garden/`；Cloudflare Pages 构建需设置
 - 单一主标题、目录高亮、主题持久化、技术标签展开与响应式页面；
 - 草稿元数据及路由隔离，以及同名媒体的源笔记相对路径；
 - 1440px / 1920px 正文宽度、1024px 单栏布局、目录断点切换；
-- 专注阅读的加宽、刷新和跨笔记持久化、退出状态及手机端溢出检查。
+- 专注阅读的加宽、刷新和跨笔记持久化、退出状态及手机端溢出检查；
+- 全部已发布图表的渲染、明暗重绘、手机溢出、放大缩放与关闭焦点；
+- Markdown 图表语法错误降级、旧结构图兼容、X 联系方式与英文教育信息。
 
 测试使用 Chromium，覆盖桌面与手机尺寸；这不等同于所有浏览器的兼容性认证。发布工作流使用完整 Git 历史计算最近笔记日期，测试通过后再上传正式 `dist/` 并发布。

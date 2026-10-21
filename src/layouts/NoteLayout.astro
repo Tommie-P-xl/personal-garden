@@ -7,11 +7,13 @@ import CodeBlock from '../components/mdx/CodeBlock.astro';
 import Gallery from '../components/mdx/Gallery.astro';
 import Progress from '../components/mdx/Progress.astro';
 import BraceMap from '../components/mdx/BraceMap.astro';
+import KnowledgeMap from '../components/mdx/KnowledgeMap.astro';
 import Latex from '../components/mdx/Latex.astro';
 import Table from '../components/mdx/Table.astro';
 import Media from '../components/mdx/Media.astro';
 import Image from '../components/mdx/Image.astro';
 import '../styles/latex.css';
+import '../styles/diagrams.css';
 
 interface Props {
   Content: any;
@@ -30,6 +32,7 @@ const components = {
   Gallery,
   Progress,
   BraceMap,
+  KnowledgeMap,
   Latex,
   Table,
   Media,
@@ -40,3 +43,16 @@ const components = {
 <div class="prose">
   <Content components={components} />
 </div>
+<dialog class="diagram-dialog" aria-labelledby="diagram-dialog-title">
+  <div class="diagram-dialog-toolbar">
+    <strong id="diagram-dialog-title">流程图</strong>
+    <div>
+      <button type="button" data-diagram-zoom="out" aria-label="缩小图表">−</button>
+      <button type="button" data-diagram-zoom="reset">适应窗口</button>
+      <button type="button" data-diagram-zoom="in" aria-label="放大图表">＋</button>
+      <button type="button" data-diagram-close aria-label="关闭图表">关闭 ✕</button>
+    </div>
+  </div>
+  <div class="diagram-dialog-viewport" tabindex="0" role="region" aria-label="图表预览，可滚动查看"><div class="diagram-dialog-canvas"></div></div>
+</dialog>
+<script>import '../scripts/diagrams';</script>

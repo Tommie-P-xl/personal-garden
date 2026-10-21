@@ -10,16 +10,19 @@ tags: [测试]
 
 ## 目录结构
 
-```
-0001-linux/
-├── _meta.json
-├── 0000-测试笔记.mdx      ← 笔记（本文件）
-├── 0001-memory-management/ ← 子目录
-│   ├── 0001-虚拟内存.mdx
-│   └── 0002-分页机制.mdx
-└── 0002-process-scheduling/
-    └── 0001-CFS调度器.mdx
-```
+<KnowledgeMap data={{
+  name: "Linux 笔记目录",
+  children: [
+    { name: "_meta.json", description: "目录元数据" },
+    { name: "0000-测试笔记.mdx", description: "当前笔记" },
+    { name: "0001-memory-management/", description: "内存管理", children: [
+      { name: "0001-虚拟内存.mdx" }, { name: "0002-分页机制.mdx" }
+    ] },
+    { name: "0002-process-scheduling/", description: "进程调度", children: [
+      { name: "0001-CFS调度器.mdx" }
+    ] }
+  ]
+}} />
 
 ---
 
