@@ -3,8 +3,9 @@ title: ViM-Pytorch：无人机射频开集识别
 description: 用 PyTorch 训练无人机射频 STFT 分类器，并在特征空间上拟合 Virtual-logit Matching（ViM），区分已知类别与未知信号。
 tech: [Python, PyTorch, ViM, ResNet, Open-Set Recognition, RF]
 github: https://github.com/Tommie-P-xl/ViM-Pytorch
-featured: true
-featuredOrder: 1
+featured: false
+featuredOrder: 20
+category: 研究项目
 date: 2026-05-08
 ---
 

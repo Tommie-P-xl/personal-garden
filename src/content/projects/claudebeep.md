@@ -5,6 +5,7 @@ tech: [Python, Windows, Flask, WinRT, GitHub Actions]
 github: https://github.com/Tommie-P-xl/ClaudeBeep
 featured: true
 featuredOrder: 4
+category: AI Agent 与工具
 date: 2026-09-09
 ---
 

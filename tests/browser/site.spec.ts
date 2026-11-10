@@ -3,6 +3,32 @@ import { hashSlug } from '../../src/lib/slug-hash';
 
 for (const base of ['/personal-garden/', '/']) {
   test.describe(base === '/' ? 'Cloudflare' : 'GitHub Pages', () => {
+    test('engineering portfolio keeps research in the project list and combines direction with search', async ({page}) => {
+      await page.goto(base);
+      await expect(page.locator('.home-hero')).toContainText('嵌入式 Linux');
+      await expect(page.locator('main')).not.toContainText(/射频|开集识别/);
+      await expect(page.locator('meta[name="description"]')).not.toHaveAttribute('content', /射频|开集识别/);
+      await expect(page.locator('.paper-project-card h3')).toHaveText(['ESP32-S3 NetKeeper', 'PyTorch Research Skill', 'Math Worksheets Skill', 'ClaudeBeep']);
+      await expect(page.locator('#projects-heading')).toBeVisible();
+      await page.goto(`${base}about/`);
+      await expect(page.locator('main')).not.toContainText(/射频|radio-frequency|开集识别/);
+      await page.goto(`${base}projects/`);
+      await expect(page.locator('.project-card:visible')).toHaveCount(10);
+      await page.getByRole('button', {name: '研究项目 3', exact: true}).click();
+      await expect(page.locator('.project-card:visible')).toHaveCount(3);
+      await page.locator('#search-input').fill('ViM');
+      await expect(page.locator('.project-card:visible')).toHaveCount(1);
+      await page.getByRole('button', {name: '嵌入式开发 1', exact: true}).click();
+      await expect(page.locator('#no-results')).toBeVisible();
+      await page.locator('#search-input').fill('');
+      await expect(page.locator('.project-card:visible')).toHaveCount(1);
+      await expect(page.locator('#project-count')).toHaveText('共 1 个项目');
+      await page.getByRole('link', {name:'ESP32-S3 NetKeeper', exact:true}).click();
+      await expect(page.locator('h1')).toHaveText('ESP32-S3 NetKeeper');
+      await expect(page.locator('main')).toContainText('DMA');
+      await page.getByRole('link', {name: '项目', exact:true}).first().click();
+      await expect(page.locator('.project-card:visible')).toHaveCount(10);
+    });
     test('technical notes use wider content and responsive sidebars', async ({page}) => {
       await page.setViewportSize({width:1920,height:1000});
       await page.goto(`${base}garden/517192fd3ee42bf6/`);

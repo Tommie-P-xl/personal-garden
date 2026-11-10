@@ -4,6 +4,8 @@ description: 以章节代码、主题笔记和 PyTorch Notebook 组织的个人�
 tech: [Python, NumPy, PyTorch, Jupyter Notebook]
 github: https://github.com/Tommie-P-xl/resource_deeplearning
 featured: false
+featuredOrder: 6
+category: 深度学习
 date: 2026-09-20
 ---
 

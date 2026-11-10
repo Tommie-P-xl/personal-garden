@@ -11,20 +11,22 @@ const base = import.meta.env.BASE_URL;
 const projects = await getCollection('projects');
 const projectsWithStars = await enrichWithStars(projects);
 
-// 排序：stars 降序 → date 降序
+// 人工精选优先，避免研究项目因 Star 数盖过工程作品。
 projectsWithStars.sort((a, b) => {
-  if (b.stars !== a.stars) return b.stars - a.stars;
+  if (a.data.featuredOrder !== b.data.featuredOrder) return a.data.featuredOrder - b.data.featuredOrder;
   return b.data.date.valueOf() - a.data.date.valueOf();
 });
+const categories = ['嵌入式开发', '深度学习', 'AI Agent 与工具', '研究项目'];
 ---
 
-<BaseLayout title="项目展示">
+<BaseLayout title="项目展示" description="Tommie 的嵌入式开发、深度学习与 AI Agent 项目：查看技术栈、实现过程与公开源码。">
   <div class="mb-8">
+    <p class="eyebrow">PROJECTS / 代码与实践</p>
     <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
       <Icon name="project" class="w-6 h-6" />
       项目展示
     </h1>
-    <p class="text-gray-500 dark:text-gray-400">我做过的项目，展示我的技术能力和实践经验</p>
+    <p class="text-gray-500 dark:text-gray-400">从嵌入式设备、深度学习到 AI 工具，记录问题、实现与工程取舍。</p>
   </div>
 
   {/* ⭐ 搜索栏 - 搜索图标 focus 变色 */}
@@ -42,10 +44,15 @@ projectsWithStars.sort((a, b) => {
     </div>
   </div>
 
+  <div id="project-filter" class="project-filter" role="group" aria-label="按技术方向筛选">
+    <button type="button" data-category="" aria-pressed="true">全部 <span>{projects.length}</span></button>
+    {categories.map(category => <button type="button" data-category={category} aria-pressed="false">{category} <span>{projects.filter(p => p.data.category === category).length}</span></button>)}
+  </div>
+  <p id="project-count" class="project-result-count" role="status" aria-live="polite">共 {projects.length} 个项目</p>
   {projectsWithStars.length > 0 ? (
     <div class="grid sm:grid-cols-2 gap-5" id="projects-grid">
       {projectsWithStars.map((project) => (
-        <div class="project-card" data-title={project.data.title.toLowerCase()} data-tech={normalizeTags(project.data.tech).join(' ').toLowerCase()} data-desc={project.data.description.toLowerCase()}>
+        <div class="project-card" data-category={project.data.category} data-title={project.data.title.toLowerCase()} data-tech={normalizeTags(project.data.tech).join(' ').toLowerCase()} data-desc={project.data.description.toLowerCase()}>
           <ProjectCard
             title={project.data.title}
             description={project.data.description}
@@ -56,6 +63,7 @@ projectsWithStars.sort((a, b) => {
             date={project.data.date}
             slug={project.id.replace(/\.md$/, '')}
             stars={project.stars}
+            category={project.data.category}
           />
         </div>
       ))}
