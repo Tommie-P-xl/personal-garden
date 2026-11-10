@@ -13,7 +13,7 @@ const base = import.meta.env.BASE_URL;
     <header class="mb-8">
       <p class="text-sm font-medium tracking-[0.16em] uppercase text-garden-700 dark:text-garden-300 mb-2">About</p>
       <h1 class="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900 dark:text-white">关于我</h1>
-      <p class="mt-3 text-gray-600 dark:text-gray-300">学习机器学习与嵌入式 AI，也把日常遇到的问题做成工具、笔记和可复用的工作流。</p>
+      <p class="mt-3 text-gray-600 dark:text-gray-300">面向嵌入式 Linux、MCU、深度学习与 AI Agent 开发，持续积累项目、工具和技术笔记。</p>
     </header>
 
     <section class="paper-surface   rounded-2xl border border-gray-200/50 dark:border-white/[0.06] p-6 sm:p-8 shadow-sm dark:shadow-none mb-7" aria-labelledby="profile-title">
@@ -27,9 +27,9 @@ const base = import.meta.env.BASE_URL;
         </div>
         <div class="min-w-0">
           <h2 id="profile-title" class="text-2xl font-bold text-gray-900 dark:text-white">Tommie</h2>
-          <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">AI Agent &amp; Embedded AI Development</p>
+          <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Embedded Development · Deep Learning · AI Agent</p>
           <p class="mt-4 leading-7 text-gray-700 dark:text-gray-300">
-            I am a master's student in Electronic Information. My interests include UAV radio-frequency signal identification, open-set recognition, and deep learning engineering. I also turn recurring tasks into small tools, Agent Skills, and structured notes.
+            I am a master's student in Electronic Information, interested in embedded Linux, MCU development, deep learning, and AI agents. My projects include an ESP32-S3 network companion, Windows developer tools, and reusable Agent Skills. This garden collects the code, decisions, and notes behind that work.
           </p>
           <div class="mt-5 flex flex-wrap gap-2">
             <a href="mailto:wux4948@gmail.com" class="paper-contact paper-contact-secondary inline-flex items-center gap-2 px-4 py-2 text-sm font-medium">
@@ -51,13 +51,13 @@ const base = import.meta.env.BASE_URL;
 
     <section class="grid md:grid-cols-2 gap-5 mb-7" aria-label="学习与实践方向">
       <article class="paper-surface   rounded-xl border border-gray-200/50 dark:border-white/[0.06] p-6 shadow-sm dark:shadow-none">
-        <p class="text-sm font-semibold text-garden-700 dark:text-garden-300">研究与工程</p>
-        <h2 class="mt-2 text-xl font-semibold text-gray-900 dark:text-white">射频信号与开集识别</h2>
+        <p class="text-sm font-semibold text-garden-700 dark:text-garden-300">设备与系统</p>
+        <h2 class="mt-2 text-xl font-semibold text-gray-900 dark:text-white">嵌入式开发与工程调试</h2>
         <p class="mt-3 leading-7 text-gray-600 dark:text-gray-300">
-          我在学习如何把深度学习方法用于无人机射频信号分类，并关注模型面对未知类别时的识别与拒识。相关实践包括 ViM、OpenMax，以及散射变换与 Vision Transformer 的组合探索。
+          在 ESP32-S3 NetKeeper 中，把网络探测、自动认证、LVGL 触摸界面与配置存储串成完整设备功能，也记录显示缓冲、任务同步和电源管理中的调试过程。嵌入式 Linux 与 MCU 是我希望继续深入的开发方向。
         </p>
-        <a href={`${base}projects/`} class="mt-4 inline-flex items-center gap-1 text-sm font-medium text-garden-700 dark:text-garden-300 hover:underline">
-          查看相关项目 <span aria-hidden="true">→</span>
+        <a href={`${base}projects/esp32s3-netkeeper/`} class="mt-4 inline-flex items-center gap-1 text-sm font-medium text-garden-700 dark:text-garden-300 hover:underline">
+          查看 NetKeeper <span aria-hidden="true">→</span>
         </a>
       </article>
 
@@ -65,7 +65,7 @@ const base = import.meta.env.BASE_URL;
         <p class="text-sm font-semibold text-garden-700 dark:text-garden-300">工具与工作流</p>
         <h2 class="mt-2 text-xl font-semibold text-gray-900 dark:text-white">把重复工作整理成工具</h2>
         <p class="mt-3 leading-7 text-gray-600 dark:text-gray-300">
-          我也开发面向实际工作流的小型工具：例如为 Claude Code 和 Codex 管理通知的 ClaudeBeep、整理 Codex 会话记录的 Codex Transfer，以及帮助 AI 助手遵循 PyTorch 科研代码规范的 Skill。
+          用 PyTorch 学习模型与训练流程，再将实验管理经验整理成 Research Skill；开发 ClaudeBeep 和 Codex Transfer，改善编码代理的通知与会话管理；用 Math Worksheets Skill 实践任务拆分、工具调用和交付检查。
         </p>
         <a href={`${base}projects/`} class="mt-4 inline-flex items-center gap-1 text-sm font-medium text-garden-700 dark:text-garden-300 hover:underline">
           浏览全部项目 <span aria-hidden="true">→</span>

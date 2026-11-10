@@ -3,8 +3,9 @@ title: OpenMax PyTorch
 description: 基于 ResNet-50 的开集识别复现项目，覆盖闭集训练、MAV 与距离统计、Weibull 尾部拟合、OpenMax 分数重校准和未知类阈值评估。
 tech: [Python, PyTorch, ResNet-50, OpenMax, Weibull, SciPy, scikit-learn]
 github: https://github.com/Tommie-P-xl/OpenMax-PyTorch
-featured: true
-featuredOrder: 3
+featured: false
+featuredOrder: 22
+category: 研究项目
 date: 2026-03-27
 ---
 

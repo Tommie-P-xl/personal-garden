@@ -3,8 +3,9 @@ title: Scattering-ViT
 description: 面向射频时频谱图分类的研究代码，包含可学习散射网络、ViT 与 CNN 基线、多种组合模型，以及训练、评估和频谱图处理脚本。
 tech: [Python, PyTorch, Kymatio, timm, Vision Transformer, RF]
 github: https://github.com/Tommie-P-xl/MulScatteringViT
-featured: true
-featuredOrder: 2
+featured: false
+featuredOrder: 21
+category: 研究项目
 date: 2026-04-03
 ---
 

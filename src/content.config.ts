@@ -23,6 +23,7 @@ const projects = defineCollection({
     image: z.string().optional(),
     featured: z.boolean().default(false),
     featuredOrder: z.number().default(100),
+    category: z.enum(['嵌入式开发', '深度学习', 'AI Agent 与工具', '研究项目']),
     date: z.date(),
   }),
 });

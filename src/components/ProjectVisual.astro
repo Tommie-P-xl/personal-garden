@@ -7,8 +7,11 @@ const flows: Record<string, { label: string; steps: string[] }> = {
   'openmax-pytorch': { label: 'OPEN SET / CALIBRATION', steps: ['激活', 'Weibull', '重校准', '未知判定'] },
   claudebeep: { label: 'AGENT / NOTIFICATIONS', steps: ['Agent 事件', '通知路由', '桌面 / 手机'] },
   'personal-garden': { label: 'KNOWLEDGE / GARDEN', steps: ['Markdown', 'Astro', '数字花园'] },
-  'codex-transfer': { label: 'SESSION / ARCHIVE', steps: ['会话记录', '导出', '归档'] },
-  'resource-deeplearning': { label: 'RESEARCH / LIBRARY', steps: ['文献资料', '主题分类', '学习索引'] },
+  'codex-transfer': { label: 'DEVELOPER / DESKTOP', steps: ['SQLite / JSONL', '筛选会话', '迁移 / 复制'] },
+  'resource-deeplearning': { label: 'DEEP LEARNING / PRACTICE', steps: ['基础原理', 'PyTorch', 'CNN / ViT'] },
+  'esp32s3-netkeeper': { label: 'EMBEDDED / ESP32-S3', steps: ['网络探测', '自动认证', 'LVGL / Web'] },
+  'pytorch-research-skill': { label: 'PYTORCH / ENGINEERING', steps: ['YAML 配置', '训练 / 评估', '实验留档'] },
+  'math-worksheets-skill': { label: 'AGENT / MATH WORKFLOW', steps: ['题目设计', '独立验算', 'PDF 交付'] },
 };
 const flow = flows[slug] || { label: 'AGENT / WORKFLOW', steps: ['任务约束', '可复用流程', '交付检查'] };
 ---

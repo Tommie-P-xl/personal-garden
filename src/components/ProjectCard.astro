@@ -4,10 +4,10 @@ import ProjectVisual from './ProjectVisual.astro';
 import { normalizeTags } from '../lib/tags';
 import { sitePath } from '../lib/site-path';
 interface Props {
-  title: string; description: string; tech: string[]; date: Date;
+  title: string; description: string; tech: string[]; date: Date; category: string;
   link?: string; github?: string; image?: string; slug?: string; stars?: number;
 }
-const { title, description, tech, date, link, github, image, slug, stars } = Astro.props;
+const { title, description, tech, date, category, link, github, image, slug, stars } = Astro.props;
 const base = import.meta.env.BASE_URL;
 const detail = slug ? `${base}projects/${slug}/` : github || link || '#';
 const tags = normalizeTags(tech);
@@ -15,7 +15,7 @@ const tags = normalizeTags(tech);
 <article class="paper-project-card paper-surface">
   <a class="project-cover" href={detail} tabindex="-1" aria-hidden="true">{image ? <img src={sitePath(image,base)} alt="" loading="lazy" width="640" height="260" /> : <ProjectVisual slug={slug || ''} />}</a>
   <div class="project-card-body">
-    <div class="project-card-meta"><time datetime={date.toISOString()}>{date.toISOString().slice(0,7)}</time>{stars !== undefined && stars > 0 && <span aria-label={`${stars} 个 GitHub Star`}>☆ {stars}</span>}</div>
+    <div class="project-card-meta"><span class="project-category">{category}</span><span><time datetime={date.toISOString()}>{date.toISOString().slice(0,7)}</time>{stars !== undefined && stars > 0 && <span aria-label={`${stars} 个 GitHub Star`}> · ☆ {stars}</span>}</span></div>
     <h3><a href={detail}>{title}</a></h3><p class="project-description">{description}</p>
     <div class="project-tags">{tags.slice(0,4).map(t => <span class="paper-tag">{t}</span>)}{tags.length > 4 && <details class="extra-tags"><summary aria-label={`展开另外 ${tags.length-4} 个技术标签`}>+{tags.length-4}</summary><div>{tags.slice(4).map(t => <span class="paper-tag">{t}</span>)}</div></details>}</div>
     <div class="project-links"><a href={detail}>项目详情 <Icon name="arrow" class="w-4 h-4" /></a><div>{github && <a href={github} target="_blank" rel="noopener noreferrer" aria-label={`${title} 的 GitHub 仓库`} title="GitHub 仓库"><Icon name="github" class="w-[18px] h-[18px]" /></a>}{link && <a href={link} target="_blank" rel="noopener noreferrer" aria-label={`访问 ${title}`} title="访问项目"><Icon name="link" class="w-[18px] h-[18px]" /></a>}</div></div>

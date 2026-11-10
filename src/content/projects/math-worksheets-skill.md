@@ -1,9 +1,11 @@
 ---
 title: Math Worksheets Skill
-description: 面向 AI Agent 的数学练习与讲义工作流，支持新题设计、图片或文本题目复现、独立验算、程序绘图和可选的审核式全局题库。
+description: 面向 AI Agent 的数学练习工作流，串联出题、独立验算与 PDF 交付；支持纯文本全局题库、离线浏览、按题号引用及单题导出。
 tech: [Agent Skills, Python, SymPy, LaTeX, XeLaTeX, TikZ, SQLite]
 github: https://github.com/Tommie-P-xl/math-worksheets-skill
 featured: true
+featuredOrder: 3
+category: AI Agent 与工具
 date: 2026-10-16
 ---
 
@@ -45,6 +47,16 @@ date: 2026-10-16
 
 ## 可选全局题库
 
+当前版本 **4.1.2** 的题库只保存文本与代码：题干、完整解答、标签、图形条件，以及 TikZ / pgfplots / SVG 绘图代码。照片仍可作为当前任务输入，题库只记录文件定位、哈希或 URL 等来源信息，不复制图片字节；个人题库也不进入安装包。
+
+### 离线浏览与按题号引用
+
+`browse` 命令生成本地 HTML，提供摘要卡片和详细展示两种视图，支持筛选、分页、选题、公式显示、图形放大和解答展开。短题号保持稳定；“复制参考提示词”同时带上题库位置和修订版本，便于 Agent 按题号读取完整参考。
+
+详细模式可分别复制或下载题干与答案 Markdown，选择仅题干、仅答案或两者，导出 PDF 或高清 PNG。浏览页打包 KaTeX 与字体，基础浏览无需服务器或前端依赖；TikZ / pgfplots 题图在生成浏览页时由已有 LaTeX 与 Poppler 渲染。
+
+### 跨项目复用与配置
+
 题库将可复用题目示例和命题指南保存在 Agent Skill 安装目录之外，供不同项目中的工作流参考。它使用 Python 标准库和 SQLite，不依赖数据库服务器、向量服务或后台进程；生成 PDF 仍需要常规数学与排版依赖。
 
 题目以稳定 ID 和内容指纹管理，可附带学段、年级/考试、知识点、题型、方法、难度特征、解答、图形描述、验证状态和来源。相同题目的年级或考试标签可以合并到同一条记录；工具会提示可能的重复项，但相似度匹配并不能证明两道题在数学上等价。每一类标签每题最多 5 个。
@@ -62,7 +74,7 @@ date: 2026-10-16
 
 ### 安装 Skill
 
-推荐从仓库 [Releases](https://github.com/Tommie-P-xl/math-worksheets-skill/releases/latest) 下载 `math-worksheets-v*.zip`，通过 CC Switch 安装，或解压后把 `math-worksheets/` 目录放入 Agent 的个人 Skill 目录。Claude Code 的目录示例为 `~/.claude/skills/math-worksheets/`，Codex 为 `~/.agents/skills/math-worksheets/`。也可以克隆源码后，在提示中直接指定其中的 `SKILL.md`。
+推荐从仓库 [Releases](https://github.com/Tommie-P-xl/math-worksheets-skill/releases/latest) 下载 `math-worksheets.zip`，通过 CC Switch 安装，或解压后把 `math-worksheets/` 目录放入 Agent 的个人 Skill 目录。Claude Code 的目录示例为 `~/.claude/skills/math-worksheets/`，Codex 为 `~/.agents/skills/math-worksheets/`。也可以克隆源码后，在提示中直接指定其中的 `SKILL.md`。题库数据位于 Skill 目录之外，Windows 默认使用 `%LOCALAPPDATA%/MathWorksheets`，可通过 `MWS_DATA_HOME` 或 `--home` 修改；`config.json` 的设置在下次命令或构建时生效。
 
 ### PDF 构建依赖
 

@@ -4,6 +4,8 @@ description: 面向 Windows 的 Codex 会话管理工具：从本地 SQLite 与 
 tech: [Python 3.10+, tkinter, ttkbootstrap, SQLite, JSONL, Nuitka, GitHub Actions]
 github: https://github.com/Tommie-P-xl/codex-transfer
 featured: true
+featuredOrder: 5
+category: AI Agent 与工具
 date: 2026-06-29
 ---
 

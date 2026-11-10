@@ -9,8 +9,24 @@ function applyTheme(theme: string, save = false) {
   if (save) { try { localStorage.setItem('theme', theme); } catch {} }
   for (const mode of ['light','dark','system']) for (const suffix of ['', '-mobile']) document.getElementById(`icon-${mode}${suffix}`)?.classList.toggle('hidden', theme !== mode);
 }
+function filterProjects() {
+  if (!document.getElementById('projects-grid')) return;
+  const term = (document.querySelector<HTMLInputElement>('#search-input')?.value || '').trim().toLowerCase();
+  const category = document.querySelector<HTMLElement>('#project-filter [aria-pressed="true"]')?.dataset.category || '';
+  let count = 0;
+  document.querySelectorAll<HTMLElement>('.project-card').forEach(card => {
+    const matches = (!category || card.dataset.category === category) &&
+      (!term || [card.dataset.title, card.dataset.tech, card.dataset.desc, card.dataset.category].some(value => value?.toLowerCase().includes(term)));
+    card.hidden = !matches;
+    if (matches) count++;
+  });
+  document.getElementById('no-results')?.classList.toggle('hidden', count > 0);
+  const status = document.getElementById('project-count');
+  if (status) status.textContent = `共 ${count} 个项目`;
+}
 function init() {
   applyTheme(getTheme());
+  filterProjects();
   document.querySelectorAll('pre').forEach(pre => {
     if (pre.querySelector('.code-copy-btn')) return;
     const button = document.createElement('button');
@@ -45,6 +61,11 @@ document.addEventListener('click', async event => {
   if(target.closest('#mobile-menu-btn')) { const menu=document.getElementById('mobile-menu'); menu?.classList.toggle('hidden'); document.getElementById('mobile-menu-btn')?.setAttribute('aria-expanded',String(!menu?.classList.contains('hidden'))); return; }
   const tag = target.closest<HTMLElement>('#tag-filter button[data-tag]');
   if(tag) { globals.__gardenTagFilter?.(tag); return; }
+  const category = target.closest<HTMLButtonElement>('#project-filter button[data-category]');
+  if(category) {
+    document.querySelectorAll('#project-filter button').forEach(button => button.setAttribute('aria-pressed', String(button === category)));
+    filterProjects(); return;
+  }
   const button = target.closest<HTMLButtonElement>('.code-copy-btn');
   if(button) {
     const text=button.closest('pre')?.querySelector('code')?.textContent || '';
@@ -61,12 +82,6 @@ document.addEventListener('input', event => {
   const input=event.target as HTMLInputElement;
   if(input.id !== 'search-input') return;
   if(document.getElementById('categories-grid')) { globals.__gardenSearch?.(input.value); return; }
-  if(!document.getElementById('projects-grid')) return;
-  const term=input.value.trim().toLowerCase(); let count=0;
-  document.querySelectorAll<HTMLElement>('.project-card').forEach(card=>{
-    const matches=!term || [card.dataset.title,card.dataset.tech,card.dataset.desc].some(value=>value?.includes(term));
-    card.hidden=!matches; if(matches) count++;
-  });
-  document.getElementById('no-results')?.classList.toggle('hidden',count>0 || !term);
+  filterProjects();
 });
 init();

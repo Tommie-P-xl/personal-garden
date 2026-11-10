@@ -14,16 +14,21 @@ const notes = getAllFlatNotes().filter(n => !n.slug.startsWith('0004-mdx-compone
 const recent = recentNotes(notes);
 const projects = await enrichWithStars(await getCollection('projects'));
 const featured = projects.filter(p => p.data.featured).sort((a,b) => a.data.featuredOrder - b.data.featuredOrder || b.data.date.valueOf() - a.data.date.valueOf()).slice(0,4);
-const interests = ['无人机射频', '开集识别', 'PyTorch', '嵌入式 AI', 'Agent Skills', 'Python', 'Linux', 'GitHub Actions'];
+const interests = ['嵌入式 Linux', 'MCU / ESP32', 'C / C++', 'ESP-IDF', '深度学习', 'PyTorch', 'AI Agent', 'Python'];
+const directions = [
+  { number: '01', title: '嵌入式开发', description: '从 MCU、网络通信到触摸界面，关注设备上的完整功能链路。', detail: 'ESP32-S3 · FreeRTOS · LVGL', href: `${base}projects/esp32s3-netkeeper/` },
+  { number: '02', title: '深度学习', description: '学习网络结构，整理训练、评估与批量实验的工程流程。', detail: 'PyTorch · CNN / ViT · 实验管理', href: `${base}projects/pytorch-research-skill/` },
+  { number: '03', title: 'AI Agent 与工具', description: '把日常开发中的重复操作，做成桌面工具与可复用工作流。', detail: 'Agent Skills · Python · 自动化', href: `${base}projects/claudebeep/` },
+];
 ---
-<BaseLayout title="首页" description="Tommie 的数字花园：无人机射频与开集识别实践、AI 工具，以及持续整理的技术笔记。">
+<BaseLayout title="首页" description="Tommie 的技术作品与学习笔记：关注嵌入式 Linux、MCU、深度学习与 AI Agent，记录从代码到可用工具的工程实践。">
   <section class="home-hero paper-surface">
     <div class="hero-copy">
-      <p class="eyebrow">学习 · 研究 · 构建</p>
+      <p class="eyebrow">TOMMIE / 工程实践与技术笔记</p>
       <h1>Tommie 的数字花园</h1>
-      <p class="hero-intro">研究射频信号与开集识别，<br class="hidden sm:block" />也把反复遇到的问题，做成可复用的工具。</p>
-      <p class="text-muted hero-caption">Master's student in Electronic Information / AI Agent &amp; Embedded AI</p>
-      <div class="hero-actions"><a class="button-primary" href={`${base}garden/`}>阅读笔记 <Icon name="arrow" class="w-4 h-4" /></a><a class="button-secondary" href={`${base}projects/`}>查看项目</a></div>
+      <p class="hero-intro">从嵌入式设备到 AI 工具，<br class="hidden sm:block" />把学到的技术，做成能用的东西。</p>
+      <p class="text-muted hero-caption">关注嵌入式 Linux、MCU、深度学习与 AI Agent 开发</p>
+      <div class="hero-actions"><a class="button-primary" href={`${base}projects/`}>查看项目 <Icon name="arrow" class="w-4 h-4" /></a><a class="button-secondary" href={`${base}about/`}>关于我与联系方式</a></div>
       <div class="hero-contacts">
         <a href="mailto:wux4948@gmail.com"><Icon name="mail" class="w-4 h-4" />邮件</a>
         <a href="https://github.com/Tommie-P-xl" target="_blank" rel="noopener noreferrer"><Icon name="github" class="w-4 h-4" />GitHub</a>
@@ -33,10 +38,11 @@ const interests = ['无人机射频', '开集识别', 'PyTorch', '嵌入式 AI',
     <img class="hero-avatar" src={`${base}images/avatar.jpg`} width="128" height="128" alt="Tommie 的头像" />
   </section>
   <section class="home-interests" aria-label="关注领域"><span>关注领域</span><div>{interests.map(tag => <span class="paper-tag">{tag}</span>)}</div></section>
+  <section class="direction-grid" aria-label="技术实践方向">{directions.map(direction => <a class="direction-card" href={direction.href}><span class="direction-number">{direction.number} /</span><h2>{direction.title}<Icon name="arrow" class="w-4 h-4" /></h2><p>{direction.description}</p><span class="direction-detail">{direction.detail}</span></a>)}</section>
+  <section class="home-section" aria-labelledby="projects-heading"><div class="section-heading"><div><p class="eyebrow">从问题到实现</p><h2 id="projects-heading">精选项目</h2></div><a href={`${base}projects/`}>全部 {projects.length} 个项目 <Icon name="arrow" class="w-4 h-4" /></a></div><div class="grid sm:grid-cols-2 gap-5">{featured.map(p => <ProjectCard {...p.data} slug={p.id} stars={p.stars} />)}</div></section>
   <section class="home-section" aria-labelledby="recent-heading">
     <div class="section-heading"><div><p class="eyebrow">持续整理</p><h2 id="recent-heading">{recent.some(n => n.updated) ? '最近笔记' : '笔记选读'}</h2></div><a href={`${base}garden/`}>全部笔记 <Icon name="arrow" class="w-4 h-4" /></a></div>
     <div class="recent-grid">{recent.map(note => <a class="recent-note paper-surface" href={`${base}garden/${registerSlug(note.slug)}/`}><div class="recent-meta"><span>{note.category}</span>{note.updated && <time datetime={note.updated}>{note.updated.slice(0,10)}</time>}</div><h3>{note.title}</h3><p>{note.summary}</p><span class="read-more">阅读笔记 ↗</span></a>)}</div>
   </section>
-  <section class="home-section" aria-labelledby="projects-heading"><div class="section-heading"><div><p class="eyebrow">研究与工具</p><h2 id="projects-heading">精选项目</h2></div><a href={`${base}projects/`}>全部项目 <Icon name="arrow" class="w-4 h-4" /></a></div><div class="grid sm:grid-cols-2 gap-5">{featured.map(p => <ProjectCard {...p.data} slug={p.id} stars={p.stars} />)}</div></section>
   <section class="home-section" aria-labelledby="topics-heading"><div class="section-heading"><div><p class="eyebrow">按主题探索</p><h2 id="topics-heading">笔记花园</h2></div></div><div class="topic-grid">{categories.map(cat => <a class="topic-card paper-surface" href={`${base}garden/${registerSlug(cat.slug)}/`}><Icon name="folder" /><div><h3>{cat.meta?.title || cat.title}</h3><p>{cat.meta?.description}</p></div><Icon name="arrow" class="w-4 h-4" /></a>)}</div><div class="home-about"><span>UESTC · Master's student in Electronic Information</span><a href={`${base}about/`}>Education & About →</a></div></section>
 </BaseLayout>

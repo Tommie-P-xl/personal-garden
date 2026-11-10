@@ -4,6 +4,8 @@ description: 面向 AI 编程助手的 PyTorch 科研工作规范，按任务加
 tech: [Python, PyTorch, YAML, Agent Skills]
 github: https://github.com/Tommie-P-xl/pytorch_research_skill
 featured: true
+featuredOrder: 2
+category: 深度学习
 date: 2026-10-15
 ---
 
@@ -12,6 +14,12 @@ date: 2026-10-15
 **PyTorch Research Skill** 是一套供 AI 编程助手读取的科研代码工作规范。它把常见工作流程、实现约定和示例整理成主入口与任务模块，帮助助手在新建或修改 PyTorch 项目、安排实验、阅读代码时先明确范围，再按阶段参考相关规则。
 
 当前仓库根目录 `VERSION` 与 README 标注的版本均为 **1.3.4**。Skill 的主入口是 [`SKILL.md`](https://github.com/Tommie-P-xl/pytorch_research_skill/blob/main/skills/pytorch-research-code-style/SKILL.md)，内容按 [Agent Skills 规范](https://agentskills.io/specification)组织。它本身是说明文件和参考示例，不是训练框架或可直接运行的实验脚本；README 中的训练入口、批量实验脚本等，是助手依照要求在用户的目标项目中实现后才会存在。
+
+## 近期工作流更新
+
+- **终端进度**：直接训练与批量子进程均保持单行刷新，按终端宽度收缩；重定向输出使用阶段摘要，文件日志保留已完成的进度。
+- **注释方式**：简洁档默认局部补充，标准和教学档默认逐文件生成完整注释版本；通过候选版本、diff / AST 检查和覆盖复核，说明算法、张量形状与梯度流。
+- **发布与维护**：Skill ZIP 与独立更新工具分开交付，CC Switch 可从仓库的 `skills` 路径发现、安装和更新。
 
 ## 按任务加载的六个模块
 

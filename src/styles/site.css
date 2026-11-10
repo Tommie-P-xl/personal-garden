@@ -229,6 +229,8 @@ a,button {
   align-items: flex-start;
   border-radius: 14px;
   position: relative;
+  overflow: hidden;
+  background: linear-gradient(115deg, var(--paper-surface) 55%, var(--paper-accent-soft));
 }
 .home-hero h1 {
   font-family: Georgia,"Songti SC",serif;
@@ -250,6 +252,7 @@ a,button {
   height: 112px;
   border: 5px solid var(--paper-accent-soft);
   flex-shrink: 0;
+  margin-top: 10px;
 }
 .hero-actions {
   display: flex;
@@ -293,6 +296,32 @@ a,button {
 .home-section {
   margin-top: 48px;
 }
+.direction-grid {
+  display: grid;
+  grid-template-columns: repeat(3,minmax(0,1fr));
+  margin-top: 28px;
+  border: 1px solid var(--paper-line);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.direction-card {
+  padding: 24px;
+  background: var(--paper-surface);
+  transition: background .18s;
+}
+.direction-card + .direction-card { border-left: 1px solid var(--paper-line); }
+.direction-card:hover { background: var(--paper-accent-soft); }
+.direction-number { color: var(--paper-accent); font-size: .72rem; font-variant-numeric: tabular-nums; }
+.direction-card h2 { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 12px 0 9px; font-size: 1.05rem; font-weight: 650; }
+.direction-card p { font-size: .82rem; line-height: 1.85; color: var(--paper-muted); }
+.direction-detail { display: block; margin-top: 18px; color: var(--paper-accent); font-size: .7rem; }
+.project-category { color: var(--paper-accent); font-weight: 600; }
+.project-filter { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.project-filter button { display: inline-flex; align-items: center; gap: 10px; padding: 8px 13px; border: 1px solid var(--paper-line); border-radius: 6px; font-size: .8rem; background: var(--paper-surface); }
+.project-filter button span { font-size: .7rem; opacity: .75; font-variant-numeric: tabular-nums; }
+.project-filter button:hover { border-color: var(--paper-accent); }
+.project-filter button[aria-pressed="true"] { color: var(--paper-surface); background: var(--paper-accent); border-color: var(--paper-accent); }
+.project-result-count { margin-bottom: 18px; color: var(--paper-muted); font-size: .8rem; }
 .section-heading {
   display: flex;
   justify-content: space-between;
@@ -939,6 +968,11 @@ html[data-reading-mode="focus"] .note-layout > :is(.paper-sidebar, .paper-toc, #
   color: var(--paper-accent);
 }
 @media(max-width:767px) {
+  .direction-grid { grid-template-columns: 1fr; margin-top: 20px; }
+  .direction-card { padding: 20px; }
+  .direction-card + .direction-card { border-left: 0; border-top: 1px solid var(--paper-line); }
+  .direction-card h2 { margin-top: 7px; }
+  .direction-detail { margin-top: 12px; }
   .home-hero {
     padding: 24px;
   }
@@ -947,6 +981,7 @@ html[data-reading-mode="focus"] .note-layout > :is(.paper-sidebar, .paper-toc, #
   }
   .hero-avatar {
     position: absolute;
+    margin-top: 0;
     right: 22px;
     top: 22px;
     width: 48px;
