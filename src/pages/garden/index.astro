@@ -30,6 +30,7 @@ const documentation = tree.filter(item => item.type === 'dir' && item.meta?.kind
 ---
 
 <BaseLayout title="笔记">
+  <div class="garden-index">
   <div class="mb-8">
     <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
       <Icon name="note" class="w-6 h-6" />
@@ -72,7 +73,7 @@ const documentation = tree.filter(item => item.type === 'dir' && item.meta?.kind
         {cat.meta?.description && (
           <p class="text-sm text-gray-500 dark:text-gray-400">{cat.meta.description}</p>
         )}
-        <div class="mt-3 text-xs text-gray-400 dark:text-gray-500">
+        <div class="garden-note-count mt-3 text-xs text-gray-400 dark:text-gray-500">
           {(() => {
             let count = 0;
             function countFiles(items) {
@@ -117,6 +118,7 @@ const documentation = tree.filter(item => item.type === 'dir' && item.meta?.kind
     </div>
   </div>
 
+  </div>
   <script is:inline define:vars={{ base, notesJson: JSON.stringify(allFlatNotes.map(n => ({ title: n.title, slug: registerSlug(n.slug), tags: n.tags, summary: n.summary || '', category: n.category }))) }}>
     (function() {
       var notesData = JSON.parse(notesJson);

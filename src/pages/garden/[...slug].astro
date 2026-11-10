@@ -117,7 +117,7 @@ if (!isDir) {
 ---
 
 <BaseLayout title={isDir ? dirTitle : noteTitle} description={isDir ? dirDescription : noteSummary} wide={!isDir}>
-  <div class:list={["flex gap-3 xl:gap-4", !isDir && "note-layout"]}>
+  <div class:list={["flex gap-3 xl:gap-4", isDir ? "garden-directory" : "note-layout"]}>
     {/* 左侧边栏 */}
     <Sidebar
       tree={finalSidebarTree}

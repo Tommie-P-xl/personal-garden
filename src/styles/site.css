@@ -580,6 +580,49 @@ a,button {
   gap: 12px;
   align-items: center;
 }
+/* Note indexes and directory listings share the readable card typography. */
+.garden-index h1,
+.garden-directory h1 {
+  font-size: clamp(1.75rem, 2.5vw, 2rem);
+}
+.garden-index h2,
+.garden-directory #directory-content-title {
+  font-size: 1.375rem;
+}
+.garden-index > div:first-child > p,
+.garden-directory .paper-reading > p {
+  font-size: 1.0625rem;
+  line-height: 1.8;
+}
+.garden-index :is(.category-item, #search-results-grid) h3,
+.garden-directory .paper-directory-card h3 {
+  font-size: var(--paper-card-title-size);
+  line-height: 1.5;
+}
+.garden-index :is(.category-item, #search-results-grid) p,
+.garden-directory .paper-directory-card p {
+  font-size: var(--paper-text-size);
+  line-height: 1.8;
+}
+.garden-index :is(.garden-note-count, #tag-filter button) {
+  font-size: var(--paper-small-size);
+}
+.garden-index #search-results-grid span {
+  font-size: var(--paper-meta-size);
+}
+.garden-directory .note-toolbar nav {
+  font-size: var(--paper-text-size);
+  flex-wrap: wrap;
+}
+.garden-directory :is(#note-sidebar, #sidebar-drawer) .text-sm {
+  font-size: var(--paper-small-size);
+}
+.garden-directory .paper-directory-card svg {
+  flex-shrink: 0;
+}
+.garden-directory .paper-directory-card > div {
+  min-width: 0;
+}
 /* Technical notes prioritize content width; home and project layouts keep their own scale. */
 .paper-main-wide {
   max-width: 1680px;
